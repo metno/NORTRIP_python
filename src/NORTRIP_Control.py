@@ -3,8 +3,7 @@ from load_model_parameters import load_model_flags_xlsx, load_model_parameters_x
 
 
 def main():
-    package_version = version("nortrip-python")
-    print(f"Starting NORTRIP_model_python_v{package_version}...")
+    print(f"Starting NORTRIP_model_python_v{version("nortrip-python")}...")
 
     # Loading model parameters and flags
     paramater_path = "model_parameters/Road_dust_parameter_table_v11.xlsx"

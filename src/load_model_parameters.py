@@ -19,7 +19,6 @@ def load_model_flags_xlsx(file_path: str) -> model_flags:
         flags_df = pd.read_excel(file_path, sheet_name="Flags")
         for _, row in flags_df.iterrows():
             flag_name = str(row.tolist()[0]).strip()
-            # Set the flag value in the loaded_flags dataclass
             if hasattr(loaded_flags, flag_name):
                 flag_value = int(row.tolist()[1])
                 setattr(loaded_flags, flag_name, flag_value)
@@ -28,8 +27,8 @@ def load_model_flags_xlsx(file_path: str) -> model_flags:
                 pass
 
     except Exception as e:
-        print(f"Error loading model flags from {file_path}: {e}")
-        exit()
+        print(f"Error loading model flags from {file_path}: {e}, using default values.")
+        return model_flags()
 
     return loaded_flags
 
