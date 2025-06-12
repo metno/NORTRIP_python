@@ -1,0 +1,14 @@
+NORTRIP model text input file (initial)     
+---------------------------------------     
+PARAMETER                                   	VALUE       	UNIT        
+M2_dust_road                                	10.00       	(g/m2)      
+M2_sand_road                                	0.00        	(g/m2)      
+M2_salt_road(na)                            	0.00        	(g/m2)      
+M2_salt_road(mg)                            	0.00        	(g/m2)      
+water_road                                  	0.10        	(mm)        
+snow_road                                   	0.10        	(mm.w.e)    
+ice_road                                    	0.00        	(mm.w.e)    
+P2_fugitive                                 	0.00        	(g/m2/hr)   
+long_rad_in_offset                          	0.00        	(W/m2)      
+RH_offset                                   	0.00        	(%)         
+T_2m_offset                                 	0.00        	(C)         

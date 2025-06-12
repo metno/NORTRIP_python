@@ -1,0 +1,40 @@
+NORTRIP model text input file (metadata)    
+-----------------------------------------   
+PARAMETER                                   	VALUE       	UNIT        
+Missing data                                	-99.00      	            
+Driving cycle                               	1           	            
+Pavement type                               	1           	            
+Surface texture scaling                     	1           	            
+Number of lanes                             	4           	            
+Width of lane                               	3.50        	(m)         
+Road width                                  	15.00       	(m)         
+Street canyon width                         	23.00       	(m)         
+Street canyon height north                  	25.00       	(m)         
+Street canyon height south                  	24.00       	(m)         
+Street orientation                          	76.00       	(m)         
+Street slope                                	0.00        	(deg)       
+Latitude                                    	59.17       	(deg)       
+Longitude                                   	18.30       	(deg)       
+Elevation                                   	0.00        	(m)         
+Surface albedo                              	0.15        	            
+Time difference                             	-1.00       	(hr +west)  
+Height obs wind                             	2.00        	(m)         
+Height obs temperature                      	2.00        	(m)         
+Surface pressure                            	1000.00     	(mbar)      
+Wind speed correction                       	0.50        	(m/s)       
+Observed moisture cut off                   	1.50        	(mV)        
+Suspension rate scaling factor              	1.00        	            
+Exhaust EF (he)                             	0.00        	(g/km/veh)  
+Exhaust EF (li)                             	0.00        	(g/km/veh)  
+NOX EF (he)                                 	0.00        	(g/km/veh)  
+NOX EF (li)                                 	0.00        	(g/km/veh)  
+Choose receptor position for ospm           	1           	(1=N,2=S,3=av)
+Street canyon length north for ospm         	100.00      	(m)         
+Street canyon length south for ospm         	100.00      	(m)         
+f_roof factor for ospm                      	0.40        	            
+Receptor height for ospm                    	2.00        	(m)         
+f_turb factor for ospm                      	0.60        	            
+Start date                                  	01.10.2010 01:00        	dd.mm.yyyy hh:mm
+Start save date                             	01.11.2010 01:00        	dd.mm.yyyy hh:mm
+End date                                    	                        	dd.mm.yyyy hh:mm
+End save date                               	31.05.2011 23:00        	dd.mm.yyyy hh:mm

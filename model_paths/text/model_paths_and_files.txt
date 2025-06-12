@@ -1,0 +1,15 @@
+NORTRIP model text path and file names (model run info)
+-------------------------------------------------------
+Path or filename                            	String
+Model input parameter path                  	C:\NORTRIP\NORTRIP_model_public_v3_2\model_parameters\text\
+Model input data path                       	C:\NORTRIP\NORTRIP_model_public_v3_2\input_data\text\
+Model output data path                      	C:\NORTRIP\NORTRIP_model_public_v3_2\output_data\text\
+Model output figures path                   	C:\NORTRIP\NORTRIP_model_public_v3_2\output_figures\
+Model parameter filename                    	Road_dust_parameter_table_v5
+Model input data filename                   	NORTRIP_input_data_example
+Model output data filename                  	
+Model ospm path                             	C:\NORTRIP\NORTRIP_model_public_v3_2\ospm\
+Model fortran path                          	C:\NORTRIP\NORTRIP_model_public_v3_2\fortran\
+Model fortran output path                   	C:\NORTRIP\NORTRIP_model_public_v3_2\fortran\output\
+Log file name                               	C:\NORTRIP\NORTRIP_model_public_v3_2\fortran\NORTRIP_log.txt
+Model fortran executable filename           	NORTRIP_v3.2
