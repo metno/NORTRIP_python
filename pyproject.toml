@@ -1,6 +1,6 @@
 [project]
 name = "nortrip-python"
-version = "0.1.0"
+version = "1.0.0"
 description = "Python version of the Nortrip tool"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -10,3 +10,6 @@ dependencies = [
 
 [project.scripts]
 nortrip = "NORTRIP_Control:main"
+
+[tool.uv]
+package = true

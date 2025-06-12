@@ -1,4 +1,5 @@
-import pandas as pd
+from importlib.metadata import version
 
 def main():
-    print("Starting NORTRIP_model_python_v1_0...")
+    package_version = version("nortrip-python")
+    print(f"Starting NORTRIP_model_python_v{package_version}...")
