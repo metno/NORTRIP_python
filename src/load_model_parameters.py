@@ -27,8 +27,8 @@ def load_model_flags_xlsx(file_path: str) -> model_flags:
                 pass
 
     except Exception as e:
-        print(f"Error loading model flags from {file_path}: {e}, using default values.")
-        return model_flags()
+        print(f"Error loading model flags from {file_path}: {e}.")
+        exit()
 
     return loaded_flags
 
@@ -44,6 +44,12 @@ def load_model_parameters_xlsx(file_path: str) -> model_parameters:
     """
     loaded_parameters = model_parameters()
 
+    try: 
+        paramaters_df = pd.read_excel(file_path, sheet_name="Parameters")
+    
+    except Exception as e:
+        print(f"Error loading model parameters from {file_path}: {e}")
+        exit()
 
 
     return loaded_parameters
