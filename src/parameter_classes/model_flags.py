@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
 @dataclass
-class simulation_flags:
+class model_flags:
     """
-    Dataclass containing various simulation flags and their default values.
+    Dataclass containing model flags and their default values.
     """
     road_wear_flag: int = 1
     tyre_wear_flag: int = 1
