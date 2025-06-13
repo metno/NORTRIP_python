@@ -18,12 +18,14 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
     """
     loaded_flags = model_flags()
 
+    i = 0
     try:
         for _, row in flags_df.iterrows():
             flag_name = str(row.iloc[0]).strip()
             if hasattr(loaded_flags, flag_name):
                 flag_value = int(row.iloc[1])
                 setattr(loaded_flags, flag_name, flag_value)
+                i += 1
             else:
                 logger.warning(
                     f"Flag '{flag_name}' not found in model_flags dataclass."
@@ -32,7 +34,7 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
         logger.error(f"Error loading model flags: {e}")
         raise
 
-    logger.info(f"Successfully loaded {len(flags_df)} model flags")
+    logger.info(f"Successfully loaded {i} model flags")
     return loaded_flags
 
 
