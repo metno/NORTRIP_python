@@ -1,6 +1,9 @@
 from config_classes.model_flags import model_flags
 from config_classes.model_parameters import model_parameters
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
@@ -22,11 +25,14 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
                 flag_value = int(row.iloc[1])
                 setattr(loaded_flags, flag_name, flag_value)
             else:
-                # print(f"Warning: Flag '{flag_name}' not found in simulation_flags dataclass.")
+                logger.warning(
+                    f"Flag '{flag_name}' not found in model_flags dataclass."
+                )
+
                 pass
 
     except Exception as e:
-        print(f"Error loading model flags: {e}.")
+        logger.error(f"Error loading model flags: {e}")
         exit()
 
     return loaded_flags
