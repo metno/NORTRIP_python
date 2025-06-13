@@ -9,14 +9,16 @@ def read_road_dust_paths(read_as_text=0) -> model_file_paths:
         if read_as_text == 0:
             print("Reading info file and setting paths from excel")
             paths_df = pd.read_excel(
-                "model_paths/model_paths_and_files.xlsx", sheet_name="Filenames"
+                "model_paths/model_paths_and_files.xlsx",
+                sheet_name="Filenames",
+                header=None,
             )
             header_text = paths_df.iloc[:, 0].astype(str)
             file_text = paths_df.iloc[:, 1].astype(str)
         else:
             print("Reading info file and setting paths from text")
             # Convert Excel file to text equivalent
-            txt_filename = "model_paths/model_paths_and_files.txt"
+            txt_filename = "model_paths/text/model_paths_and_files.txt"
             paths_df = pd.read_csv(txt_filename, sep="\t", header=None)
             header_text = paths_df.iloc[:, 0].astype(str)
             file_text = paths_df.iloc[:, 1].fillna("").astype(str)

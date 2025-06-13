@@ -1,15 +1,12 @@
-NORTRIP model text path and file names (model run info)
--------------------------------------------------------
-Path or filename                            	String
-Model input parameter path                  	C:\NORTRIP\NORTRIP_model_public_v3_2\model_parameters\text\
-Model input data path                       	C:\NORTRIP\NORTRIP_model_public_v3_2\input_data\text\
-Model output data path                      	C:\NORTRIP\NORTRIP_model_public_v3_2\output_data\text\
-Model output figures path                   	C:\NORTRIP\NORTRIP_model_public_v3_2\output_figures\
-Model parameter filename                    	Road_dust_parameter_table_v5
-Model input data filename                   	NORTRIP_input_data_example
-Model output data filename                  	
-Model ospm path                             	C:\NORTRIP\NORTRIP_model_public_v3_2\ospm\
-Model fortran path                          	C:\NORTRIP\NORTRIP_model_public_v3_2\fortran\
-Model fortran output path                   	C:\NORTRIP\NORTRIP_model_public_v3_2\fortran\output\
-Log file name                               	C:\NORTRIP\NORTRIP_model_public_v3_2\fortran\NORTRIP_log.txt
-Model fortran executable filename           	NORTRIP_v3.2
+Path or filename	String	Alternatives																									
+Model input parameter path	/Users/sindredenby/Documents/metrologisk/NORTRIP-python/model_parameters/	C:\WORK\NORTRIP\NORTRIP\NORTRIP_model_public_v3_4\model_parameters\	C:\Users\brucerd\Downloads\	C:\WORK\NORTRIP\NORDUST2\Data\Sweden\																							
+Model input data path	/Users/sindredenby/Documents/metrologisk/NORTRIP-python/input_data/																										
+Model output data path	/Users/sindredenby/Documents/metrologisk/NORTRIP-python/output_data/																										
+Model output figures path	/Users/sindredenby/Documents/metrologisk/NORTRIP-python/output_figures/																										
+Model parameter filename	Road_dust_parameter_table_v11.xlsx	Road_dust_parameter_table_v9_test_Hornsgatan.xlsx	Road_dust_parameter_table_v5.xlsx	Road_dust_parameter_table_v5_Nina.xlsx				Road_dust_parameter_table_v9.xlsx				Road_dust_parameter_table_v9_E18_crushing.xlsx						Road_dust_parameter_table_v9_Denby.xlsx									TRV atgarder Sundsvall 250121_settings.xlsx
+Model input data filename	NORTRIP_input_data_example.xlsx																										
+Model output data filename																											
+Model ospm path	C:\Prog\ospm\		C:\WORK\NORTRIP\NORTRIP\NORTRIP_model_public_v3_4\ospm\																								
+Model fortran path	C:\WORK\NORTRIP\NORTRIP\NORTRIP_model_public_v3_4\fortran\																										
+Model fortran output path	C:\WORK\NORTRIP\NORTRIP\NORTRIP_model_public_v3_4\fortran\output\																										
+Model fortran executable filename	NORTRIP_v3.2																										
