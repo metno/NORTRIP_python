@@ -3,6 +3,10 @@ from dataclasses import dataclass
 
 @dataclass
 class model_file_paths:
+    """
+    Dataclass containing file paths and names
+    """
+
     path_inputparam = ""
     path_inputdata = ""
     path_outputdata = ""

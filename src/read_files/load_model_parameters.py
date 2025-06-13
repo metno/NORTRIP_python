@@ -17,9 +17,9 @@ def load_model_flags(flags_df: pd.DataFrame) -> model_flags:
 
     try:
         for _, row in flags_df.iterrows():
-            flag_name = str(row.tolist()[0]).strip()
+            flag_name = str(row.iloc[0]).strip()
             if hasattr(loaded_flags, flag_name):
-                flag_value = int(row.tolist()[1])
+                flag_value = int(row.iloc[1])
                 setattr(loaded_flags, flag_name, flag_value)
             else:
                 # print(f"Warning: Flag '{flag_name}' not found in simulation_flags dataclass.")

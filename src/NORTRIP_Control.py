@@ -9,9 +9,6 @@ def main():
 
     # Loading model parameters and flags
     paths = read_road_dust_paths()
-    print(paths.path_filename_inputparam)
 
     flags_df = pd.read_excel(paths.path_filename_inputparam, sheet_name="Flags")
     model_flags = load_model_flags(flags_df)
-
-    print(model_flags)
