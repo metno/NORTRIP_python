@@ -1,6 +1,5 @@
 from importlib.metadata import version
-from read_files.read_road_dust_paths import read_road_dust_paths
-from read_files.read_road_dust_parameters import read_model_flags, read_model_parameters
+from read_files import read_road_dust_paths, read_model_flags, read_model_parameters
 import pandas as pd
 
 
