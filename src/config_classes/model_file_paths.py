@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class file_paths:
+class model_file_paths:
     path_inputparam = ""
     path_inputdata = ""
     path_outputdata = ""
@@ -14,3 +14,8 @@ class file_paths:
     filename_inputdata = ""
     filename_outputdata = ""
     filename_outputfigures = ""
+    filename_log = ""
+    file_fortran_exe = ""
+    title_str = ""
+    path_filename_inputparam = ""
+    path_filename_inputdata = ""
