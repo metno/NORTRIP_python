@@ -1,10 +1,5 @@
 """
 Configuration classes for NORTRIP model.
-
-This package contains dataclasses that define the structure for:
-- Model flags
-- Model parameters
-- Model file paths
 """
 
 from .model_flags import model_flags
