@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class model_flags:
     """
     Dataclass containing model flags and their default values.
     """
+
     road_wear_flag: int = 1
     tyre_wear_flag: int = 1
     brake_wear_flag: int = 1

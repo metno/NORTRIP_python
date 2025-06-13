@@ -36,6 +36,7 @@ def load_model_flags_xlsx(file_path: str) -> model_flags:
 def load_model_parameters_xlsx(file_path: str) -> model_parameters:
     """
     Load model parameters from xlsx file and return an instance of model_parameters.
+
     Args:
         file_path (str): Path to the file containing model parameters.
 
@@ -44,12 +45,11 @@ def load_model_parameters_xlsx(file_path: str) -> model_parameters:
     """
     loaded_parameters = model_parameters()
 
-    try: 
+    try:
         paramaters_df = pd.read_excel(file_path, sheet_name="Parameters")
-    
+
     except Exception as e:
         print(f"Error loading model parameters from {file_path}: {e}")
         exit()
-
 
     return loaded_parameters
