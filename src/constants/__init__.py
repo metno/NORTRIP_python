@@ -8,6 +8,7 @@ TODO: Fix the indexing for the Python to be 0 indexed
 n_roads = 1
 
 # Vehicle classes
+# TODO: Are these indexed?
 he = 1
 li = 2
 num_veh = 2
