@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 
 def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
     """
-    Load model flags from xlsx file and return an instance of model_flags.
+    Load model flags from DataFrame and return an instance of model_flags.
 
     Args:
-        file_path (str): Path to the file containing model flags.
+        file_path (DataFrae): DataFrame containing model flags.
 
     Returns:
         model_flags: An instance of model_flags with loaded values.
@@ -28,13 +28,11 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
                 logger.warning(
                     f"Flag '{flag_name}' not found in model_flags dataclass."
                 )
-
-                pass
-
     except Exception as e:
         logger.error(f"Error loading model flags: {e}")
-        exit()
+        raise
 
+    logger.info(f"Successfully loaded {len(flags_df)} model flags")
     return loaded_flags
 
 

@@ -3,10 +3,11 @@ from read_files import read_road_dust_paths, read_model_flags, read_model_parame
 import pandas as pd
 import logging
 
-# Configure logging once at the application level
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
+
+logger = logging.getLogger(__name__)
 
 
 def main():
