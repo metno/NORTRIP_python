@@ -11,3 +11,4 @@ wheels/
 
 .DS_Store
 matlab-version/
+.vscode/
