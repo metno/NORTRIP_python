@@ -223,6 +223,7 @@ f_conc_index = 12
 num_airquality_index = 12
 
 # PM observation index mappings
+# TODO: Check if these are correct
 PM_obs_index = [0, 0, 0, PM10_obs_index, PM25_obs_index]  # pm_10=3, pm_25=4
 PM_bg_index = [0, 0, 0, PM10_bg_index, PM25_bg_index]
 PM_net_index = [0, 0, 0, PM10_net_index, PM25_net_index]
