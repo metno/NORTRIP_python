@@ -20,3 +20,5 @@ def main():
 
     flags_df = pd.read_excel(paths.path_filename_inputparam, sheet_name="Flags")
     model_flags = read_model_flags(flags_df)
+
+    logger.info(constants.ca)
