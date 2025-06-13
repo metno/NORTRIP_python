@@ -1,6 +1,6 @@
 from importlib.metadata import version
 from read_files.read_road_dust_paths import read_road_dust_paths
-from read_files.load_model_parameters import load_model_flags, load_model_parameters
+from read_files.read_road_dust_parameters import read_model_flags, read_model_parameters
 import pandas as pd
 
 
@@ -12,4 +12,4 @@ def main():
     paths = read_road_dust_paths(read_as_text=read_as_text)
 
     flags_df = pd.read_excel(paths.path_filename_inputparam, sheet_name="Flags")
-    model_flags = load_model_flags(flags_df)
+    model_flags = read_model_flags(flags_df)

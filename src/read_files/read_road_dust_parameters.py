@@ -3,7 +3,7 @@ from config_classes.model_parameters import model_parameters
 import pandas as pd
 
 
-def load_model_flags(flags_df: pd.DataFrame) -> model_flags:
+def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
     """
     Load model flags from xlsx file and return an instance of model_flags.
 
@@ -32,7 +32,7 @@ def load_model_flags(flags_df: pd.DataFrame) -> model_flags:
     return loaded_flags
 
 
-def load_model_parameters(paramter_df: pd.DataFrame) -> model_parameters:
+def read_model_parameters(paramter_df: pd.DataFrame) -> model_parameters:
     """
     Load model parameters from xlsx file and return an instance of model_parameters.
 
