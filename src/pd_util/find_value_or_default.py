@@ -12,4 +12,9 @@ def find_value_or_default(
     if result == "" or pd.isna(result):
         return default_val
 
+    # Handle case where result is already numeric
+    if isinstance(result, (int, float)):
+        return float(result)
+
+    # Handle string case with comma replacement
     return float(result.replace(",", "."))
