@@ -1,6 +1,6 @@
 from config_classes.model_file_paths import model_file_paths
 import pandas as pd
-from pd_util.find_value import find_value
+from pd_util import find_value
 
 
 def read_road_dust_paths(read_as_text=0) -> model_file_paths:
