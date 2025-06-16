@@ -52,6 +52,9 @@ def read_road_dust_parameters(
                 )
                 logger.info(f"Read parameters with encoding: {encoding}")
                 break
+            except FileNotFoundError as e:
+                logger.error(f"File not found: {e.filename}")
+                exit(1)
             except UnicodeDecodeError:
                 if encoding == encodings[-1]:
                     logger.error(
@@ -61,7 +64,11 @@ def read_road_dust_parameters(
                 continue
 
     else:
-        all_sheets = pd.read_excel(parameter_file_path, sheet_name=None)
+        try:
+            all_sheets = pd.read_excel(parameter_file_path, sheet_name=None)
+        except FileNotFoundError:
+            logger.error(f"File not found: {parameter_file_path}")
+            exit(1)
         parameter_df = all_sheets["Parameters"]
         flags_df = all_sheets["Flags"]
         activities_df = all_sheets["Activities"]

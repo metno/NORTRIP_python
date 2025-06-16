@@ -9,7 +9,7 @@ class model_activities:
     """
 
     # Salting activities
-    salting_hour: List[int] = field(default_factory=lambda: [0, 0])
+    salting_hour: List[float] = field(default_factory=lambda: [0, 0])
     delay_salting_day: float = 0.9
     check_salting_day: float = 0.5
     min_temp_salt: float = -6.0
@@ -19,10 +19,10 @@ class model_activities:
     g_salting_rule: float = 0.1
     salt_mass: float = 0.1
     salt_dilution: float = 0.2
-    salt_type_distribution: int = 1
+    salt_type_distribution: float = 1
 
     # Sanding activities
-    sanding_hour: List[int] = field(default_factory=lambda: [0, 0])
+    sanding_hour: List[float] = field(default_factory=lambda: [0, 0])
     delay_sanding_day: float = 0.9
     check_sanding_day: float = 0.5
     min_temp_sand: float = -6.0
@@ -40,14 +40,14 @@ class model_activities:
     # Cleaning activities
     delay_cleaning_hour: float = 168.0  # 7*24 hours
     min_temp_cleaning: float = 0.0
-    clean_with_salting: int = 0
-    start_month_cleaning: int = 1
-    end_month_cleaning: int = 12
-    wetting_with_cleaning: int = 0
+    clean_with_salting: float = 0
+    start_month_cleaning: float = 1
+    end_month_cleaning: float = 12
+    wetting_with_cleaning: float = 0
     efficiency_of_cleaning: float = 0.0
 
     # Binding activities
-    binding_hour: List[int] = field(default_factory=lambda: [0, 0])
+    binding_hour: List[float] = field(default_factory=lambda: [0, 0])
     delay_binding_day: float = 0.9
     check_binding_day: float = 0.5
     min_temp_binding: float = -6.0
@@ -57,5 +57,5 @@ class model_activities:
     g_binding_rule: float = 0.1
     binding_mass: float = 0.1
     binding_dilution: float = 0.2
-    start_month_binding: int = 1
-    end_month_binding: int = 12
+    start_month_binding: float = 1
+    end_month_binding: float = 12
