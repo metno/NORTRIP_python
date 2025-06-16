@@ -13,6 +13,8 @@ he = 1
 li = 2
 num_veh = 2
 
+for i in range(2):
+    
 # Tyre type
 st = 1
 wi = 2

@@ -1,5 +1,6 @@
 from config_classes.model_file_paths import model_file_paths
 import pandas as pd
+from pd_util.find_value import find_value
 
 
 def read_road_dust_paths(read_as_text=0) -> model_file_paths:
@@ -26,14 +27,6 @@ def read_road_dust_paths(read_as_text=0) -> model_file_paths:
     except FileNotFoundError as e:
         print(f"Error: {e}. The file was not found.")
         exit()
-
-    def find_value(
-        search_text: str, header_list: pd.Series, file_list: pd.Series
-    ) -> str:
-        matches = header_list.str.contains(search_text, case=False, na=False)
-        if matches.any():
-            return file_list[matches].iloc[0]
-        return ""
 
     # Extract paths and filenames
     paths.path_inputparam = find_value(
