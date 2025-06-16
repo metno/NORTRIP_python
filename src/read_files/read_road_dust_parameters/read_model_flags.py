@@ -10,7 +10,7 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
     Load model flags from DataFrame and return an instance of model_flags.
 
     Args:
-        file_path (DataFrae): DataFrame containing model flags.
+        flags_df (DataFrame): DataFrame containing model flags.
 
     Returns:
         model_flags: An instance of model_flags with loaded values.

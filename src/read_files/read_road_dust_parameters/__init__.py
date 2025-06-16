@@ -1,4 +1,10 @@
-from .read_model_flags import read_model_flags
-from .read_model_parameters import read_model_parameters
+"""
+Paramter loading for NORTRIP.
+"""
 
-__all__ = ["read_model_flags", "read_model_parameters"]
+from .read_road_dust_parameters import read_road_dust_parameters
+
+
+__all__ = [
+    "read_road_dust_parameters",
+]

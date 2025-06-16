@@ -1,6 +1,5 @@
 from importlib.metadata import version
-from read_files import read_road_dust_paths, read_model_flags, read_model_parameters
-import pandas as pd
+from read_files import read_road_dust_parameters, read_road_dust_paths
 import constants
 import logging
 
@@ -14,12 +13,12 @@ logger = logging.getLogger(__name__)
 def main():
     print(f"Starting NORTRIP_model_python_v{version('nortrip-python')}...")
 
-    read_as_text = 0
+    read_as_text = 1
     # Loading model parameters and flags
     paths = read_road_dust_paths(read_as_text=read_as_text)
 
-    input_parameters_sheets = pd.read_excel(
-        paths.path_filename_inputparam, sheet_name=None
+    model_parameter, model_flags, model_activities = read_road_dust_parameters(
+        paths.path_filename_inputparam, read_as_text=read_as_text
     )
 
-    model_flags = read_model_flags(input_parameters_sheets["Flags"])
+    logger.info(model_parameter)
