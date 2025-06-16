@@ -4,6 +4,9 @@ from .read_model_activities import read_model_activities
 from config_classes import model_flags, model_parameters, model_activities
 import pandas as pd
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def read_road_dust_parameters(
@@ -32,11 +35,30 @@ def read_road_dust_parameters(
 
         parameters_path = os.path.join(text_dir, f"{base_name}_parameters.txt")
         flags_path = os.path.join(text_dir, f"{base_name}_flags.txt")
-        activities_path = os.path.join(text_dir, f"{base_name}_params.txt")
+        activities_path = os.path.join(text_dir, f"{base_name}_activities.txt")
 
-        parameter_df = pd.read_csv(parameters_path, sep="\t", header=None)
-        flags_df = pd.read_csv(flags_path, sep="\t", header=None)
-        activities_df = pd.read_csv(activities_path, sep="\t", header=None)
+        encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
+
+        for encoding in encodings:
+            try:
+                parameter_df = pd.read_csv(
+                    parameters_path, sep="\t", header=None, encoding=encoding
+                )
+                flags_df = pd.read_csv(
+                    flags_path, sep="\t", header=None, encoding=encoding
+                )
+                activities_df = pd.read_csv(
+                    activities_path, sep="\t", header=None, encoding=encoding
+                )
+                logger.info(f"Read parameters with encoding: {encoding}")
+                break
+            except UnicodeDecodeError:
+                if encoding == encodings[-1]:
+                    logger.error(
+                        f"Failed to read parameters with all encodings: {encodings}"
+                    )
+                    exit()
+                continue
 
     else:
         all_sheet = pd.read_excel(parameter_file_path, sheet_name=None)
@@ -44,8 +66,8 @@ def read_road_dust_parameters(
         flags_df = all_sheet["Flags"]
         activities_df = all_sheet["Activities"]
 
-    parameters = read_model_parameters(parameter_df)
-    flags = read_model_flags(flags_df)
-    activities = read_model_activities(activities_df)
+    parameters = read_model_parameters(parameter_df)  # type: ignore
+    flags = read_model_flags(flags_df)  # type: ignore
+    activities = read_model_activities(activities_df)  # type: ignore
 
     return parameters, flags, activities

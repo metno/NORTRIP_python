@@ -17,8 +17,8 @@ def main():
     # Loading model parameters and flags
     paths = read_road_dust_paths(read_as_text=read_as_text)
 
-    model_parameter, model_flags, model_activities = read_road_dust_parameters(
+    model_parameters, model_flags, model_activities = read_road_dust_parameters(
         paths.path_filename_inputparam, read_as_text=read_as_text
     )
 
-    logger.info(model_parameter)
+    logger.info(model_flags)
