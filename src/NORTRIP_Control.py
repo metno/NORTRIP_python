@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def main():
     print(f"Starting NORTRIP_model_python_v{version('nortrip-python')}...")
 
-    read_as_text = False
+    read_as_text = True
     # Loading model parameters and flags
     paths = read_road_dust_paths(read_as_text=read_as_text)
 
@@ -21,4 +21,4 @@ def main():
         paths.path_filename_inputparam, read_as_text=read_as_text
     )
 
-    logger.info(model_activities)
+    logger.info(model_parameters)

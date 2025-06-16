@@ -12,4 +12,4 @@ def find_value_or_default(
     if result == "" or pd.isna(result):
         return default_val
 
-    return float(result)
+    return float(result.replace(",", "."))
