@@ -1,5 +1,5 @@
 """
-Paramter loading for NORTRIP.
+Parameter file loading for NORTRIP.
 """
 
 from .read_road_dust_parameters import read_road_dust_parameters

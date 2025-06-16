@@ -1,3 +1,7 @@
+"""
+Main script for the NORTRIP Road Dust Model in Python.
+"""
+
 from importlib.metadata import version
 from read_files import read_road_dust_parameters, read_road_dust_paths
 import logging
@@ -33,4 +37,4 @@ def main():
         paths.path_filename_inputparam, read_as_text=read_as_text
     )
 
-    logger.info(model_flags)
+    logger.info(model_parameters.z0)
