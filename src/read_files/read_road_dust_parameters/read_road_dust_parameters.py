@@ -75,6 +75,6 @@ def read_road_dust_parameters(
 
     parameters = read_model_parameters(parameter_df)  # type: ignore
     flags = read_model_flags(flags_df)  # type: ignore
-    activities = read_model_activities(activities_df)  # type: ignore
+    activities = read_model_activities(activities_df, parameters)  # type: ignore
 
     return parameters, flags, activities

@@ -1,17 +1,20 @@
 import pandas as pd
-from config_classes import model_activities
+from config_classes import model_activities, model_parameters
 from pd_util import find_value_or_default
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def read_model_activities(activities_df: pd.DataFrame) -> model_activities:
+def read_model_activities(
+    activities_df: pd.DataFrame, model_parameters: model_parameters
+) -> model_activities:
     """
     Load model activities from DataFrame and return an instance of model_activities.
 
     Args:
         activities_df (DataFrame): DataFrame containing model activities.
+        model_parameters (model_parameters): model_parameters to potentially overwrite ploughing threshold.
 
     Returns:
         model_activities: An instance of model_activities with loaded values.
@@ -113,8 +116,10 @@ def read_model_activities(activities_df: pd.DataFrame) -> model_activities:
         data_col,
         loaded_activities.delay_ploughing_hour,
     )
-    loaded_activities.ploughing_thresh = find_value_or_default(
-        "ploughing_thresh", header_col, data_col, loaded_activities.ploughing_thresh
+
+    # Can overwrite the ploughing threshold set in model parameters
+    model_parameters.ploughing_thresh = find_value_or_default(
+        "ploughing_thresh", header_col, data_col, model_parameters.ploughing_thresh
     )
 
     # Cleaning parameters

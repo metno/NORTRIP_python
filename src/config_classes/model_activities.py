@@ -35,7 +35,6 @@ class model_activities:
 
     # Ploughing activities
     delay_ploughing_hour: float = 3.0
-    ploughing_thresh: float = 0.0  # Note: default depends on existing value in MATLAB
 
     # Cleaning activities
     delay_cleaning_hour: float = 168.0  # 7*24 hours
