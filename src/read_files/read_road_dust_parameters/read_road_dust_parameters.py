@@ -11,14 +11,14 @@ logger = logging.getLogger(__name__)
 
 def read_road_dust_parameters(
     parameter_file_path: str,
-    read_as_text=0,
+    read_as_text=False,
 ) -> tuple[model_parameters, model_flags, model_activities]:
     """
     Read road dust model parameters, flags, and activities from specified file.
 
     Args:
-        parameter_file_path (str): Path to the file containing model parameters.
-        read_as_text (int, optional): If 1, read the file as text. Defaults to 0.
+        parameter_file_path (str): Path to the xlsx containing model parameters.
+        read_as_text (bool, optional): If True, read the file as text. Will reformat parameter_file_path to text format.
 
     Returns:
         tuple: A tuple containing:
@@ -61,10 +61,10 @@ def read_road_dust_parameters(
                 continue
 
     else:
-        all_sheet = pd.read_excel(parameter_file_path, sheet_name=None)
-        parameter_df = all_sheet["Parameters"]
-        flags_df = all_sheet["Flags"]
-        activities_df = all_sheet["Activities"]
+        all_sheets = pd.read_excel(parameter_file_path, sheet_name=None)
+        parameter_df = all_sheets["Parameters"]
+        flags_df = all_sheets["Flags"]
+        activities_df = all_sheets["Activities"]
 
     parameters = read_model_parameters(parameter_df)  # type: ignore
     flags = read_model_flags(flags_df)  # type: ignore
