@@ -18,7 +18,8 @@ def main():
     # Loading model parameters and flags
     paths = read_road_dust_paths(read_as_text=read_as_text)
 
-    flags_df = pd.read_excel(paths.path_filename_inputparam, sheet_name="Flags")
-    model_flags = read_model_flags(flags_df)
+    input_parameters_sheets = pd.read_excel(
+        paths.path_filename_inputparam, sheet_name=None
+    )
 
-    logger.info(constants.ca)
+    model_flags = read_model_flags(input_parameters_sheets["Flags"])
