@@ -1,8 +1,9 @@
 import pandas as pd
-import numpy as np
+import logging
 from input_classes import input_metadata
-from pd_util.find_value_or_default import find_value_or_default
-from pd_util.find_value import find_value
+from pd_util import find_value_or_default
+
+logger = logging.getLogger(__name__)
 
 
 def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
@@ -17,110 +18,170 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
     """
     loaded_metadata = input_metadata()
 
-    # Create mapping of header text to field names and their required status
-    field_mapping = {
-        "Driving cycle": ("d_index", True, 1),
-        "Pavement type": ("p_index", True, 1),
-        "Road width": ("b_road", False, None),  # Required field
-        "Latitude": ("LAT", False, None),  # Required field
-        "Longitude": ("LON", False, None),  # Required field
-        "Elevation": ("Z_SURF", True, 0.0),
-        "Height obs wind": ("z_FF", False, None),  # Required field
-        "Height obs temperature": ("z_T", False, None),  # Required field
-        "Height obs other temperature": ("z2_T", True, 25.0),
-        "Surface albedo": ("albedo_road", True, 0.3),
-        "Time difference": ("DIFUTC_H", False, None),  # Required field
-        "Surface pressure": ("Pressure", True, 1000.0),
-        "Missing data": ("nodata", True, -99.0),
-        "Number of lanes": ("n_lanes", True, 2),
-        "Width of lane": ("b_lane", True, 3.5),
-        "Street canyon width": ("b_canyon", True, None),  # Special handling
-        "Street orientation": ("ang_road", True, 0.0),
-        "Street slope": ("slope_road", True, 0.0),
-        "Wind speed correction": ("wind_speed_correction", True, 1.0),
-        "Observed moisture cut off": ("observed_moisture_cutoff_value", True, 1.5),
-        "Suspension rate scaling factor": ("h_sus", True, 1.0),
-        "Surface texture scaling": ("h_texture", True, 1.0),
-        "Choose receptor position for ospm": ("choose_receptor_ospm", True, 3),
-        "Street canyon length north for ospm": ("SL1_ospm", True, 100.0),
-        "Street canyon length south for ospm": ("SL2_ospm", True, 100.0),
-        "f_roof factor for ospm": ("f_roof_ospm", True, 0.82),
-        "Receptor height for ospm": ("RecHeight_ospm", True, 2.5),
-        "f_turb factor for ospm": ("f_turb_ospm", True, 1.0),
-    }
+    # Extract header and value columns
+    header_col = metadata_df.iloc[:, 0]
+    data_col = metadata_df.iloc[:, 1]
 
-    header_series = pd.Series(metadata_df.index)
-    data_series = metadata_df.iloc[:, 0]
+    # Helper for string fields (dates)
+    def find_str_value(search_text, header_col, metadata_df, col_idx=1, default=""):
+        matches = header_col.str.contains(search_text, case=False, na=False)
+        if matches.any():
+            val = metadata_df.iloc[matches[matches].index[0], col_idx]
+            if pd.isna(val):
+                return default
+            return str(val)
+        return default
 
-    # Process standard fields using mapping
-    for header_text, (field_name, has_default, default_value) in field_mapping.items():
-        if has_default:
-            value = find_value_or_default(header_text, header_series, data_series, float(default_value) if default_value is not None else 0.0)
-        else:
-            # Required field: use find_value, raise error if missing
-            value = find_value(header_text, header_series, data_series)
-            if value == "" or pd.isna(value):
-                raise ValueError(f"Required field '{header_text}' not found or is NaN")
-            # Try to convert to float if possible
-            try:
-                value = float(value)
-            except Exception:
-                pass
-        setattr(loaded_metadata, field_name, value)
+    # Mapping: (header, field)
+    mapping = [
+        ("Driving cycle", "d_index"),
+        ("Pavement type", "p_index"),
+        ("Road width", "b_road"),
+        ("Latitude", "LAT"),
+        ("Longitude", "LON"),
+        ("Height obs wind", "z_FF"),
+        ("Height obs temperature", "z_T"),
+        ("Time difference", "DIFUTC_H"),
+        ("Elevation", "Z_SURF"),
+        ("Height obs other temperature", "z2_T"),
+        ("Surface albedo", "albedo_road"),
+        ("Surface pressure", "Pressure"),
+        ("Missing data", "nodata"),
+        ("Number of lanes", "n_lanes"),
+        ("Width of lane", "b_lane"),
+        ("Street orientation", "ang_road"),
+        ("Street slope", "slope_road"),
+        ("Wind speed correction", "wind_speed_correction"),
+        ("Observed moisture cut off", "observed_moisture_cutoff_value"),
+        ("Suspension rate scaling factor", "h_sus"),
+        ("Surface texture scaling", "h_texture"),
+        ("Choose receptor position for ospm", "choose_receptor_ospm"),
+        ("Street canyon length north for ospm", "SL1_ospm"),
+        ("Street canyon length south for ospm", "SL2_ospm"),
+        ("f_roof factor for ospm", "f_roof_ospm"),
+        ("Receptor height for ospm", "RecHeight_ospm"),
+        ("f_turb factor for ospm", "f_turb_ospm"),
+    ]
 
-    # Special handling for b_canyon
-    if loaded_metadata.b_canyon is None:
-        loaded_metadata.b_canyon = loaded_metadata.b_road
-    if loaded_metadata.b_canyon < loaded_metadata.b_road:
-        loaded_metadata.b_canyon = loaded_metadata.b_road
+    loaded_count = 0
 
-    # Handle street canyon height (can be single value or north/south)
-    h_canyon = [0.0, 0.0]
-    canyon_height = find_value_or_default("Street canyon height", header_series, data_series, 0.0)
-    if isinstance(canyon_height, (list, np.ndarray)) and len(canyon_height) > 1:
-        h_canyon[0] = float(canyon_height[0])
-        h_canyon[1] = float(canyon_height[1]) if len(canyon_height) > 1 else float(canyon_height[0])
+    # Set all simple fields using dataclass default as fallback
+    for header, field in mapping:
+        current_default = getattr(loaded_metadata, field)
+        val = find_value_or_default(header, header_col, data_col, current_default)
+        if val != current_default:
+            loaded_count += 1
+        setattr(loaded_metadata, field, val)
+
+    # b_canyon: default to b_road if missing or less than b_road
+    b_canyon = find_value_or_default(
+        "Street canyon width", header_col, data_col, loaded_metadata.b_road
+    )
+    if b_canyon < loaded_metadata.b_road:
+        b_canyon = loaded_metadata.b_road
+    if b_canyon != loaded_metadata.b_canyon:
+        loaded_count += 1
+    loaded_metadata.b_canyon = b_canyon
+
+    # h_canyon: handle north/south logic
+    h_canyon_north = find_value_or_default(
+        "Street canyon height north", header_col, data_col, 0.0
+    )
+    h_canyon_south = find_value_or_default(
+        "Street canyon height south", header_col, data_col, 0.0
+    )
+    # If both are zero, try 'Street canyon height' (single value)
+    if h_canyon_north == 0.0 and h_canyon_south == 0.0:
+        h_canyon_single = find_value_or_default(
+            "Street canyon height", header_col, data_col, 0.0
+        )
+        loaded_metadata.h_canyon = [h_canyon_single, h_canyon_single]
+        if h_canyon_single != 0.0:
+            loaded_count += 1
     else:
-        h_canyon[0] = float(canyon_height)
-        h_canyon[1] = float(canyon_height)
+        loaded_metadata.h_canyon = [h_canyon_north, h_canyon_south]
+        if h_canyon_north != 0.0 or h_canyon_south != 0.0:
+            loaded_count += 1
 
-    # Override with specific north/south values if available
-    h_canyon[0] = find_value_or_default("Street canyon height north", header_series, data_series, h_canyon[0])
-    h_canyon[1] = find_value_or_default("Street canyon height south", header_series, data_series, h_canyon[1])
-    loaded_metadata.h_canyon = h_canyon
+    # exhaust_EF and NOX_EF arrays
+    exhaust_EF_0 = find_value_or_default(
+        "Exhaust EF (he)", header_col, data_col, loaded_metadata.exhaust_EF[0]
+    )
+    exhaust_EF_1 = find_value_or_default(
+        "Exhaust EF (li)", header_col, data_col, loaded_metadata.exhaust_EF[1]
+    )
+    if (
+        exhaust_EF_0 != loaded_metadata.exhaust_EF[0]
+        or exhaust_EF_1 != loaded_metadata.exhaust_EF[1]
+    ):
+        loaded_count += 1
+    loaded_metadata.exhaust_EF = [exhaust_EF_0, exhaust_EF_1]
+    loaded_metadata.exhaust_EF_available = int(sum(loaded_metadata.exhaust_EF) != 0)
 
-    # Handle emission factors
-    exhaust_ef = [0.0, 0.0]
-    exhaust_ef[0] = find_value_or_default("Exhaust EF (he)", header_series, data_series, 0.0)  # Heavy vehicles
-    exhaust_ef[1] = find_value_or_default("Exhaust EF (li)", header_series, data_series, 0.0)  # Light vehicles
-    loaded_metadata.exhaust_EF = exhaust_ef
-    loaded_metadata.exhaust_EF_available = 1 if sum(exhaust_ef) > 0 else 0
+    NOX_EF_0 = find_value_or_default(
+        "NOX EF (he)", header_col, data_col, loaded_metadata.NOX_EF[0]
+    )
+    NOX_EF_1 = find_value_or_default(
+        "NOX EF (li)", header_col, data_col, loaded_metadata.NOX_EF[1]
+    )
+    if NOX_EF_0 != loaded_metadata.NOX_EF[0] or NOX_EF_1 != loaded_metadata.NOX_EF[1]:
+        loaded_count += 1
+    loaded_metadata.NOX_EF = [NOX_EF_0, NOX_EF_1]
+    loaded_metadata.NOX_EF_available = int(sum(loaded_metadata.NOX_EF) != 0)
 
-    nox_ef = [0.0, 0.0]
-    nox_ef[0] = find_value_or_default("NOX EF (he)", header_series, data_series, 0.0)  # Heavy vehicles
-    nox_ef[1] = find_value_or_default("NOX EF (li)", header_series, data_series, 0.0)  # Light vehicles
-    loaded_metadata.NOX_EF = nox_ef
-    loaded_metadata.NOX_EF_available = 1 if sum(nox_ef) > 0 else 0
+    # Dates (strings)
+    start_date_str = find_str_value(
+        "Start date", header_col, metadata_df, 1, loaded_metadata.start_date_str
+    )
+    end_date_str = find_str_value(
+        "End date", header_col, metadata_df, 1, loaded_metadata.end_date_str
+    )
+    if start_date_str and len(start_date_str) < 11:
+        start_date_str += " 00:00:00"
+    if end_date_str and len(end_date_str) < 11:
+        end_date_str += " 00:00:00"
+    if start_date_str != loaded_metadata.start_date_str:
+        loaded_count += 1
+    if end_date_str != loaded_metadata.end_date_str:
+        loaded_count += 1
+    loaded_metadata.start_date_str = start_date_str
+    loaded_metadata.end_date_str = end_date_str
 
-    # Handle date strings (assuming they're in text columns)
-    def format_date_string(date_str):
-        """Add time if missing from date string."""
-        if date_str and len(str(date_str)) < 11:
-            return f"{date_str} 00:00:00"
-        return str(date_str) if date_str else ""
+    # Save dates (multiple possible)
+    start_date_save_str = find_str_value(
+        "Start save date",
+        header_col,
+        metadata_df,
+        1,
+        loaded_metadata.start_date_save_str,
+    )
+    end_date_save_str = find_str_value(
+        "End save date", header_col, metadata_df, 1, loaded_metadata.end_date_save_str
+    )
+    if start_date_save_str and len(start_date_save_str) < 11:
+        start_date_save_str += " 00:00:00"
+    if end_date_save_str and len(end_date_save_str) < 11:
+        end_date_save_str += " 00:00:00"
+    if start_date_save_str != loaded_metadata.start_date_save_str:
+        loaded_count += 1
+    if end_date_save_str != loaded_metadata.end_date_save_str:
+        loaded_count += 1
+    loaded_metadata.start_date_save_str = start_date_save_str
+    loaded_metadata.end_date_save_str = end_date_save_str
 
-    # Simple date handling (not implementing multiple save dates for now)
-    start_date = find_value("Start date", header_series, data_series)
-    end_date = find_value("End date", header_series, data_series)
-    start_save_date = find_value("Start save date", header_series, data_series)
-    end_save_date = find_value("End save date", header_series, data_series)
+    # For now, only support one subdate (can be extended for multiple)
+    loaded_metadata.start_subdate_save_str = (
+        [loaded_metadata.start_date_save_str]
+        if loaded_metadata.start_date_save_str
+        else []
+    )
+    loaded_metadata.end_subdate_save_str = (
+        [loaded_metadata.end_date_save_str] if loaded_metadata.end_date_save_str else []
+    )
+    loaded_metadata.n_save_subdate = max(1, len(loaded_metadata.start_subdate_save_str))
 
-    loaded_metadata.start_date_str = format_date_string(start_date)
-    loaded_metadata.end_date_str = format_date_string(end_date)
-    loaded_metadata.start_date_save_str = format_date_string(start_save_date)
-    loaded_metadata.end_date_save_str = format_date_string(end_save_date)
-
-    # Calculate derived field
+    # Calculated field
     loaded_metadata.b_road_lanes = loaded_metadata.n_lanes * loaded_metadata.b_lane
 
+    logger.info(f"Successfully loaded {loaded_count} metadata fields")
     return loaded_metadata

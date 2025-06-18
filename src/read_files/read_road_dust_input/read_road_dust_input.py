@@ -81,12 +81,17 @@ def read_road_dust_input(
         except FileNotFoundError:
             logger.error(f"File not found: {input_file_path}")
             exit(1)
-        activity_df = all_sheets["Activity"]
-        airquality_df = all_sheets["AirQuality"]
-        meteorology_df = all_sheets["Meteorology"]
-        traffic_df = all_sheets["Traffic"]
-        initial_df = all_sheets["Initialconditions"]
-        metadata_df = all_sheets["Metadata"]
+
+        try:
+            activity_df = all_sheets["Activity"]
+            airquality_df = all_sheets["Airquality"]
+            meteorology_df = all_sheets["Meteorology"]
+            traffic_df = all_sheets["Traffic"]
+            initial_df = all_sheets["Initialconditions"]
+            metadata_df = all_sheets["Metadata"]
+        except KeyError:
+            logger.error(f"Sheet not found in file: {input_file_path}")
+            exit(1)
 
     activity_data = read_input_activity(activity_df)  # type: ignore
     airquality_data = read_input_airquality(airquality_df)  # type: ignore
