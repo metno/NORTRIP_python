@@ -14,7 +14,7 @@ def read_model_activities(
 
     Args:
         activities_df (DataFrame): DataFrame containing model activities.
-        model_parameters (model_parameters): model_parameters to potentially overwrite ploughing_threshold.
+        model_parameters (model_parameters): to potentially overwrite ploughing_threshold.
 
     Returns:
         model_activities: An instance of model_activities with loaded values.
