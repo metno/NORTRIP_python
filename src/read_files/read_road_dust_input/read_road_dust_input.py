@@ -104,10 +104,10 @@ def read_road_dust_input(
     initial_data = read_input_initial(
         initial_df, model_parameters, metadata_data, print_results
     )
+    traffic_data = read_input_traffic(traffic_df, metadata_data.nodata, print_results)
     activity_data = read_input_activity(activity_df)
     airquality_data = read_input_airquality(airquality_df)
     meteorology_data = read_input_meteorology(meteorology_df)
-    traffic_data = read_input_traffic(traffic_df)
 
     return (
         activity_data,

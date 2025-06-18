@@ -48,7 +48,7 @@ def main():
         print_results,
     )
 
-    logger.info(metadata_input.b_road)
+    logger.info(traffic_input.day)
 
 
 if __name__ == "__main__":
