@@ -21,3 +21,8 @@ class input_initial:
             (constants.num_moisture, constants.num_track_max)
         )
     )
+    long_rad_in_offset: float = 0.0
+    RH_offset: float = 0.0
+    T_2m_offset: float = 0.0
+    P_fugitive: float = 0.0
+    P2_fugitive: float = 0.0

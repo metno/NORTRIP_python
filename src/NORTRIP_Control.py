@@ -48,7 +48,7 @@ def main():
         print_results,
     )
 
-    logger.info(initial_input.m_road_init)
+    logger.info(metadata_input.b_road)
 
 
 if __name__ == "__main__":

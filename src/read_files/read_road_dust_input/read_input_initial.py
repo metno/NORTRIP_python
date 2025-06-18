@@ -19,16 +19,15 @@ def read_input_initial(
     Read and process initial input data for NORTRIP.
 
     """
-    b_road_lanes = getattr(input_metadata, "b_road_lanes", 1.0)
-    f_track = getattr(
-        model_parameters, "f_track", [1.0] + [0.0] * (constants.num_track_max - 1)
-    )
-    num_track = len(f_track)
+    b_road_lanes = input_metadata.b_road_lanes
+    f_track = model_parameters.f_track
+    num_track = model_parameters.num_track
 
     # Parse all possible values into loaded_values_initial
     loaded_values_initial = input_values_initial()
     header_col = initial_df.iloc[:, 0]
     data_col = initial_df.iloc[:, 1]
+
     for field_name in loaded_values_initial.__dataclass_fields__:
         default_val = getattr(loaded_values_initial, field_name)
         new_value = find_float_or_default(field_name, header_col, data_col, default_val)
@@ -102,5 +101,11 @@ def read_input_initial(
             loaded_initial.m_road_init[:, 0] * f_track[tr]
         )
         loaded_initial.g_road_init[:, tr] = loaded_initial.g_road_init[:, 0]
+
+    loaded_initial.long_rad_in_offset = loaded_values_initial.long_rad_in_offset
+    loaded_initial.RH_offset = loaded_values_initial.RH_offset
+    loaded_initial.T_2m_offset = loaded_values_initial.T_2m_offset
+    loaded_initial.P_fugitive = loaded_values_initial.P_fugitive
+    loaded_initial.P2_fugitive = loaded_values_initial.P2_fugitive
 
     return loaded_initial
