@@ -4,6 +4,7 @@ from .read_input_meteorology import read_input_meteorology
 from .read_input_traffic import read_input_traffic
 from .read_input_initial import read_input_initial
 from .read_input_metadata import read_input_metadata
+from config_classes import model_parameters
 import pandas as pd
 import os
 import logging
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 def read_road_dust_input(
     input_file_path: str,
+    model_parameters: model_parameters,
     read_as_text=False,
     print_results=False,
 ):
@@ -26,6 +28,10 @@ def read_road_dust_input(
     Returns:
 
     """
+
+    activity_df = airquality_df = meteorology_df = traffic_df = initial_df = (
+        metadata_df
+    ) = None
 
     if read_as_text:
         # Extract directory and base filename without extension
@@ -93,12 +99,26 @@ def read_road_dust_input(
             logger.error(f"Sheet not found in file: {input_file_path}")
             exit(1)
 
-    activity_data = read_input_activity(activity_df)  # type: ignore
-    airquality_data = read_input_airquality(airquality_df)  # type: ignore
-    meteorology_data = read_input_meteorology(meteorology_df)  # type: ignore
-    traffic_data = read_input_traffic(traffic_df)  # type: ignore
-    initial_data = read_input_initial(initial_df)  # type: ignore
-    metadata_data = read_input_metadata(metadata_df)  # type: ignore
+    # Check if all required sheets are present (for the linter)
+    if (
+        metadata_df is None
+        or initial_df is None
+        or activity_df is None
+        or airquality_df is None
+        or meteorology_df is None
+        or traffic_df is None
+    ):
+        logger.error("One or more required sheets are missing from the input file.")
+        exit(1)
+
+    metadata_data = read_input_metadata(metadata_df)
+    initial_data = read_input_initial(
+        initial_df, model_parameters, metadata_data, print_results
+    )
+    activity_data = read_input_activity(activity_df)
+    airquality_data = read_input_airquality(airquality_df)
+    meteorology_data = read_input_meteorology(meteorology_df)
+    traffic_data = read_input_traffic(traffic_df)
 
     return (
         activity_data,

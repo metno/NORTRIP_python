@@ -41,9 +41,14 @@ def main():
         traffic_input,
         initial_input,
         metadata_input,
-    ) = read_road_dust_input(paths.path_filename_inputdata, read_as_text)
+    ) = read_road_dust_input(
+        paths.path_filename_inputdata,
+        model_parameters,
+        read_as_text,
+        print_results,
+    )
 
-    logger.info(metadata_input.b_road_lanes)
+    logger.info(initial_input.m_road_init)
 
 
 if __name__ == "__main__":
