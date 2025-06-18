@@ -20,7 +20,7 @@ def main():
     print_results = bool(args.print)
 
     print(f"Starting NORTRIP_model_python_v{version('nortrip-python')}...")
-    print(f"Read as text mode: {read_as_text}")
+    print(f"Read as inputs as text: {read_as_text}")
     print(f"Print results to terminal: {print_results}")
     # Loading model parameters and flags
     paths = read_road_dust_paths(read_as_text=read_as_text)
