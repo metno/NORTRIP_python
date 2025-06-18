@@ -5,6 +5,7 @@ from config_classes import model_flags, model_parameters, model_activities
 import pandas as pd
 import os
 import logging
+from pd_util import read_txt
 
 logger = logging.getLogger(__name__)
 
@@ -37,31 +38,14 @@ def read_road_dust_parameters(
         flags_path = os.path.join(text_dir, f"{base_name}_flags.txt")
         activities_path = os.path.join(text_dir, f"{base_name}_activities.txt")
 
-        encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
-
-        for encoding in encodings:
-            try:
-                parameter_df = pd.read_csv(
-                    parameters_path, sep="\t", header=None, encoding=encoding
-                )
-                flags_df = pd.read_csv(
-                    flags_path, sep="\t", header=None, encoding=encoding
-                )
-                activities_df = pd.read_csv(
-                    activities_path, sep="\t", header=None, encoding=encoding
-                )
-                logger.info(f"Read parameters with encoding: {encoding}")
-                break
-            except FileNotFoundError as e:
-                logger.error(f"File not found: {e.filename}")
-                exit(1)
-            except UnicodeDecodeError:
-                if encoding == encodings[-1]:
-                    logger.error(
-                        f"Failed to read parameters with all encodings: {encodings}"
-                    )
-                    exit()
-                continue
+        try:
+            parameter_df = read_txt(parameters_path)
+            flags_df = read_txt(flags_path)
+            activities_df = read_txt(activities_path)
+            logger.info(f"Read parameters from text files.")
+        except FileNotFoundError as e:
+            logger.error(f"File not found: {e.filename}")
+            exit(1)
 
     else:
         try:

@@ -8,6 +8,7 @@ from config_classes import model_parameters
 import pandas as pd
 import os
 import logging
+from pd_util import read_txt
 
 logger = logging.getLogger(__name__)
 
@@ -50,24 +51,12 @@ def read_road_dust_input(
 
         for encoding in encodings:
             try:
-                activity_df = pd.read_csv(
-                    activity_path, sep="\t", header=None, encoding=encoding
-                )
-                airquality_df = pd.read_csv(
-                    airquality_path, sep="\t", header=None, encoding=encoding
-                )
-                meteorology_df = pd.read_csv(
-                    meteorology_path, sep="\t", header=None, encoding=encoding
-                )
-                traffic_df = pd.read_csv(
-                    traffic_path, sep="\t", header=None, encoding=encoding
-                )
-                initial_df = pd.read_csv(
-                    initial_path, sep="\t", header=None, encoding=encoding
-                )
-                metadata_df = pd.read_csv(
-                    metadata_path, sep="\t", header=None, encoding=encoding
-                )
+                activity_df = read_txt(activity_path)
+                airquality_df = read_txt(airquality_path)
+                meteorology_df = read_txt(meteorology_path)
+                traffic_df = read_txt(traffic_path)
+                initial_df = read_txt(initial_path)
+                metadata_df = read_txt(metadata_path)
                 logger.info(f"Read input data with encoding: {encoding}")
                 break
             except FileNotFoundError as e:
