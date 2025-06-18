@@ -43,7 +43,7 @@ def main():
         metadata_input,
     ) = read_road_dust_input(paths.path_filename_inputdata, read_as_text)
 
-    logger.info(metadata_input.h_canyon)
+    logger.info(metadata_input.b_road_lanes)
 
 
 if __name__ == "__main__":
