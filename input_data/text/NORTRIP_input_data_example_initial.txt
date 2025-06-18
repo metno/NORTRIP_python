@@ -1,14 +1,13 @@
-NORTRIP model text input file (initial)     
----------------------------------------     
-PARAMETER                                   	VALUE       	UNIT        
-M2_dust_road                                	10.00       	(g/m2)      
-M2_sand_road                                	0.00        	(g/m2)      
-M2_salt_road(na)                            	0.00        	(g/m2)      
-M2_salt_road(mg)                            	0.00        	(g/m2)      
-water_road                                  	0.10        	(mm)        
-snow_road                                   	0.10        	(mm.w.e)    
-ice_road                                    	0.00        	(mm.w.e)    
-P2_fugitive                                 	0.00        	(g/m2/hr)   
-long_rad_in_offset                          	0.00        	(W/m2)      
-RH_offset                                   	0.00        	(%)         
-T_2m_offset                                 	0.00        	(C)         
+Parameter	Value	Units	0	Comment	Status	Default
+M2_dust_road	10,000	g/m^2		Initial dust load	optional	0
+M2_sand_road	0,000	g/m^2		Initial sand load	optional	0
+M2_salt_road(na)	0,000	g/m^2		Initial salt load (NaCl)	optional	0
+M2_salt_road(mg)	0,000	g/m^2		 'mg' , 'cma' or 'ca'	optional	0
+water_road	0,100	mm		Initial water layer depth	optional	0
+snow_road	0,100	mm w.e.		Initial snow layer depth	optional	0
+ice_road	0,000	mm w.e.		Initial ice layer depth	optional	0
+long_rad_in_offset 	0,000	W/m^2		Constant offset for long wave radiation in	optional	0
+RH_offset	0,000	 %		Constant offset for relative humidity	optional	0
+T_2m_offset	0,000	Celsius		Constant offset for temperature	optional	0
+P2_fugitive	0,000	g/m^2/hr		Constant fugitive addition	optional	0
+						

@@ -41,7 +41,7 @@ def main():
         traffic_input,
         initial_input,
         metadata_input,
-    ) = read_road_dust_input(paths.path_filename_inputdata)
+    ) = read_road_dust_input(paths.path_filename_inputdata, read_as_text)
 
     logger.info(metadata_input.h_canyon)
 

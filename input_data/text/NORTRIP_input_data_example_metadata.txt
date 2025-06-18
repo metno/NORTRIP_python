@@ -1,40 +1,47 @@
-NORTRIP model text input file (metadata)    
------------------------------------------   
-PARAMETER                                   	VALUE       	UNIT        
-Missing data                                	-99.00      	            
-Driving cycle                               	1           	            
-Pavement type                               	1           	            
-Surface texture scaling                     	1           	            
-Number of lanes                             	4           	            
-Width of lane                               	3.50        	(m)         
-Road width                                  	15.00       	(m)         
-Street canyon width                         	23.00       	(m)         
-Street canyon height north                  	25.00       	(m)         
-Street canyon height south                  	24.00       	(m)         
-Street orientation                          	76.00       	(m)         
-Street slope                                	0.00        	(deg)       
-Latitude                                    	59.17       	(deg)       
-Longitude                                   	18.30       	(deg)       
-Elevation                                   	0.00        	(m)         
-Surface albedo                              	0.15        	            
-Time difference                             	-1.00       	(hr +west)  
-Height obs wind                             	2.00        	(m)         
-Height obs temperature                      	2.00        	(m)         
-Surface pressure                            	1000.00     	(mbar)      
-Wind speed correction                       	0.50        	(m/s)       
-Observed moisture cut off                   	1.50        	(mV)        
-Suspension rate scaling factor              	1.00        	            
-Exhaust EF (he)                             	0.00        	(g/km/veh)  
-Exhaust EF (li)                             	0.00        	(g/km/veh)  
-NOX EF (he)                                 	0.00        	(g/km/veh)  
-NOX EF (li)                                 	0.00        	(g/km/veh)  
-Choose receptor position for ospm           	1           	(1=N,2=S,3=av)
-Street canyon length north for ospm         	100.00      	(m)         
-Street canyon length south for ospm         	100.00      	(m)         
-f_roof factor for ospm                      	0.40        	            
-Receptor height for ospm                    	2.00        	(m)         
-f_turb factor for ospm                      	0.60        	            
-Start date                                  	01.10.2010 01:00        	dd.mm.yyyy hh:mm
-Start save date                             	01.11.2010 01:00        	dd.mm.yyyy hh:mm
-End date                                    	                        	dd.mm.yyyy hh:mm
-End save date                               	31.05.2011 23:00        	dd.mm.yyyy hh:mm
+Parameter	Value	End of data		Units	0	Comment	Status	Default	
+Missing data value	-99					Value of missing data in input file	Required	-999	
+Road surface parameters									
+Driving cycle index (d)	1					See parameter file	Optional	1	
+Pavement type index (p)	1					See parameter file	Optional	1	
+Surface texture scaling	1			> 0		Not implemented yet (h_texture)	Optional	1	
+Number of lanes	4			> 0			Optional	2	
+Width of lane 	3,5			m		Defines surface area of road * n_lanes	Optional	3,5	
+Street geometry									
+Road width (b_road)	15			m		Total width of road surface	Required		
+Street canyon width	23			m		Can not be less than road width	Required	b_road	
+Street canyon height north	25			m		Northern fascade	Optional	0	
+Street canyon height south 	24			m		Southern fascade	Optional	0	
+Street orientation 	76			degrees		Clockwise from North	Required		
+Street slope	0			degrees		Positive when increasing in northward direction	Optional	0	Not currently used
+Radiation related									
+Latitude 	59,17			decimal degrees		Used for  clear sky radiation calculation	Required		
+Longitude 	18,3			decimal degrees		Used for  clear sky radiation calculation	Required		
+Elevation	0			m		Used for  clear sky radiation calculation	Optional	0	
+Surface albedo 	0,15			(0-1)		Road albedo (0-1)	Optional	0,3	
+Time difference (UTC)	-1			hr		East < 0, West > 0	Required		
+Meteorological  information									
+Height obs wind 	2			m		Above surface	Required		
+Height obs temperature and RH 	2			m		Above surface	Required		
+Height obs other temperature 				m		Only if 'T25m' is given in Meteorology sheet 	Optional	25	
+Surface pressure 	1000			mbar		For air density calculations only	Optional	1000	
+Wind speed correction	0,5			> 0		Scales the given wind speed by this value	Optional	1	
+Other									
+Observed moisture cut off 				mV		Dry/wet cutoff voltage of observed conductivity	Optional 	1,5	
+Suspension rate scaling factor						Scales the suspension rate by this factor	Optional	1	
+Emission factors									
+Exhaust EF (he) 				g/km/veh		Only specify if emissions are calculated from traffic	Optional		
+Exhaust EF (li) 				g/km/veh	¢	Only specify if emissions are calculated from traffic	Optional		
+Exhaust NOX (he)				g/km/veh		Only specify if emissions are calculated from traffic	Optional		
+Exhaust NOX (li) 				g/km/veh		Only specify if emissions are calculated from traffic	Optional		
+OSPM data									
+Choose receptor position for ospm	1					1 is northern, 2 is southern, 3 is average	Optional	3	
+Street canyon length north for ospm 	100			m			Optional	100	
+Street canyon length south for ospm 	100			m			Optional	100	
+f_roof factor for ospm	0,4			> 0		Do not change	Optional	0,82	
+Receptor height for ospm 	2			m		Do not change	Optional	2,5	
+f_turb factor for ospm	0,6			> 0		Do not change	Optional	1	
+Run time date data									
+Start date	01.08.2010  01:00:00			dd.mm.yyyy hh:mm		Sets the start date for calculating	Optional		
+Start save date	01.11.2010  01:00:00			dd.mm.yyyy hh:mm		Sets the start date for saving calculations	Optional		Can add more periods to plot and save in each row
+End date	31.05.2011  23:00:00			dd.mm.yyyy hh:mm		Sets the enddate for calculating	Optional		
+End save date	31.05.2011  23:00:00			dd.mm.yyyy hh:mm		Sets the end date for saving calculations	Optional		Can add more periods to plot and save in each row
