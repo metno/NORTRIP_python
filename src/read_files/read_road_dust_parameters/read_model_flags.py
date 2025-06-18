@@ -1,6 +1,7 @@
 from config_classes.model_flags import model_flags
 import pandas as pd
 import logging
+from pd_util import find_float_or_default
 
 logger = logging.getLogger(__name__)
 
@@ -16,22 +17,23 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
         model_flags: An instance of model_flags with loaded values.
     """
     loaded_flags = model_flags()
-
+    header_col = flags_df.iloc[:, 0]
+    data_col = flags_df.iloc[:, 1]
     loaded_count = 0
-    try:
-        for _, row in flags_df.iterrows():
-            flag_name = str(row.iloc[0]).strip()
-            if hasattr(loaded_flags, flag_name):
-                flag_value = int(row.iloc[1])
-                setattr(loaded_flags, flag_name, flag_value)
-                loaded_count += 1
-            else:
-                logger.warning(
-                    f"Flag '{flag_name}' not found in model_flags dataclass."
-                )
-    except Exception as e:
-        logger.error(f"Error loading model flags: {e}")
-        raise
 
-    logger.info(f"Successfully loaded {loaded_count} model flags")
+    for field_name in loaded_flags.__dataclass_fields__:
+        current_value = getattr(loaded_flags, field_name)
+        new_value = find_float_or_default(
+            field_name, header_col, data_col, float("nan")
+        )
+        if pd.isna(new_value):
+            logger.warning(
+                f"Flag '{field_name}' not found in DataFrame. Using default value: {current_value}"
+            )
+            continue
+        if new_value != current_value:
+            setattr(loaded_flags, field_name, int(new_value))
+        loaded_count += 1
+
+    logger.info(f"Successfully loaded {loaded_count} model flag parameters")
     return loaded_flags
