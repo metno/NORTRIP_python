@@ -1,6 +1,6 @@
 from config_classes.model_file_paths import model_file_paths
 import pandas as pd
-from pd_util import find_value
+from pd_util import find_value, read_txt
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def read_road_dust_paths(read_as_text=0) -> model_file_paths:
             logger.info("Setting paths from text file")
             # Convert Excel file to text equivalent
             txt_filename = "model_paths/text/model_paths_and_files.txt"
-            paths_df = pd.read_csv(txt_filename, sep="\t", header=None)
+            paths_df = read_txt(txt_filename)
             header_text = paths_df.iloc[:, 0].astype(str)
             file_text = paths_df.iloc[:, 1].fillna("").astype(str)
 
