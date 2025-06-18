@@ -38,3 +38,7 @@ def main():
     )
 
     logger.info(model_parameters.z0)
+
+
+if __name__ == "__main__":
+    main()
