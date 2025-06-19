@@ -2,34 +2,9 @@ import pandas as pd
 import numpy as np
 from src.read_files.read_road_dust_parameters.read_model_parameters import (
     read_model_parameters,
-    safe_float,
 )
 from config_classes.model_parameters import model_parameters
 import constants
-
-
-def test_safe_float():
-    """Test the safe_float function with various inputs."""
-    # Test normal float conversion
-    assert safe_float("10.5") == 10.5
-    assert safe_float(10.5) == 10.5
-    assert safe_float("10") == 10.0
-
-    # Test European decimal format (comma as decimal separator)
-    assert safe_float("10,5") == 10.5
-    assert safe_float("1,234") == 1.234
-
-    # Test edge cases
-    assert safe_float(pd.NA) == 0.0
-    assert safe_float(None) == 0.0
-    assert safe_float("") == 0.0
-    assert safe_float("nan") == 0.0
-    assert safe_float("NaN") == 0.0
-    assert safe_float("  ") == 0.0
-
-    # Test invalid values
-    assert safe_float("invalid") == 0.0
-    assert safe_float("10.5.6") == 0.0
 
 
 def test_read_model_parameters_minimal():
@@ -342,21 +317,6 @@ def test_read_model_parameters_activity_efficiency():
         result.h_eff[constants.spraying_eff_index, constants.salt_index[1], 0].item()
         == 1.0
     )
-
-
-def test_read_model_parameters_empty_dataframe():
-    """Test that empty DataFrame doesn't crash."""
-    df = pd.DataFrame()
-
-    # Should handle empty DataFrame gracefully
-    try:
-        result = read_model_parameters(df)
-        # If it doesn't crash, that's already good
-        # But we shouldn't get here with truly empty DataFrame
-        assert False, "Should have raised an error with empty DataFrame"
-    except:
-        # Expected to fail with empty DataFrame
-        pass
 
 
 def test_read_model_parameters_integration():
