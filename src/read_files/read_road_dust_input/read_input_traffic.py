@@ -9,7 +9,15 @@ def read_input_traffic(
     traffic_df: pd.DataFrame, nodata: float = -99.0, print_results: bool = False
 ) -> input_traffic:
     """
-    Parse traffic data from DataFrame into input_traffic dataclass.
+    Read traffic data from DataFrame into input_traffic dataclass.
+
+    Args:
+        traffic_df (pd.DataFrame): DataFrame containing the traffic data
+        nodata (float): Nodata value to use for missing data
+        print_results (bool): Whether to print the results to the console
+
+    Returns:
+        input_traffic: Dataclass containing the traffic data
     """
     loaded_traffic = input_traffic()
 

@@ -12,3 +12,5 @@ wheels/
 .DS_Store
 matlab-version/
 .vscode/
+.pytest_cache/
+.coverage
