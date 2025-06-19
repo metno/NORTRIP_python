@@ -15,7 +15,7 @@ class input_traffic:
     day: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
     hour: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
     minute: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
-    date_num: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
+    date_num: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.float64))
     date_str: np.ndarray = field(
         default_factory=lambda: np.array([[], []], dtype=object)
     )

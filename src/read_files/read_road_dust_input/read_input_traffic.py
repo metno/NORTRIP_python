@@ -41,7 +41,12 @@ def read_input_traffic(
     ]
 
     # Create date_num similar to MATLAB datenum (days since year 1 + fractional day)
-    loaded_traffic.date_num = np.array([dt.timestamp() for dt in datetime_objects])
+    loaded_traffic.date_num = np.array(
+        [
+            dt.toordinal() + 366 + dt.hour / 24.0 + dt.minute / (24.0 * 60.0)
+            for dt in datetime_objects
+        ]
+    )
 
     # Create date_str arrays matching MATLAB datestr format
     date_str_format1 = np.array([dt.strftime("%Y.%m.%d %H") for dt in datetime_objects])
