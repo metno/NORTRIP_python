@@ -2,7 +2,17 @@ import pandas as pd
 import numpy as np
 
 
-def read_txt(filepath):
+def read_txt(filepath: str) -> pd.DataFrame:
+    """
+    Read a text file into a pandas DataFrame.
+
+    Args:
+        filepath (str): Path to the text file to read
+
+    Returns:
+        pd.DataFrame: DataFrame containing the data from the text file
+    """
+
     rows = []
     max_cols = 0
     with open(filepath, "r", encoding="latin-1") as f:

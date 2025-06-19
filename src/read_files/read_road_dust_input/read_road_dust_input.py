@@ -27,6 +27,13 @@ def read_road_dust_input(
         read_as_text (bool, optional): If True, read the file as text. Will reformat input_file_path to text format.
         print_results (bool, optional): If True, print the results to the console
     Returns:
+        tuple: A tuple containing the following dataframes:
+            - activity_df: DataFrame containing the activity data
+            - airquality_df: DataFrame containing the air quality data
+            - meteorology_df: DataFrame containing the meteorology data (nodata = -99)
+            - traffic_df: DataFrame containing the traffic data
+            - initial_df: DataFrame containing the initial conditions data
+            - metadata_df: DataFrame containing the metadata (nodata = -99)
 
     """
 
@@ -47,28 +54,17 @@ def read_road_dust_input(
         initial_path = os.path.join(text_dir, f"{base_name}_initial.txt")
         metadata_path = os.path.join(text_dir, f"{base_name}_metadata.txt")
 
-        encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
+        try:
+            activity_df = read_txt(activity_path)
+            airquality_df = read_txt(airquality_path)
+            meteorology_df = read_txt(meteorology_path)
+            traffic_df = read_txt(traffic_path)
+            initial_df = read_txt(initial_path)
+            metadata_df = read_txt(metadata_path)
 
-        for encoding in encodings:
-            try:
-                activity_df = read_txt(activity_path)
-                airquality_df = read_txt(airquality_path)
-                meteorology_df = read_txt(meteorology_path)
-                traffic_df = read_txt(traffic_path)
-                initial_df = read_txt(initial_path)
-                metadata_df = read_txt(metadata_path)
-                logger.info(f"Read input data with encoding: {encoding}")
-                break
-            except FileNotFoundError as e:
-                logger.error(f"File not found: {e.filename}")
-                exit(1)
-            except UnicodeDecodeError:
-                if encoding == encodings[-1]:
-                    logger.error(
-                        f"Failed to read input data with all encodings: {encodings}"
-                    )
-                    exit()
-                continue
+        except FileNotFoundError as e:
+            logger.error(f"File not found: {e.filename}")
+            exit(1)
 
     else:
         try:
