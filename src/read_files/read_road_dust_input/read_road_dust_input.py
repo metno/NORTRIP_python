@@ -68,7 +68,7 @@ def read_road_dust_input(
 
     else:
         try:
-            all_sheets = pd.read_excel(input_file_path, sheet_name=None)
+            all_sheets = pd.read_excel(input_file_path, sheet_name=None, header=None)
         except FileNotFoundError:
             logger.error(f"File not found: {input_file_path}")
             exit(1)

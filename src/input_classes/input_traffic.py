@@ -10,12 +10,12 @@ class input_traffic:
     """
 
     # Date/time fields
-    year: np.ndarray = field(default_factory=lambda: np.array([]))
-    month: np.ndarray = field(default_factory=lambda: np.array([]))
-    day: np.ndarray = field(default_factory=lambda: np.array([]))
-    hour: np.ndarray = field(default_factory=lambda: np.array([]))
-    minute: np.ndarray = field(default_factory=lambda: np.array([]))
-    date_num: np.ndarray = field(default_factory=lambda: np.array([]))
+    year: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
+    month: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
+    day: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
+    hour: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
+    minute: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
+    date_num: np.ndarray = field(default_factory=lambda: np.array([], dtype=np.int64))
     date_str: np.ndarray = field(
         default_factory=lambda: np.array([[], []], dtype=object)
     )

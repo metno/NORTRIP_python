@@ -28,6 +28,6 @@ def read_txt(filepath: str) -> pd.DataFrame:
             rows[i] = rows[i] + [np.nan] * (max_cols - len(rows[i]))
         elif len(rows[i]) > max_cols:
             rows[i] = rows[i][:max_cols]
-    columns = [f"col{i + 1}" for i in range(max_cols)]
+    columns = [f"{i}" for i in range(max_cols)]
     df = pd.DataFrame(rows, columns=pd.Index(columns))
     return df
