@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.pd_util.find_str_or_default import find_str_or_default
+from src.pd_util import find_str_or_default
 
 
 def test_find_str_or_default_found_value():
