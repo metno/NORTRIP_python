@@ -3,12 +3,12 @@ import pandas as pd
 
 
 def test_read_model_flags_partial_data():
-    dummy_flags = {
+    dummy_data = {
         "0": ["road_wear_flag", "tyre_wear_flag", "brake_wear_flag"],
         "1": [10, 20, 30],
     }
 
-    flags_df = pd.DataFrame(dummy_flags)
+    flags_df = pd.DataFrame(dummy_data)
 
     result = read_model_flags(flags_df)
 
