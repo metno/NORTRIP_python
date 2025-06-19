@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import datetime
 from input_classes import input_traffic
-import constants
 
 
 def read_input_traffic(
