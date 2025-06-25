@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from read_files.read_road_dust_input.read_input_meteorology import (
     read_input_meteorology,
 )
@@ -34,21 +33,14 @@ def test_read_input_meteorology_basic():
 def test_read_input_meteorology_with_optional_fields():
     """Test meteorology reading with optional fields."""
     # Create test data with optional fields
+    # fmt: off
     data = [
-        [
-            "T2m",
-            "FF",
-            "Rain",
-            "Snow",
-            "RH",
-            "DD",
-            "Global radiation",
-            "Pressure",
-        ],  # Headers
+        ["T2m", "FF", "Rain", "Snow", "RH", "DD", "Global radiation", "Pressure"],  # Headers
         [15.5, 5.2, 0.0, 0.0, 75.0, 180.0, 500.0, 101325.0],  # Data row 1
         [16.0, 4.8, 0.5, 0.0, 70.0, 175.0, 450.0, 101300.0],  # Data row 2
         [14.2, 6.1, 0.0, 0.2, 80.0, 185.0, 600.0, 101350.0],  # Data row 3
     ]
+    # fmt: on
     df = pd.DataFrame(data)
 
     result = read_input_meteorology(df)
