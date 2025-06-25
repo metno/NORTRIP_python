@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from read_files.read_road_dust_input.read_input_meteorology import (
     read_input_meteorology,
 )
