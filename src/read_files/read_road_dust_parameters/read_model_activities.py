@@ -23,11 +23,7 @@ def read_model_activities(
 
     # Extract header and data columns
     header_col = activities_df.iloc[:, 0]  # First column contains headers
-    data_col = (
-        activities_df.iloc[:, 1]
-        if activities_df.shape[1] > 1
-        else pd.Series(dtype=float)
-    )
+    data_col = activities_df.iloc[:, 1]
 
     loaded_count = 0
 
@@ -37,13 +33,11 @@ def read_model_activities(
     # Process all fields automatically, except those needing manual handling
     for field_name in loaded_activities.__dataclass_fields__:
         if field_name not in manual_fields:
-            current_value = getattr(loaded_activities, field_name)
             new_value = find_float_or_default(
-                field_name, header_col, data_col, current_value
+                field_name, header_col, data_col, getattr(loaded_activities, field_name)
             )
-            if new_value != current_value:
-                setattr(loaded_activities, field_name, new_value)
-                loaded_count += 1
+            setattr(loaded_activities, field_name, new_value)
+            loaded_count += 1
 
     # Manual handling for array fields and special cases
     loaded_activities.salting_hour = [
