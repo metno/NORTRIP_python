@@ -27,13 +27,13 @@ def read_road_dust_input(
         read_as_text (bool, optional): If True, read the file as text. Will reformat input_file_path to text format.
         print_results (bool, optional): If True, print the results to the console
     Returns:
-        tuple: A tuple containing the following dataframes:
-            - activity_df: DataFrame containing the activity data
-            - airquality_df: DataFrame containing the air quality data
-            - meteorology_df: DataFrame containing the meteorology data (nodata = -99)
-            - traffic_df: DataFrame containing the traffic data
-            - initial_df: DataFrame containing the initial conditions data
-            - metadata_df: DataFrame containing the metadata (nodata = -99)
+        tuple: A tuple containing the following dataclasses:
+            - activity_data: input_activity dataclass
+            - airquality_data: input_airquality dataclass
+            - meteorology_data: input_meteorology dataclass
+            - traffic_data: input_traffic dataclass
+            - initial_data: input_initial dataclass
+            - metadata_data: input_metadata dataclass
 
     """
 
@@ -101,9 +101,15 @@ def read_road_dust_input(
         initial_df, model_parameters, metadata_data, print_results
     )
     traffic_data = read_input_traffic(traffic_df, metadata_data.nodata, print_results)
+    meteorology_data = read_input_meteorology(
+        meteorology_df,
+        nodata=metadata_data.nodata,
+        wind_speed_correction=metadata_data.wind_speed_correction,
+        pressure_default=metadata_data.Pressure,
+        print_results=print_results,
+    )
     activity_data = read_input_activity(activity_df)
     airquality_data = read_input_airquality(airquality_df)
-    meteorology_data = read_input_meteorology(meteorology_df)
 
     return (
         activity_data,
