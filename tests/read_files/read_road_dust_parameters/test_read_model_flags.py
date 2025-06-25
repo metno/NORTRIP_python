@@ -3,15 +3,33 @@ import pandas as pd
 
 
 def test_read_model_flags_partial_data():
-    dummy_data = {
-        "0": ["road_wear_flag", "tyre_wear_flag", "brake_wear_flag"],
-        "1": [10, 20, 30],
-    }
+    # Create test data using list of lists approach like other tests
+    test_data = [
+        ["road_wear_flag", "10"],
+        ["tyre_wear_flag", "20"],
+        ["brake_wear_flag", "30"],
+    ]
 
-    flags_df = pd.DataFrame(dummy_data)
+    flags_df = pd.DataFrame(test_data)
 
     result = read_model_flags(flags_df)
 
     assert result.road_wear_flag == 10
     assert result.tyre_wear_flag == 20
     assert result.brake_wear_flag == 30
+
+
+def test_read_model_flags_default_values():
+    # Create test data using list of lists approach like other tests
+    test_data = [
+        ["road_wear_flag", "10"],
+        ["tyre_wear_flag", "20"],
+        ["brake_wear_flag", "30"],
+    ]
+
+    flags_df = pd.DataFrame(test_data)
+
+    result = read_model_flags(flags_df)
+
+    assert result.save_type_flag == 1
+    assert result.dust_drainage_flag == 2

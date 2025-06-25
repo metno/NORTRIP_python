@@ -96,7 +96,7 @@ def read_road_dust_input(
         logger.error("One or more required sheets are missing from the input file.")
         exit(1)
 
-    metadata_data = read_input_metadata(metadata_df)
+    metadata_data = read_input_metadata(metadata_df, print_results)
     initial_data = read_input_initial(
         initial_df, model_parameters, metadata_data, print_results
     )

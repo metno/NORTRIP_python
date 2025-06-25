@@ -22,17 +22,10 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
     loaded_count = 0
 
     for field_name in loaded_flags.__dataclass_fields__:
-        current_value = getattr(loaded_flags, field_name)
         new_value = find_float_or_default(
-            field_name, header_col, data_col, float("nan")
+            field_name, header_col, data_col, getattr(loaded_flags, field_name)
         )
-        if pd.isna(new_value):
-            logger.warning(
-                f"Flag '{field_name}' not found in DataFrame. Using default value: {current_value}"
-            )
-            continue
-        if new_value != current_value:
-            setattr(loaded_flags, field_name, int(new_value))
+        setattr(loaded_flags, field_name, int(new_value))
         loaded_count += 1
 
     logger.info(f"Successfully loaded {loaded_count} model flag parameters")
