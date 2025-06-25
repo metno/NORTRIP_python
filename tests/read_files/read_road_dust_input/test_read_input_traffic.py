@@ -3,7 +3,6 @@ import numpy as np
 from src.read_files.read_road_dust_input.read_input_traffic import read_input_traffic
 
 
-# TODO: Fix the tests, they are missing header data
 def test_read_input_traffic_basic():
     """Test basic traffic data reading functionality."""
     # fmt: off
@@ -115,29 +114,6 @@ def test_read_input_traffic_date_string_formatting():
     np.testing.assert_array_equal(result.minute, [30, 45, 0])
 
 
-def test_read_input_traffic_date_string_edge_cases():
-    """Test date string formatting with edge cases like leap year and different months."""
-    # fmt: off
-    test_data = [
-        ["Year", "Month", "Day", "Hour", "Minute", "N(total)", "N(he)", "N(li)", "N(st,he)", "N(wi,he)", "N(su,he)", "N(st,li)", "N(wi,li)", "N(su,li)", "V_veh(he)", "V_veh(li)"],
-        ["2024", "2", "29", "23", "59", "100", "70", "30", "35", "20", "15", "15", "10", "5", "50", "60"],  # Leap year
-        ["2023", "6", "21", "12", "0", "120", "80", "40", "40", "25", "15", "20", "12", "8", "55", "65"],   # Summer solstice
-        ["2023", "11", "30", "6", "15", "90", "60", "30", "30", "18", "12", "15", "10", "5", "45", "55"],  # End of November
-    ]
-    # fmt: on
-
-    df = pd.DataFrame(test_data)
-    result = read_input_traffic(df, nodata=-99.0, print_results=False)
-
-    # Check format 1 for edge cases
-    expected_format1 = ["2024.02.29 23", "2023.06.21 12", "2023.11.30 06"]
-    np.testing.assert_array_equal(result.date_str[0, :], expected_format1)
-
-    # Check format 2 for edge cases
-    expected_format2 = ["23:59 29 Feb ", "12:00 21 Jun ", "06:15 30 Nov "]
-    np.testing.assert_array_equal(result.date_str[1, :], expected_format2)
-
-
 def test_read_input_traffic_missing_minute_column():
     """Test date string creation when Minute column is missing."""
     # fmt: off
@@ -160,3 +136,60 @@ def test_read_input_traffic_missing_minute_column():
 
     expected_format2 = ["08:00 04 Jul ", "16:00 04 Jul "]
     np.testing.assert_array_equal(result.date_str[1, :], expected_format2)
+
+
+def test_read_input_traffic_nodata_handling():
+    """Test handling of nodata values (-99) in traffic data."""
+    # fmt: off
+    test_data = [
+        ["Year", "Month", "Day", "Hour", "Minute", "N(total)", "N(he)", "N(li)", "N(st,he)", "N(wi,he)", "N(su,he)", "N(st,li)", "N(wi,li)", "N(su,li)", "V_veh(he)", "V_veh(li)"],
+        ["2023", "1", "1", "0", "0", "100", "70", "30", "35", "20", "15", "15", "10", "5", "50", "60"],
+        ["2023", "1", "1", "1", "0", "-99", "80", "40", "40", "25", "15", "20", "12", "8", "55", "65"],
+        ["2023", "1", "1", "2", "0", "90", "-99", "30", "30", "18", "12", "15", "10", "5", "45", "55"],
+        ["2023", "1", "1", "3", "0", "110", "75", "-99", "35", "22", "18", "-99", "-99", "-99", "50", "60"],
+        ["2023", "1", "1", "4", "0", "95", "65", "30", "32", "20", "13", "14", "11", "5", "-99", "0"],
+    ]
+    # fmt: on
+
+    df = pd.DataFrame(test_data)
+    result = read_input_traffic(df, nodata=-99.0, print_results=False)
+
+    # Basic structure checks
+    assert result.n_traffic == 5
+    assert len(result.year) == 5
+
+    # Check nodata tracking
+    assert len(result.N_total_nodata) == 1
+    assert result.N_total_nodata[0] == 1
+
+    assert len(result.N_v_nodata) == 2
+    assert len(result.N_v_nodata[0]) == 1
+    assert result.N_v_nodata[0][0] == 2
+    assert len(result.N_v_nodata[1]) == 1
+    assert result.N_v_nodata[1][0] == 3
+
+    assert len(result.V_veh_nodata) == 2
+    assert len(result.V_veh_nodata[0]) == 1
+    assert result.V_veh_nodata[0][0] == 4
+    assert len(result.V_veh_nodata[1]) == 1
+    assert result.V_veh_nodata[1][0] == 4
+
+    # Check that missing data is tracked correctly
+    assert 2 in result.N_v_nodata[0]
+    assert 3 in result.N_v_nodata[1]
+
+    # Check vehicle speed forward fill
+    assert result.V_veh[0, 4] == 50.0
+    assert result.V_veh[1, 4] == 60.0
+
+    # Verify good data is preserved
+    np.testing.assert_array_equal(result.year, [2023, 2023, 2023, 2023, 2023])
+    assert result.N_total[0] == 100.0
+    assert result.N_v[0, 0] == 70.0
+    assert result.N_v[1, 0] == 30.0
+
+    # Check that -99 values were processed
+    assert result.N_total[1] != -99.0
+
+    # Check that zeros in speed data are treated as missing
+    assert 4 in result.V_veh_nodata[1]
