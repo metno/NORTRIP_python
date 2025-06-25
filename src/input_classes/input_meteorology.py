@@ -11,4 +11,71 @@ class input_meteorology:
     along with their availability flags and missing data indices.
     """
 
+    # Main meteorological data arrays
+    T_a: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    T2_a: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    FF: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    DD: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    RH: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    T_dewpoint: np.ndarray = field(
+        default_factory=lambda: np.array([[], []], dtype=object)
+    )
+    Rain: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    Snow: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    short_rad_in: np.ndarray = field(
+        default_factory=lambda: np.array([[], []], dtype=object)
+    )
+    long_rad_in: np.ndarray = field(
+        default_factory=lambda: np.array([[], []], dtype=object)
+    )
+    cloud_cover: np.ndarray = field(
+        default_factory=lambda: np.array([[], []], dtype=object)
+    )
+    road_wetness_obs: np.ndarray = field(
+        default_factory=lambda: np.array([[], []], dtype=object)
+    )
+    road_temperature_obs: np.ndarray = field(
+        default_factory=lambda: np.array([[], []], dtype=object)
+    )
+    Pressure_a: np.ndarray = field(
+        default_factory=lambda: np.array([[], []], dtype=object)
+    )
+    T_sub: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+
+    # Availability flags
+    T2_a_available: int = 0
+    DD_available: int = 0
+    RH_available: int = 0
+    T_dewpoint_available: int = 0
+    short_rad_in_available: int = 0
+    long_rad_in_available: int = 0
+    cloud_cover_available: int = 0
+    road_wetness_obs_available: int = 0
+    road_temperature_obs_available: int = 0
+    pressure_obs_available: int = 0
+    T_sub_available: int = 0
+
+    # Missing data indices
+    T_a_nodata: list = field(default_factory=list)
+    FF_nodata: list = field(default_factory=list)
+    RH_nodata: list = field(default_factory=list)
+    Rain_nodata: list = field(default_factory=list)
+    Snow_nodata: list = field(default_factory=list)
+    DD_nodata: list = field(default_factory=list)
+    T2_a_nodata: list = field(default_factory=list)
+    T_sub_nodata: list = field(default_factory=list)
+    short_rad_in_missing: list = field(default_factory=list)
+    long_rad_in_missing: list = field(default_factory=list)
+    cloud_cover_missing: list = field(default_factory=list)
+    road_wetness_obs_missing: list = field(default_factory=list)
+    road_temperature_obs_missing: list = field(default_factory=list)
+    pressure_obs_missing: list = field(default_factory=list)
+
+    # Road wetness specific fields
+    road_wetness_obs_in_mm: int = 0
+    max_road_wetness_obs: float = np.nan
+    min_road_wetness_obs: float = np.nan
+    mean_road_wetness_obs: float = np.nan
+
+    # Number of meteorological data points
     n_meteo: int = 0
