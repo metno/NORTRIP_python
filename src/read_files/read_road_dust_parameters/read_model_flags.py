@@ -28,5 +28,5 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
         setattr(loaded_flags, field_name, int(new_value))
         loaded_count += 1
 
-    logger.info(f"Successfully loaded {loaded_count} model flag parameters")
+    logger.info(f"Successfully loaded {loaded_count} model flags")
     return loaded_flags

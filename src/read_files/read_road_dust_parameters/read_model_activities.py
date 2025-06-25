@@ -72,5 +72,5 @@ def read_model_activities(
         "ploughing_thresh", header_col, data_col, model_parameters.ploughing_thresh
     )
 
-    logger.info(f"Successfully loaded {loaded_count} model activity parameters")
+    logger.info(f"Successfully loaded {loaded_count} model activities")
     return loaded_activities

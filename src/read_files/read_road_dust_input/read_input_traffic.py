@@ -287,4 +287,7 @@ def read_input_traffic(
                         loaded_traffic.N_ratio[t, v, i] * loaded_traffic.N_v[v, i]
                     )
 
+    logger.info(
+        f"Successfully loaded traffic data with {loaded_traffic.n_traffic} records"
+    )
     return loaded_traffic

@@ -17,20 +17,18 @@ def read_road_dust_paths(read_as_text=0) -> model_file_paths:
                 sheet_name="Filenames",
                 header=None,
             )
-            header_text = paths_df.iloc[:, 0].astype(str)
-            file_text = paths_df.iloc[:, 1].astype(str)
         else:
             logger.info("Setting paths from text file")
             # Convert Excel file to text equivalent
             txt_filename = "model_paths/text/model_paths_and_files.txt"
             paths_df = read_txt(txt_filename)
-            header_text = paths_df.iloc[:, 0].astype(str)
-            file_text = paths_df.iloc[:, 1].fillna("").astype(str)
 
     except FileNotFoundError as e:
         print(f"Error: {e}. The file was not found.")
         exit()
 
+    header_text = paths_df.iloc[:, 0]
+    file_text = paths_df.iloc[:, 1]
     # Extract paths and filenames
     paths.path_inputparam = find_value(
         "Model input parameter path", header_text, file_text
@@ -96,4 +94,5 @@ def read_road_dust_paths(read_as_text=0) -> model_file_paths:
     paths.path_filename_inputparam = paths.path_inputparam + paths.filename_inputparam
     paths.path_filename_inputdata = paths.path_inputdata + paths.filename_inputdata
 
+    logger.info("Successfully loaded model file paths")
     return paths

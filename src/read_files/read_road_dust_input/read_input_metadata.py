@@ -232,5 +232,5 @@ def read_input_metadata(
     # Calculated field
     loaded_metadata.b_road_lanes = loaded_metadata.n_lanes * loaded_metadata.b_lane
 
-    logger.info(f"Successfully loaded {loaded_count} metadata fields")
+    logger.info(f"Successfully loaded {loaded_count} metadata values")
     return loaded_metadata

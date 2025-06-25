@@ -42,7 +42,6 @@ def read_road_dust_parameters(
             parameter_df = read_txt(parameters_path)
             flags_df = read_txt(flags_path)
             activities_df = read_txt(activities_path)
-            logger.info(f"Read parameters from text files.")
         except FileNotFoundError as e:
             logger.error(f"File not found: {e.filename}")
             exit(1)

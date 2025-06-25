@@ -104,6 +104,7 @@ def read_input_initial(
     loaded_initial.T_2m_offset = loaded_values_initial.T_2m_offset
     loaded_initial.P_fugitive = loaded_values_initial.P_fugitive
 
+    logger.info("Successfully loaded initial data values")
     return loaded_initial
 
 

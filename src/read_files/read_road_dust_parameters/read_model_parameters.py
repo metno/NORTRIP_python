@@ -545,5 +545,5 @@ def read_model_parameters(parameter_df: pd.DataFrame) -> model_parameters:
             loaded_parameters.veh_track = [
                 v / total for v in loaded_parameters.veh_track
             ]
-
+    logger.info("Successfully loaded model parameters")
     return loaded_parameters
