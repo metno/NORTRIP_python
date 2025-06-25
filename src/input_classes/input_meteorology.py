@@ -11,36 +11,22 @@ class input_meteorology:
     along with their availability flags and missing data indices.
     """
 
-    # Main meteorological data arrays
-    T_a: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
-    T2_a: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
-    FF: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
-    DD: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
-    RH: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
-    T_dewpoint: np.ndarray = field(
-        default_factory=lambda: np.array([[], []], dtype=object)
-    )
-    Rain: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
-    Snow: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
-    short_rad_in: np.ndarray = field(
-        default_factory=lambda: np.array([[], []], dtype=object)
-    )
-    long_rad_in: np.ndarray = field(
-        default_factory=lambda: np.array([[], []], dtype=object)
-    )
-    cloud_cover: np.ndarray = field(
-        default_factory=lambda: np.array([[], []], dtype=object)
-    )
-    road_wetness_obs: np.ndarray = field(
-        default_factory=lambda: np.array([[], []], dtype=object)
-    )
-    road_temperature_obs: np.ndarray = field(
-        default_factory=lambda: np.array([[], []], dtype=object)
-    )
-    Pressure_a: np.ndarray = field(
-        default_factory=lambda: np.array([[], []], dtype=object)
-    )
-    T_sub: np.ndarray = field(default_factory=lambda: np.array([[], []], dtype=object))
+    # Main meteorological data arrays (1D time series)
+    T_a: np.ndarray = field(default_factory=lambda: np.array([]))
+    T2_a: np.ndarray = field(default_factory=lambda: np.array([]))
+    FF: np.ndarray = field(default_factory=lambda: np.array([]))
+    DD: np.ndarray = field(default_factory=lambda: np.array([]))
+    RH: np.ndarray = field(default_factory=lambda: np.array([]))
+    T_dewpoint: np.ndarray = field(default_factory=lambda: np.array([]))
+    Rain: np.ndarray = field(default_factory=lambda: np.array([]))
+    Snow: np.ndarray = field(default_factory=lambda: np.array([]))
+    short_rad_in: np.ndarray = field(default_factory=lambda: np.array([]))
+    long_rad_in: np.ndarray = field(default_factory=lambda: np.array([]))
+    cloud_cover: np.ndarray = field(default_factory=lambda: np.array([]))
+    road_wetness_obs: np.ndarray = field(default_factory=lambda: np.array([]))
+    road_temperature_obs: np.ndarray = field(default_factory=lambda: np.array([]))
+    Pressure_a: np.ndarray = field(default_factory=lambda: np.array([]))
+    T_sub: np.ndarray = field(default_factory=lambda: np.array([]))
 
     # Availability flags
     T2_a_available: int = 0

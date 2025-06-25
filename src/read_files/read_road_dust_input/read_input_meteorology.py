@@ -389,24 +389,22 @@ def read_input_meteorology(
         RH_data = _rh_from_dewpoint(T_a_data, T_dewpoint_data)
         loaded_meteo.RH_available = 1
 
-    # Store data in the correct format (2D arrays as expected by the dataclass)
-    loaded_meteo.T_a = np.array([T_a_data, []], dtype=object)
-    loaded_meteo.T2_a = np.array([T2_a_data, []], dtype=object)
-    loaded_meteo.FF = np.array([FF_data, []], dtype=object)
-    loaded_meteo.DD = np.array([DD_data, []], dtype=object)
-    loaded_meteo.RH = np.array([RH_data, []], dtype=object)
-    loaded_meteo.T_dewpoint = np.array([T_dewpoint_data, []], dtype=object)
-    loaded_meteo.Rain = np.array([Rain_data, []], dtype=object)
-    loaded_meteo.Snow = np.array([Snow_data, []], dtype=object)
-    loaded_meteo.short_rad_in = np.array([short_rad_in_data, []], dtype=object)
-    loaded_meteo.long_rad_in = np.array([long_rad_in_data, []], dtype=object)
-    loaded_meteo.cloud_cover = np.array([cloud_cover_data, []], dtype=object)
-    loaded_meteo.road_wetness_obs = np.array([road_wetness_obs_data, []], dtype=object)
-    loaded_meteo.road_temperature_obs = np.array(
-        [road_temperature_obs_data, []], dtype=object
-    )
-    loaded_meteo.Pressure_a = np.array([Pressure_a_data, []], dtype=object)
-    loaded_meteo.T_sub = np.array([T_sub_data, []], dtype=object)
+    # Store data as 1D arrays
+    loaded_meteo.T_a = T_a_data
+    loaded_meteo.T2_a = T2_a_data
+    loaded_meteo.FF = FF_data
+    loaded_meteo.DD = DD_data
+    loaded_meteo.RH = RH_data
+    loaded_meteo.T_dewpoint = T_dewpoint_data
+    loaded_meteo.Rain = Rain_data
+    loaded_meteo.Snow = Snow_data
+    loaded_meteo.short_rad_in = short_rad_in_data
+    loaded_meteo.long_rad_in = long_rad_in_data
+    loaded_meteo.cloud_cover = cloud_cover_data
+    loaded_meteo.road_wetness_obs = road_wetness_obs_data
+    loaded_meteo.road_temperature_obs = road_temperature_obs_data
+    loaded_meteo.Pressure_a = Pressure_a_data
+    loaded_meteo.T_sub = T_sub_data
 
     logger.info(
         f"Successfully loaded meteorological data with {loaded_meteo.n_meteo} records"

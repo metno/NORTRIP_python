@@ -48,7 +48,7 @@ def main():
         print_results,
     )
 
-    logger.info(traffic_input.date_num)
+    logger.info(meteorology_input.Snow)
 
 
 if __name__ == "__main__":
