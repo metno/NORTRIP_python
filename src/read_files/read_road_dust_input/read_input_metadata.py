@@ -6,12 +6,15 @@ from pd_util import find_float_or_default, find_str_or_default
 logger = logging.getLogger(__name__)
 
 
-def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
+def read_input_metadata(
+    metadata_df: pd.DataFrame, print_results: bool = False
+) -> input_metadata:
     """
     Reads the metadata from the input DataFrame and returns an instance of input_metadata.
 
     Args:
         metadata_df (pd.DataFrame): DataFrame containing metadata information.
+        print_results (bool): Whether to print the results to the console
 
     Returns:
         input_metadata: An instance of input_metadata containing the metadata.
@@ -60,9 +63,10 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
         current_default = getattr(loaded_metadata, field)
         val = find_float_or_default(header, header_col, data_col, float("nan"))
         if pd.isna(val):
-            logger.warning(
-                f"Parameter '{header}' not found in metadata. Using default value: {current_default}"
-            )
+            if print_results:
+                logger.warning(
+                    f"Parameter '{header}' not found in metadata. Using default value: {current_default}"
+                )
             continue
         loaded_count += 1
         setattr(loaded_metadata, field, val)
@@ -74,9 +78,10 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
     if b_canyon < loaded_metadata.b_road:
         b_canyon = loaded_metadata.b_road
     if b_canyon == loaded_metadata.b_road:
-        logger.warning(
-            f"Parameter 'Street canyon width' not found or less than 'Road width'. Using 'Road width' value: {loaded_metadata.b_road}"
-        )
+        if print_results:
+            logger.warning(
+                f"Parameter 'Street canyon width' not found or less than 'Road width'. Using 'Road width' value: {loaded_metadata.b_road}"
+            )
     if b_canyon != loaded_metadata.b_canyon:
         loaded_count += 1
     loaded_metadata.b_canyon = b_canyon
@@ -95,17 +100,19 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
         )
         loaded_metadata.h_canyon = [h_canyon_single, h_canyon_single]
         if h_canyon_single == 0.0:
-            logger.warning(
-                "Parameter 'Street canyon height' not found in metadata. Using default value: [0.0, 0.0]"
-            )
+            if print_results:
+                logger.warning(
+                    "Parameter 'Street canyon height' not found in metadata. Using default value: [0.0, 0.0]"
+                )
         else:
             loaded_count += 1
     else:
         loaded_metadata.h_canyon = [h_canyon_north, h_canyon_south]
         if h_canyon_north == 0.0 and h_canyon_south == 0.0:
-            logger.warning(
-                "Parameter 'Street canyon height north' and 'Street canyon height south' not found in metadata. Using default value: [0.0, 0.0]"
-            )
+            if print_results:
+                logger.warning(
+                    "Parameter 'Street canyon height north' and 'Street canyon height south' not found in metadata. Using default value: [0.0, 0.0]"
+                )
         else:
             loaded_count += 1
 
@@ -117,13 +124,15 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
         "Exhaust EF (li)", header_col, data_col, loaded_metadata.exhaust_EF[1]
     )
     if exhaust_EF_0 == loaded_metadata.exhaust_EF[0]:
-        logger.warning(
-            "Parameter 'Exhaust EF (he)' not found in metadata. Using default value: 0.0"
-        )
+        if print_results:
+            logger.warning(
+                "Parameter 'Exhaust EF (he)' not found in metadata. Using default value: 0.0"
+            )
     if exhaust_EF_1 == loaded_metadata.exhaust_EF[1]:
-        logger.warning(
-            "Parameter 'Exhaust EF (li)' not found in metadata. Using default value: 0.0"
-        )
+        if print_results:
+            logger.warning(
+                "Parameter 'Exhaust EF (li)' not found in metadata. Using default value: 0.0"
+            )
     if (
         exhaust_EF_0 != loaded_metadata.exhaust_EF[0]
         or exhaust_EF_1 != loaded_metadata.exhaust_EF[1]
@@ -139,13 +148,15 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
         "NOX EF (li)", header_col, data_col, loaded_metadata.NOX_EF[1]
     )
     if NOX_EF_0 == loaded_metadata.NOX_EF[0]:
-        logger.warning(
-            "Parameter 'NOX EF (he)' not found in metadata. Using default value: 0.0"
-        )
+        if print_results:
+            logger.warning(
+                "Parameter 'NOX EF (he)' not found in metadata. Using default value: 0.0"
+            )
     if NOX_EF_1 == loaded_metadata.NOX_EF[1]:
-        logger.warning(
-            "Parameter 'NOX EF (li)' not found in metadata. Using default value: 0.0"
-        )
+        if print_results:
+            logger.warning(
+                "Parameter 'NOX EF (li)' not found in metadata. Using default value: 0.0"
+            )
     if NOX_EF_0 != loaded_metadata.NOX_EF[0] or NOX_EF_1 != loaded_metadata.NOX_EF[1]:
         loaded_count += 1
     loaded_metadata.NOX_EF = [NOX_EF_0, NOX_EF_1]
@@ -163,13 +174,15 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
     if end_date_str and len(end_date_str) < 11:
         end_date_str += " 00:00:00"
     if start_date_str == loaded_metadata.start_date_str:
-        logger.warning(
-            f"Parameter 'Start date' not found in metadata. Using default value: {loaded_metadata.start_date_str}"
-        )
+        if print_results:
+            logger.warning(
+                f"Parameter 'Start date' not found in metadata. Using default value: {loaded_metadata.start_date_str}"
+            )
     if end_date_str == loaded_metadata.end_date_str:
-        logger.warning(
-            f"Parameter 'End date' not found in metadata. Using default value: {loaded_metadata.end_date_str}"
-        )
+        if print_results:
+            logger.warning(
+                f"Parameter 'End date' not found in metadata. Using default value: {loaded_metadata.end_date_str}"
+            )
     if start_date_str != loaded_metadata.start_date_str:
         loaded_count += 1
     if end_date_str != loaded_metadata.end_date_str:
@@ -189,13 +202,15 @@ def read_input_metadata(metadata_df: pd.DataFrame) -> input_metadata:
     if end_date_save_str and len(end_date_save_str) < 11:
         end_date_save_str += " 00:00:00"
     if start_date_save_str == loaded_metadata.start_date_save_str:
-        logger.warning(
-            f"Parameter 'Start save date' not found in metadata. Using default value: {loaded_metadata.start_date_save_str}"
-        )
+        if print_results:
+            logger.warning(
+                f"Parameter 'Start save date' not found in metadata. Using default value: {loaded_metadata.start_date_save_str}"
+            )
     if end_date_save_str == loaded_metadata.end_date_save_str:
-        logger.warning(
-            f"Parameter 'End save date' not found in metadata. Using default value: {loaded_metadata.end_date_save_str}"
-        )
+        if print_results:
+            logger.warning(
+                f"Parameter 'End save date' not found in metadata. Using default value: {loaded_metadata.end_date_save_str}"
+            )
     if start_date_save_str != loaded_metadata.start_date_save_str:
         loaded_count += 1
     if end_date_save_str != loaded_metadata.end_date_save_str:
