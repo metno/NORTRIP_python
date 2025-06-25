@@ -78,7 +78,6 @@ def test_read_input_initial_basic():
     assert result.RH_offset == 5.0
     assert result.T_2m_offset == 2.0
     assert result.P_fugitive == 0.1
-    assert result.P2_fugitive == 0.05
 
 
 def test_read_input_initial_with_m2_values():

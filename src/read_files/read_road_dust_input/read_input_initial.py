@@ -103,7 +103,6 @@ def read_input_initial(
     loaded_initial.RH_offset = loaded_values_initial.RH_offset
     loaded_initial.T_2m_offset = loaded_values_initial.T_2m_offset
     loaded_initial.P_fugitive = loaded_values_initial.P_fugitive
-    loaded_initial.P2_fugitive = loaded_values_initial.P2_fugitive
 
     return loaded_initial
 

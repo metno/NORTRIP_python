@@ -23,4 +23,3 @@ class input_initial:
     RH_offset: float = 0.0
     T_2m_offset: float = 0.0
     P_fugitive: float = 0.0
-    P2_fugitive: float = 0.0
