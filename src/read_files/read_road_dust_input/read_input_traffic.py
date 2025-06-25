@@ -3,25 +3,10 @@ import numpy as np
 import datetime
 import logging
 from input_classes import input_traffic
+from pd_util import find_column_index
 import constants
 
 logger = logging.getLogger(__name__)
-
-
-def _find_column_index(
-    search_text: str, header_text: pd.Series, print_results: bool = False
-) -> int:
-    """Find column index for given search text, handling duplicates."""
-    # Use exact string match instead of regex to avoid issues with special characters
-    matches = header_text.str.lower() == search_text.lower()
-    if matches.sum() > 1 and print_results:
-        logger.warning(
-            f"Double occurrence of input data header '{search_text}': USING THE FIRST"
-        )
-    if matches.any():
-        # Get the integer position, not the index label
-        return matches.argmax()
-    return -1
 
 
 def _calculate_daily_averages(
@@ -107,7 +92,9 @@ def read_input_traffic(
 
     # Read traffic volumes
     # Total traffic
-    col_idx = _find_column_index("N(total)", header_text, print_results)
+    col_idx = find_column_index(
+        "N(total)", header_text, print_results, exact_match=True
+    )
     if col_idx == -1:
         logger.error("No traffic data found - N(total) column missing")
         return loaded_traffic
@@ -121,15 +108,20 @@ def read_input_traffic(
 
     # Vehicle type traffic volumes
     for v, veh_type in enumerate(["he", "li"]):
-        col_idx = _find_column_index(f"N({veh_type})", header_text, print_results)
+        col_idx = find_column_index(
+            f"N({veh_type})", header_text, print_results, exact_match=True
+        )
         if col_idx != -1:
             loaded_traffic.N_v[v, :] = traffic_df.iloc[:, col_idx].values.astype(float)
 
     # Tyre type traffic volumes
     for t, tyre_type in enumerate(["st", "wi", "su"]):
         for v, veh_type in enumerate(["he", "li"]):
-            col_idx = _find_column_index(
-                f"N({tyre_type},{veh_type})", header_text, print_results
+            col_idx = find_column_index(
+                f"N({tyre_type},{veh_type})",
+                header_text,
+                print_results,
+                exact_match=True,
             )
             if col_idx != -1:
                 loaded_traffic.N[t, v, :] = traffic_df.iloc[:, col_idx].values.astype(
@@ -138,7 +130,9 @@ def read_input_traffic(
 
     # Vehicle speeds
     for v, veh_type in enumerate(["he", "li"]):
-        col_idx = _find_column_index(f"V_veh({veh_type})", header_text, print_results)
+        col_idx = find_column_index(
+            f"V_veh({veh_type})", header_text, print_results, exact_match=True
+        )
         if col_idx != -1:
             loaded_traffic.V_veh[v, :] = traffic_df.iloc[:, col_idx].values.astype(
                 float

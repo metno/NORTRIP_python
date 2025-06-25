@@ -2,22 +2,9 @@ import pandas as pd
 import numpy as np
 import logging
 from input_classes import input_meteorology
+from pd_util import find_column_index
 
 logger = logging.getLogger(__name__)
-
-
-def _find_column_index(
-    search_text: str, header_text: pd.Series, print_results: bool = False
-) -> int:
-    """Find column index for given search text, handling duplicates."""
-    matches = header_text.str.contains(search_text, case=False, na=False, regex=False)
-    if matches.sum() > 1 and print_results:
-        logger.warning(
-            f"Double occurrence of input data header '{search_text}': USING THE FIRST"
-        )
-    if matches.any():
-        return matches.argmax()
-    return -1
 
 
 def _check_data_availability(data: np.ndarray, nodata: float) -> tuple[bool, list]:
@@ -95,28 +82,28 @@ def read_input_meteorology(
 
     # Read core required data
     # Air temperature (T2m)
-    col_idx = _find_column_index("T2m", header_text, print_results)
+    col_idx = find_column_index("T2m", header_text, print_results)
     if col_idx == -1:
         logger.error("Required field 'T2m' not found in meteorology data")
         return loaded_meteo
     loaded_meteo.T_a = data_df.iloc[:, col_idx].values.astype(float)
 
     # Wind speed (FF)
-    col_idx = _find_column_index("FF", header_text, print_results)
+    col_idx = find_column_index("FF", header_text, print_results)
     if col_idx == -1:
         logger.error("Required field 'FF' not found in meteorology data")
         return loaded_meteo
     loaded_meteo.FF = data_df.iloc[:, col_idx].values.astype(float)
 
     # Rain precipitation
-    col_idx = _find_column_index("Rain", header_text, print_results)
+    col_idx = find_column_index("Rain", header_text, print_results)
     if col_idx == -1:
         logger.error("Required field 'Rain' not found in meteorology data")
         return loaded_meteo
     loaded_meteo.Rain = data_df.iloc[:, col_idx].values.astype(float)
 
     # Snow precipitation
-    col_idx = _find_column_index("Snow", header_text, print_results)
+    col_idx = find_column_index("Snow", header_text, print_results)
     if col_idx == -1:
         logger.error("Required field 'Snow' not found in meteorology data")
         return loaded_meteo
@@ -124,7 +111,7 @@ def read_input_meteorology(
 
     # Read optional data with availability flags
     # Alternative air temperature (T_a_alt)
-    col_idx = _find_column_index("T_a_alt", header_text, print_results)
+    col_idx = find_column_index("T_a_alt", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.T2_a = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.T2_a_available = 1
@@ -133,7 +120,7 @@ def read_input_meteorology(
         loaded_meteo.T2_a_available = 0
 
     # Wind direction (DD)
-    col_idx = _find_column_index("DD", header_text, print_results)
+    col_idx = find_column_index("DD", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.DD = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.DD_available = 1
@@ -142,7 +129,7 @@ def read_input_meteorology(
         loaded_meteo.DD_available = 0
 
     # Relative humidity (RH)
-    col_idx = _find_column_index("RH", header_text, print_results)
+    col_idx = find_column_index("RH", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.RH = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.RH_available = 1
@@ -151,7 +138,7 @@ def read_input_meteorology(
         loaded_meteo.RH_available = 0
 
     # Dewpoint temperature (T2m dewpoint)
-    col_idx = _find_column_index("T2m dewpoint", header_text, print_results)
+    col_idx = find_column_index("T2m dewpoint", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.T_dewpoint = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.T_dewpoint_available = 1
@@ -160,7 +147,7 @@ def read_input_meteorology(
         loaded_meteo.T_dewpoint_available = 0
 
     # Global radiation
-    col_idx = _find_column_index("Global radiation", header_text, print_results)
+    col_idx = find_column_index("Global radiation", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.short_rad_in = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.short_rad_in_available = 1
@@ -169,7 +156,7 @@ def read_input_meteorology(
         loaded_meteo.short_rad_in_available = 0
 
     # Longwave radiation
-    col_idx = _find_column_index("Longwave radiation", header_text, print_results)
+    col_idx = find_column_index("Longwave radiation", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.long_rad_in = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.long_rad_in_available = 1
@@ -178,7 +165,7 @@ def read_input_meteorology(
         loaded_meteo.long_rad_in_available = 0
 
     # Cloud cover
-    col_idx = _find_column_index("Cloud cover", header_text, print_results)
+    col_idx = find_column_index("Cloud cover", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.cloud_cover = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.cloud_cover_available = 1
@@ -187,7 +174,7 @@ def read_input_meteorology(
         loaded_meteo.cloud_cover_available = 0
 
     # Road wetness
-    col_idx = _find_column_index("Road wetness", header_text, print_results)
+    col_idx = find_column_index("Road wetness", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.road_wetness_obs = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.road_wetness_obs_available = 1
@@ -201,7 +188,7 @@ def read_input_meteorology(
         loaded_meteo.road_wetness_obs_available = 0
 
     # Road surface temperature
-    col_idx = _find_column_index("Road surface temperature", header_text, print_results)
+    col_idx = find_column_index("Road surface temperature", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.road_temperature_obs = data_df.iloc[:, col_idx].values.astype(
             float
@@ -212,7 +199,7 @@ def read_input_meteorology(
         loaded_meteo.road_temperature_obs_available = 0
 
     # Atmospheric pressure
-    col_idx = _find_column_index("Pressure", header_text, print_results)
+    col_idx = find_column_index("Pressure", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.Pressure_a = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.pressure_obs_available = 1
@@ -221,7 +208,7 @@ def read_input_meteorology(
         loaded_meteo.pressure_obs_available = 1
 
     # Subsurface temperature
-    col_idx = _find_column_index("T subsurface", header_text, print_results)
+    col_idx = find_column_index("T subsurface", header_text, print_results)
     if col_idx != -1:
         loaded_meteo.T_sub = data_df.iloc[:, col_idx].values.astype(float)
         loaded_meteo.T_sub_available = 1
@@ -321,7 +308,7 @@ def read_input_meteorology(
         loaded_meteo.RH = np.maximum(loaded_meteo.RH, 0)
 
     # Handle special case for pressure - if all nodata, use default
-    if getattr(loaded_meteo, "pressure_obs_available") == 0:
+    if loaded_meteo.pressure_obs_available == 0:
         loaded_meteo.Pressure_a[:] = pressure_default
 
     # Calculate road wetness statistics if available
