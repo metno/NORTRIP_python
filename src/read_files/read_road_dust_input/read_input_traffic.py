@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import logging
 from input_classes import input_traffic
-from pd_util import find_column_index, check_data_availability
+from pd_util import find_column_index, check_data_availability, forward_fill_missing
 import constants
 
 logger = logging.getLogger(__name__)
@@ -182,9 +182,8 @@ def read_input_traffic(
         N_v_nodata.append(missing_indices)
 
         if available and len(missing_indices) > 0:
-            for i in missing_indices:
-                if i > 0:
-                    loaded_traffic.N_v[v, i] = loaded_traffic.N_v[v, i - 1]
+            filled_data, _ = forward_fill_missing(data_slice.copy(), nodata)
+            loaded_traffic.N_v[v, :] = filled_data
 
     loaded_traffic.N_v_nodata = N_v_nodata
 
@@ -200,9 +199,8 @@ def read_input_traffic(
             tyre_nodata.append(missing_indices)
 
             if available and len(missing_indices) > 0:
-                for i in missing_indices:
-                    if i > 0:
-                        loaded_traffic.N[t, v, i] = loaded_traffic.N[t, v, i - 1]
+                filled_data, _ = forward_fill_missing(data_slice.copy(), nodata)
+                loaded_traffic.N[t, v, :] = filled_data
         N_nodata.append(tyre_nodata)
 
     loaded_traffic.N_nodata = N_nodata
@@ -217,11 +215,13 @@ def read_input_traffic(
         )[0]
         V_veh_nodata.append(missing_indices.tolist())
 
-        # Check if all data is missing (don't use _check_data_availability since zeros are special here)
+        # Check if all data is missing (don't use check_data_availability since zeros are special here)
         if len(missing_indices) > 0 and len(missing_indices) != n_traffic:
-            for i in missing_indices:
-                if i > 0:
-                    loaded_traffic.V_veh[v, i] = loaded_traffic.V_veh[v, i - 1]
+            # Create a copy with zeros replaced by nodata for forward_fill_missing
+            temp_data = data_slice.copy()
+            temp_data[data_slice == 0] = nodata
+            filled_data, _ = forward_fill_missing(temp_data, nodata)
+            loaded_traffic.V_veh[v, :] = filled_data
 
     loaded_traffic.V_veh_nodata = V_veh_nodata
 
@@ -251,12 +251,14 @@ def read_input_traffic(
 
     # Forward fill as fallback for any remaining missing data
     if len(N_total_nodata) > 0 and len(N_total_nodata) != n_traffic:
-        for i in N_total_nodata:
-            if i > 0 and (
-                loaded_traffic.N_total[i] == nodata
-                or np.isnan(loaded_traffic.N_total[i])
-            ):
-                loaded_traffic.N_total[i] = loaded_traffic.N_total[i - 1]
+        # Check which values are still missing after daily average filling
+        still_missing = np.where(
+            (loaded_traffic.N_total == nodata) | np.isnan(loaded_traffic.N_total)
+        )[0]
+        if len(still_missing) > 0:
+            loaded_traffic.N_total, _ = forward_fill_missing(
+                loaded_traffic.N_total, nodata
+            )
 
     # Handle N_v missing data using daily averages
     if any(len(sublist) > 0 for sublist in N_v_nodata) and len(N_good_data) > 0:

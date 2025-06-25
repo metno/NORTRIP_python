@@ -48,7 +48,7 @@ def main():
         print_results,
     )
 
-    logger.info(meteorology_input.Snow)
+    logger.info(meteorology_input.T_sub_available)
 
 
 if __name__ == "__main__":

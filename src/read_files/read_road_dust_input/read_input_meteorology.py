@@ -2,29 +2,14 @@ import pandas as pd
 import numpy as np
 import logging
 from input_classes import input_meteorology
-from pd_util import find_column_index, safe_float, check_data_availability
+from pd_util import (
+    find_column_index,
+    safe_float,
+    check_data_availability,
+    forward_fill_missing,
+)
 
 logger = logging.getLogger(__name__)
-
-
-def _forward_fill_missing(data: np.ndarray, nodata: float) -> tuple[np.ndarray, list]:
-    """
-    Forward fill missing data and return indices of originally missing values.
-
-    Args:
-        data: Data array to fill
-        nodata: Nodata value
-
-    Returns:
-        tuple: (filled_data, missing_indices)
-    """
-    missing_indices = np.where((data == nodata) | np.isnan(data))[0]
-
-    for i in missing_indices:
-        if i > 0:
-            data[i] = data[i - 1]
-
-    return data, missing_indices.tolist()
 
 
 def _dewpoint_from_rh(temperature: np.ndarray, rh: np.ndarray) -> np.ndarray:
@@ -256,25 +241,25 @@ def read_input_meteorology(
     # Process and fill missing data
 
     # Handle T_a
-    T_a_data, loaded_meteo.T_a_nodata = _forward_fill_missing(T_a_data, nodata)
+    T_a_data, loaded_meteo.T_a_nodata = forward_fill_missing(T_a_data, nodata)
 
     # Handle FF and apply wind speed correction
-    FF_data, loaded_meteo.FF_nodata = _forward_fill_missing(FF_data, nodata)
+    FF_data, loaded_meteo.FF_nodata = forward_fill_missing(FF_data, nodata)
     FF_data = FF_data * wind_speed_correction
 
     # Handle RH
     if loaded_meteo.RH_available:
-        RH_data, loaded_meteo.RH_nodata = _forward_fill_missing(RH_data, nodata)
+        RH_data, loaded_meteo.RH_nodata = forward_fill_missing(RH_data, nodata)
         # Remove negative values
         RH_data = np.maximum(RH_data, 0)
 
     # Handle Rain
-    Rain_data, loaded_meteo.Rain_nodata = _forward_fill_missing(Rain_data, nodata)
+    Rain_data, loaded_meteo.Rain_nodata = forward_fill_missing(Rain_data, nodata)
     # Remove negative values
     Rain_data = np.maximum(Rain_data, 0)
 
     # Handle Snow
-    Snow_data, loaded_meteo.Snow_nodata = _forward_fill_missing(Snow_data, nodata)
+    Snow_data, loaded_meteo.Snow_nodata = forward_fill_missing(Snow_data, nodata)
     # Remove negative values
     Snow_data = np.maximum(Snow_data, 0)
 
@@ -284,21 +269,21 @@ def read_input_meteorology(
             check_data_availability(DD_data, loaded_meteo.DD_available, nodata)
         )
         if loaded_meteo.DD_available:
-            DD_data, _ = _forward_fill_missing(DD_data, nodata)
+            DD_data, _ = forward_fill_missing(DD_data, nodata)
 
     if loaded_meteo.T2_a_available:
         T2_a_data, loaded_meteo.T2_a_available, loaded_meteo.T2_a_nodata = (
             check_data_availability(T2_a_data, loaded_meteo.T2_a_available, nodata)
         )
         if loaded_meteo.T2_a_available:
-            T2_a_data, _ = _forward_fill_missing(T2_a_data, nodata)
+            T2_a_data, _ = forward_fill_missing(T2_a_data, nodata)
 
     if loaded_meteo.T_sub_available:
         T_sub_data, loaded_meteo.T_sub_available, loaded_meteo.T_sub_nodata = (
             check_data_availability(T_sub_data, loaded_meteo.T_sub_available, nodata)
         )
         if loaded_meteo.T_sub_available:
-            T_sub_data, _ = _forward_fill_missing(T_sub_data, nodata)
+            T_sub_data, _ = forward_fill_missing(T_sub_data, nodata)
 
     # Check data availability for optional fields
     if loaded_meteo.short_rad_in_available:
