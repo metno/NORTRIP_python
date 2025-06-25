@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import logging
 from input_classes import input_traffic
-from pd_util import find_column_index
+from pd_util import find_column_index, check_data_availability
 import constants
 
 logger = logging.getLogger(__name__)
@@ -177,12 +177,11 @@ def read_input_traffic(
     # Handle missing N_v data
     N_v_nodata = []
     for v in range(constants.num_veh):
-        missing_indices = np.where(
-            (loaded_traffic.N_v[v, :] == nodata) | np.isnan(loaded_traffic.N_v[v, :])
-        )[0]
-        N_v_nodata.append(missing_indices.tolist())
+        data_slice = loaded_traffic.N_v[v, :]
+        _, available, missing_indices = check_data_availability(data_slice, 1, nodata)
+        N_v_nodata.append(missing_indices)
 
-        if len(missing_indices) > 0 and len(missing_indices) != n_traffic:
+        if available and len(missing_indices) > 0:
             for i in missing_indices:
                 if i > 0:
                     loaded_traffic.N_v[v, i] = loaded_traffic.N_v[v, i - 1]
@@ -194,13 +193,13 @@ def read_input_traffic(
     for t in range(constants.num_tyre):
         tyre_nodata = []
         for v in range(constants.num_veh):
-            missing_indices = np.where(
-                (loaded_traffic.N[t, v, :] == nodata)
-                | np.isnan(loaded_traffic.N[t, v, :])
-            )[0]
-            tyre_nodata.append(missing_indices.tolist())
+            data_slice = loaded_traffic.N[t, v, :]
+            _, available, missing_indices = check_data_availability(
+                data_slice, 1, nodata
+            )
+            tyre_nodata.append(missing_indices)
 
-            if len(missing_indices) > 0 and len(missing_indices) != n_traffic:
+            if available and len(missing_indices) > 0:
                 for i in missing_indices:
                     if i > 0:
                         loaded_traffic.N[t, v, i] = loaded_traffic.N[t, v, i - 1]
@@ -211,13 +210,14 @@ def read_input_traffic(
     # Handle missing V_veh data (including zeros)
     V_veh_nodata = []
     for v in range(constants.num_veh):
+        # For V_veh, we treat zeros as missing data too
+        data_slice = loaded_traffic.V_veh[v, :]
         missing_indices = np.where(
-            (loaded_traffic.V_veh[v, :] == nodata)
-            | (loaded_traffic.V_veh[v, :] == 0)
-            | np.isnan(loaded_traffic.V_veh[v, :])
+            (data_slice == nodata) | (data_slice == 0) | np.isnan(data_slice)
         )[0]
         V_veh_nodata.append(missing_indices.tolist())
 
+        # Check if all data is missing (don't use _check_data_availability since zeros are special here)
         if len(missing_indices) > 0 and len(missing_indices) != n_traffic:
             for i in missing_indices:
                 if i > 0:

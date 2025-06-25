@@ -2,35 +2,9 @@ import pandas as pd
 import numpy as np
 import logging
 from input_classes import input_meteorology
-from pd_util import find_column_index, safe_float
+from pd_util import find_column_index, safe_float, check_data_availability
 
 logger = logging.getLogger(__name__)
-
-
-def _check_data_availability(
-    data: np.ndarray, available: int, nodata: float
-) -> tuple[np.ndarray, int, list]:
-    """
-    Check if data is available (not all nodata values).
-
-    Args:
-        data: Data array to check
-        available: Current availability flag
-        nodata: Nodata value
-
-    Returns:
-        tuple: (data, updated_availability_flag, missing_indices)
-    """
-    if not available:
-        return data, 0, []
-
-    missing_indices = np.where((data == nodata) | np.isnan(data))[0]
-
-    if len(missing_indices) == len(data):
-        # All data is missing
-        return data, 0, missing_indices.tolist()
-
-    return data, available, missing_indices.tolist()
 
 
 def _forward_fill_missing(data: np.ndarray, nodata: float) -> tuple[np.ndarray, list]:
@@ -307,21 +281,21 @@ def read_input_meteorology(
     # Handle optional data with availability checks
     if loaded_meteo.DD_available:
         DD_data, loaded_meteo.DD_available, loaded_meteo.DD_nodata = (
-            _check_data_availability(DD_data, loaded_meteo.DD_available, nodata)
+            check_data_availability(DD_data, loaded_meteo.DD_available, nodata)
         )
         if loaded_meteo.DD_available:
             DD_data, _ = _forward_fill_missing(DD_data, nodata)
 
     if loaded_meteo.T2_a_available:
         T2_a_data, loaded_meteo.T2_a_available, loaded_meteo.T2_a_nodata = (
-            _check_data_availability(T2_a_data, loaded_meteo.T2_a_available, nodata)
+            check_data_availability(T2_a_data, loaded_meteo.T2_a_available, nodata)
         )
         if loaded_meteo.T2_a_available:
             T2_a_data, _ = _forward_fill_missing(T2_a_data, nodata)
 
     if loaded_meteo.T_sub_available:
         T_sub_data, loaded_meteo.T_sub_available, loaded_meteo.T_sub_nodata = (
-            _check_data_availability(T_sub_data, loaded_meteo.T_sub_available, nodata)
+            check_data_availability(T_sub_data, loaded_meteo.T_sub_available, nodata)
         )
         if loaded_meteo.T_sub_available:
             T_sub_data, _ = _forward_fill_missing(T_sub_data, nodata)
@@ -332,7 +306,7 @@ def read_input_meteorology(
             short_rad_in_data,
             loaded_meteo.short_rad_in_available,
             loaded_meteo.short_rad_in_missing,
-        ) = _check_data_availability(
+        ) = check_data_availability(
             short_rad_in_data, loaded_meteo.short_rad_in_available, nodata
         )
 
@@ -341,7 +315,7 @@ def read_input_meteorology(
             long_rad_in_data,
             loaded_meteo.long_rad_in_available,
             loaded_meteo.long_rad_in_missing,
-        ) = _check_data_availability(
+        ) = check_data_availability(
             long_rad_in_data, loaded_meteo.long_rad_in_available, nodata
         )
 
@@ -350,7 +324,7 @@ def read_input_meteorology(
             cloud_cover_data,
             loaded_meteo.cloud_cover_available,
             loaded_meteo.cloud_cover_missing,
-        ) = _check_data_availability(
+        ) = check_data_availability(
             cloud_cover_data, loaded_meteo.cloud_cover_available, nodata
         )
 
@@ -359,7 +333,7 @@ def read_input_meteorology(
             road_wetness_obs_data,
             loaded_meteo.road_wetness_obs_available,
             loaded_meteo.road_wetness_obs_missing,
-        ) = _check_data_availability(
+        ) = check_data_availability(
             road_wetness_obs_data, loaded_meteo.road_wetness_obs_available, nodata
         )
 
@@ -368,7 +342,7 @@ def read_input_meteorology(
             road_temperature_obs_data,
             loaded_meteo.road_temperature_obs_available,
             loaded_meteo.road_temperature_obs_missing,
-        ) = _check_data_availability(
+        ) = check_data_availability(
             road_temperature_obs_data,
             loaded_meteo.road_temperature_obs_available,
             nodata,
@@ -379,7 +353,7 @@ def read_input_meteorology(
             Pressure_a_data,
             loaded_meteo.pressure_obs_available,
             loaded_meteo.pressure_obs_missing,
-        ) = _check_data_availability(
+        ) = check_data_availability(
             Pressure_a_data, loaded_meteo.pressure_obs_available, nodata
         )
 
