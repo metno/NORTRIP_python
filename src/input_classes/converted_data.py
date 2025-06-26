@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 import numpy as np
 import constants
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -226,6 +229,8 @@ def convert_input_data_to_consolidated_structure(
         converted.f_dis[:airquality_n_date, ro] = airquality_data.f_dis_input[
             :airquality_n_date
         ]
+
+    logger.info("Successfully converted input data to consolidated structure")
 
     return converted
 

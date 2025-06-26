@@ -58,17 +58,7 @@ def main():
         input_data, nodata=metadata_input.nodata
     )
 
-    logger.info("Successfully converted input data to consolidated structure")
-    logger.info("Converted data dimensions:")
-    logger.info(f"  - Date data: {converted_data.date_data.shape}")
-    logger.info(f"  - Traffic data: {converted_data.traffic_data.shape}")
-    logger.info(f"  - Meteorology data: {converted_data.meteo_data.shape}")
-    logger.info(f"  - Activity data: {converted_data.activity_data.shape}")
-    logger.info(f"  - Total time points: {converted_data.n_date}")
-    logger.info(f"  - Number of roads: {converted_data.n_roads}")
-
-    # Additional debug information
-    logger.info(f"T_sub availability: {meteorology_input.T_sub_available}")
+    logger.info("End of NORTRIP_Control")
 
 
 if __name__ == "__main__":
