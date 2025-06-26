@@ -29,12 +29,12 @@ def read_road_dust_input(
         print_results (bool, optional): If True, print the results to the console
     Returns:
         tuple: A tuple containing the following dataclasses:
-            - activity_data: input_activity dataclass
-            - airquality_data: input_airquality dataclass
-            - meteorology_data: input_meteorology dataclass
-            - traffic_data: input_traffic dataclass
-            - initial_data: input_initial dataclass
-            - metadata_data: input_metadata dataclass
+            activity_data: input_activity dataclass
+            airquality_data: input_airquality dataclass
+            meteorology_data: input_meteorology dataclass
+            traffic_data: input_traffic dataclass
+            initial_data: input_initial dataclass
+            metadata_data: input_metadata dataclass
 
     """
 

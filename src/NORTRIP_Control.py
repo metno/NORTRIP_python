@@ -60,10 +60,9 @@ def main():
         date_data=converted_data.date_data,
         n_date=converted_data.n_date,
         metadata=metadata_input,
-        use_fortran_flag=False,  # Set based on model flags if needed
+        use_fortran_flag=False,
     )
 
-    # Check for time configuration errors
     if time_config.time_bad:
         logger.error("Time configuration failed - stopping execution")
         return
