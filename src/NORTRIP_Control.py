@@ -9,6 +9,7 @@ from read_files import (
     read_road_dust_input,
 )
 from input_classes.converted_data import convert_read_road_dust_input_output
+from initialise import road_dust_initialise_time
 import logging
 from model_args import create_arg_parser
 
@@ -57,6 +58,19 @@ def main():
     converted_data = convert_read_road_dust_input_output(
         input_data, nodata=metadata_input.nodata
     )
+
+    # Initialize time loop parameters
+    time_config = road_dust_initialise_time(
+        date_data=converted_data.date_data,
+        n_date=converted_data.n_date,
+        metadata=metadata_input,
+        use_fortran_flag=False,  # Set based on model flags if needed
+    )
+
+    # Check for time configuration errors
+    if time_config.time_bad:
+        logger.error("Time configuration failed - stopping execution")
+        return
 
     logger.info("End of NORTRIP_Control")
 

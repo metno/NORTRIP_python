@@ -60,13 +60,8 @@ def read_input_metadata(
 
     # Set all simple fields using dataclass default as fallback
     for header, field in mapping:
-        current_default = getattr(loaded_metadata, field)
         val = find_float_or_default(header, header_col, data_col, float("nan"))
         if pd.isna(val):
-            if print_results:
-                logger.warning(
-                    f"Parameter '{header}' not found in metadata. Using default value: {current_default}"
-                )
             continue
         loaded_count += 1
         setattr(loaded_metadata, field, val)
