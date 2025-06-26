@@ -123,8 +123,7 @@ def road_dust_initialise_time(
     """
     Initialize time loop parameters for NORTRIP model execution.
 
-    This function replicates the MATLAB road_dust_initialise_time functionality,
-    setting time loop indices, time step, and parsing start/end dates from metadata.
+    This function sets the time loop indices, time step, and parses start/end dates from metadata.
 
     Args:
         date_data: Date data array with shape [num_date_index, n_date, n_roads]
@@ -136,6 +135,9 @@ def road_dust_initialise_time(
         time_config: Configuration object with time parameters
     """
     # Initialize time configuration
+
+    logger.info("Initialising time configuration...")
+
     config = time_config()
 
     # Set time loop index
@@ -244,6 +246,6 @@ def road_dust_initialise_time(
         config.min_time = 0
         config.max_time = n_date - 1
 
-    logger.info("Time configuration initialized.")
+    logger.info("Time configuration initialised.")
 
     return config

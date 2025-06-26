@@ -72,11 +72,6 @@ def read_input_metadata(
     )
     if b_canyon < loaded_metadata.b_road:
         b_canyon = loaded_metadata.b_road
-    if b_canyon == loaded_metadata.b_road:
-        if print_results:
-            logger.warning(
-                f"Parameter 'Street canyon width' not found or less than 'Road width'. Using 'Road width' value: {loaded_metadata.b_road}"
-            )
     if b_canyon != loaded_metadata.b_canyon:
         loaded_count += 1
     loaded_metadata.b_canyon = b_canyon
@@ -94,21 +89,11 @@ def read_input_metadata(
             "Street canyon height", header_col, data_col, 0.0
         )
         loaded_metadata.h_canyon = [h_canyon_single, h_canyon_single]
-        if h_canyon_single == 0.0:
-            if print_results:
-                logger.warning(
-                    "Parameter 'Street canyon height' not found in metadata. Using default value: [0.0, 0.0]"
-                )
-        else:
+        if h_canyon_single != 0.0:
             loaded_count += 1
     else:
         loaded_metadata.h_canyon = [h_canyon_north, h_canyon_south]
-        if h_canyon_north == 0.0 and h_canyon_south == 0.0:
-            if print_results:
-                logger.warning(
-                    "Parameter 'Street canyon height north' and 'Street canyon height south' not found in metadata. Using default value: [0.0, 0.0]"
-                )
-        else:
+        if not (h_canyon_north == 0.0 and h_canyon_south == 0.0):
             loaded_count += 1
 
     # exhaust_EF and NOX_EF arrays
@@ -118,16 +103,7 @@ def read_input_metadata(
     exhaust_EF_1 = find_float_or_default(
         "Exhaust EF (li)", header_col, data_col, loaded_metadata.exhaust_EF[1]
     )
-    if exhaust_EF_0 == loaded_metadata.exhaust_EF[0]:
-        if print_results:
-            logger.warning(
-                "Parameter 'Exhaust EF (he)' not found in metadata. Using default value: 0.0"
-            )
-    if exhaust_EF_1 == loaded_metadata.exhaust_EF[1]:
-        if print_results:
-            logger.warning(
-                "Parameter 'Exhaust EF (li)' not found in metadata. Using default value: 0.0"
-            )
+
     if (
         exhaust_EF_0 != loaded_metadata.exhaust_EF[0]
         or exhaust_EF_1 != loaded_metadata.exhaust_EF[1]
@@ -142,16 +118,7 @@ def read_input_metadata(
     NOX_EF_1 = find_float_or_default(
         "NOX EF (li)", header_col, data_col, loaded_metadata.NOX_EF[1]
     )
-    if NOX_EF_0 == loaded_metadata.NOX_EF[0]:
-        if print_results:
-            logger.warning(
-                "Parameter 'NOX EF (he)' not found in metadata. Using default value: 0.0"
-            )
-    if NOX_EF_1 == loaded_metadata.NOX_EF[1]:
-        if print_results:
-            logger.warning(
-                "Parameter 'NOX EF (li)' not found in metadata. Using default value: 0.0"
-            )
+
     if NOX_EF_0 != loaded_metadata.NOX_EF[0] or NOX_EF_1 != loaded_metadata.NOX_EF[1]:
         loaded_count += 1
     loaded_metadata.NOX_EF = [NOX_EF_0, NOX_EF_1]
@@ -168,16 +135,7 @@ def read_input_metadata(
         start_date_str += " 00:00:00"
     if end_date_str and len(end_date_str) < 11:
         end_date_str += " 00:00:00"
-    if start_date_str == loaded_metadata.start_date_str:
-        if print_results:
-            logger.warning(
-                f"Parameter 'Start date' not found in metadata. Using default value: {loaded_metadata.start_date_str}"
-            )
-    if end_date_str == loaded_metadata.end_date_str:
-        if print_results:
-            logger.warning(
-                f"Parameter 'End date' not found in metadata. Using default value: {loaded_metadata.end_date_str}"
-            )
+
     if start_date_str != loaded_metadata.start_date_str:
         loaded_count += 1
     if end_date_str != loaded_metadata.end_date_str:
@@ -196,16 +154,7 @@ def read_input_metadata(
         start_date_save_str += " 00:00:00"
     if end_date_save_str and len(end_date_save_str) < 11:
         end_date_save_str += " 00:00:00"
-    if start_date_save_str == loaded_metadata.start_date_save_str:
-        if print_results:
-            logger.warning(
-                f"Parameter 'Start save date' not found in metadata. Using default value: {loaded_metadata.start_date_save_str}"
-            )
-    if end_date_save_str == loaded_metadata.end_date_save_str:
-        if print_results:
-            logger.warning(
-                f"Parameter 'End save date' not found in metadata. Using default value: {loaded_metadata.end_date_save_str}"
-            )
+
     if start_date_save_str != loaded_metadata.start_date_save_str:
         loaded_count += 1
     if end_date_save_str != loaded_metadata.end_date_save_str:

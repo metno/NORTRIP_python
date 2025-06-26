@@ -9,7 +9,7 @@ from read_files import (
     read_road_dust_input,
 )
 from input_classes.converted_data import convert_read_road_dust_input_output
-from initialise import road_dust_initialise_time
+from initialise import road_dust_initialise_time, road_dust_initialise_variables
 import logging
 from model_args import create_arg_parser
 
@@ -66,6 +66,17 @@ def main():
     if time_config.time_bad:
         logger.error("Time configuration failed - stopping execution")
         return
+
+    # Initialize model variables
+    model_variables = road_dust_initialise_variables(
+        time_config=time_config,
+        converted_data=converted_data,
+        initial_data=initial_input,
+        metadata=metadata_input,
+        airquality_data=airquality_input,
+        model_parameters=model_parameters,
+        model_flags=model_flags,
+    )
 
     logger.info("End of NORTRIP_Control")
 
