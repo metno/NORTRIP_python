@@ -2,7 +2,6 @@ import numpy as np
 import datetime
 from initialise.road_dust_initialise_time import (
     road_dust_initialise_time,
-    time_config,
     _parse_date_string,
     _find_time_index,
 )
