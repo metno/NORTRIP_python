@@ -1,142 +1,310 @@
 import numpy as np
 import datetime
-import pytest
 from initialise.road_dust_initialise_time import (
     road_dust_initialise_time,
-    _parse_date_string,
-    _find_matching_time_index,
     time_config,
+    _parse_date_string,
+    _find_time_index,
 )
 from input_classes import input_metadata
 import constants
 
 
-def create_test_date_data():
-    """Create test date data array."""
-    n_date = 24  # 24 hours of data
-    date_data = np.full((constants.num_date_index, n_date, constants.n_roads), -99.0)
-
-    # Fill with hourly data for 2023-01-01
-    for i in range(n_date):
-        date_data[constants.year_index, i, 0] = 2023
-        date_data[constants.month_index, i, 0] = 1
-        date_data[constants.day_index, i, 0] = 1
-        date_data[constants.hour_index, i, 0] = i
-        date_data[constants.minute_index, i, 0] = 0
-        date_data[constants.datenum_index, i, 0] = (
-            738521.0 + i / 24.0
-        )  # 2023-01-01 + hour
-
-    return date_data
-
-
-def create_test_metadata():
-    """Create test metadata object."""
-    metadata = input_metadata()
-    metadata.start_date_str = ""
-    metadata.end_date_str = ""
-    metadata.start_date_save_str = ""
-    metadata.end_date_save_str = ""
-    metadata.n_save_subdate = 1
-    metadata.start_subdate_save_str = []
-    metadata.end_subdate_save_str = []
-    return metadata
-
-
-# Helper function tests (2 tests)
-def test_parse_date_string():
-    """Test date string parsing with NORTRIP format."""
-    result = _parse_date_string("01.01.2023 12:30")
-    expected = datetime.datetime(2023, 1, 1, 12, 30)
-    assert result == expected
-
-
-def test_find_matching_time_index():
-    """Test finding time index in date data."""
-    date_data = create_test_date_data()
-    target_datetime = datetime.datetime(2023, 1, 1, 5, 0)
-    result = _find_matching_time_index(date_data, target_datetime, 24)
-    assert result == 5
-
-
-# Config test (1 test)
-def test_time_config_defaults():
-    """Test time_config dataclass has correct defaults."""
+def test_time_config_default_values():
+    """Test that time_config has the correct default values."""
     config = time_config()
-    assert config.min_time == 0
-    assert config.max_time == 0
+
+    assert config.min_time == 1
+    assert config.max_time == 1
+    assert config.max_time_inputdata == 1
     assert config.dt == 1.0
     assert config.time_bad == 0
+    assert config.min_time_save == 1
+    assert config.max_time_save == 1
+    assert config.min_subtime_save == []
+    assert config.max_subtime_save == []
 
 
-# Main function tests (5 tests)
+def test_parse_date_string():
+    """Test date string parsing functionality."""
+    # Test standard format
+    year, month, day, hour, minute, second = _parse_date_string("2023-03-15 14:30:00")
+    assert year == 2023
+    assert month == 3
+    assert day == 15
+    assert hour == 14
+    assert minute == 30
+    assert second == 0
+
+    # Test date only format
+    year, month, day, hour, minute, second = _parse_date_string("2023-03-15")
+    assert year == 2023
+    assert month == 3
+    assert day == 15
+    assert hour == 0
+    assert minute == 0
+    assert second == 0
+
+    # Test alternative format
+    year, month, day, hour, minute, second = _parse_date_string("2023.03.15 14:30:00")
+    assert year == 2023
+    assert month == 3
+    assert day == 15
+    assert hour == 14
+    assert minute == 30
+    assert second == 0
+
+    # Test European format (day.month.year)
+    year, month, day, hour, minute, second = _parse_date_string("01.10.2010 01:00")
+    assert year == 2010
+    assert month == 10
+    assert day == 1
+    assert hour == 1
+    assert minute == 0
+    assert second == 0
+
+    # Test empty string
+    year, month, day, hour, minute, second = _parse_date_string("")
+    assert year == 0
+    assert month == 0
+    assert day == 0
+    assert hour == 0
+    assert minute == 0
+    assert second == 0
+
+    # Test invalid format
+    year, month, day, hour, minute, second = _parse_date_string("invalid date")
+    assert year == 0
+    assert month == 0
+    assert day == 0
+    assert hour == 0
+    assert minute == 0
+    assert second == 0
+
+
+def test_find_time_index():
+    """Test finding time index in date_data array."""
+    # Create sample date data
+    n_date = 5
+    n_roads = 1
+    date_data = np.zeros((constants.num_date_index, n_date, n_roads))
+
+    # Fill with sample dates
+    years = [2023, 2023, 2023, 2023, 2023]
+    months = [3, 3, 3, 3, 3]
+    days = [15, 15, 15, 15, 15]
+    hours = [10, 11, 12, 13, 14]
+
+    date_data[constants.year_index, :, 0] = years
+    date_data[constants.month_index, :, 0] = months
+    date_data[constants.day_index, :, 0] = days
+    date_data[constants.hour_index, :, 0] = hours
+
+    # Test finding existing time
+    index = _find_time_index(2023, 3, 15, 12, date_data)
+    assert index == 3  # 1-based indexing
+
+    # Test finding non-existing time
+    index = _find_time_index(2023, 3, 16, 12, date_data)
+    assert index == -1
+
+
 def test_road_dust_initialise_time_basic():
-    """Test basic time initialization without date restrictions."""
-    date_data = create_test_date_data()
-    metadata = create_test_metadata()
+    """Test basic functionality of road_dust_initialise_time."""
+    # Create sample date data
+    n_date = 10
+    n_roads = 1
+    date_data = np.zeros((constants.num_date_index, n_date, n_roads))
 
-    config = road_dust_initialise_time(date_data, 24, metadata)
+    # Fill with sample dates (hourly data)
+    base_date = datetime.datetime(2023, 3, 15, 10, 0, 0)
+    for i in range(n_date):
+        current_date = base_date + datetime.timedelta(hours=i)
+        date_data[constants.year_index, i, 0] = current_date.year
+        date_data[constants.month_index, i, 0] = current_date.month
+        date_data[constants.day_index, i, 0] = current_date.day
+        date_data[constants.hour_index, i, 0] = current_date.hour
+        date_data[constants.minute_index, i, 0] = current_date.minute
+        # Simulate MATLAB datenum (days since year 1 + fractional day)
+        date_data[constants.datenum_index, i, 0] = (
+            current_date.toordinal() + 366 + current_date.hour / 24.0
+        )
 
-    # Check 0-based indexing
-    assert config.min_time == 0
-    assert config.max_time == 24  # Exclusive end
-    assert config.max_time_inputdata == 24
+    # Create metadata
+    metadata = input_metadata()
+
+    # Test without any date restrictions
+    config = road_dust_initialise_time(date_data, n_date, metadata)
+
+    assert config.min_time == 1
+    assert config.max_time == n_date
+    assert config.max_time_inputdata == n_date
+    assert (
+        abs(config.dt - 1.0) < 1e-6
+    )  # 1 hour difference (with floating point tolerance)
     assert config.time_bad == 0
-    assert config.dt == pytest.approx(
-        1.0, abs=1e-6
-    )  # 1 hour time step (allow floating point precision)
+    assert config.min_time_save == 1
+    assert config.max_time_save == n_date
 
 
-def test_road_dust_initialise_time_with_dates():
-    """Test time initialization with start and end dates."""
-    date_data = create_test_date_data()
-    metadata = create_test_metadata()
-    metadata.start_date_str = "01.01.2023 02:00"
-    metadata.end_date_str = "01.01.2023 05:00"
+def test_road_dust_initialise_time_with_date_restrictions():
+    """Test road_dust_initialise_time with start and end date restrictions."""
+    # Create sample date data
+    n_date = 24  # 24 hours of data
+    n_roads = 1
+    date_data = np.zeros((constants.num_date_index, n_date, n_roads))
 
-    config = road_dust_initialise_time(date_data, 24, metadata)
+    # Fill with sample dates (hourly data from 2023-03-15 00:00 to 2023-03-15 23:00)
+    base_date = datetime.datetime(2023, 3, 15, 0, 0, 0)
+    for i in range(n_date):
+        current_date = base_date + datetime.timedelta(hours=i)
+        date_data[constants.year_index, i, 0] = current_date.year
+        date_data[constants.month_index, i, 0] = current_date.month
+        date_data[constants.day_index, i, 0] = current_date.day
+        date_data[constants.hour_index, i, 0] = current_date.hour
+        date_data[constants.minute_index, i, 0] = current_date.minute
+        date_data[constants.datenum_index, i, 0] = (
+            current_date.toordinal() + 366 + current_date.hour / 24.0
+        )
 
-    # Check 0-based indexing: start at index 2, end at index 6 (exclusive)
-    assert config.min_time == 2
-    assert config.max_time == 6  # Index 5 + 1 for exclusive range
+    # Create metadata with date restrictions
+    metadata = input_metadata()
+    metadata.start_date_str = "2023-03-15 08:00:00"
+    metadata.end_date_str = "2023-03-15 16:00:00"
+    metadata.start_date_save_str = "2023-03-15 10:00:00"
+    metadata.end_date_save_str = "2023-03-15 14:00:00"
+
+    config = road_dust_initialise_time(date_data, n_date, metadata)
+
+    assert config.min_time == 9  # 08:00 is index 8, 1-based = 9
+    assert config.max_time == 17  # 16:00 is index 16, 1-based = 17
+    assert config.min_time_save == 11  # 10:00 is index 10, 1-based = 11
+    assert config.max_time_save == 15  # 14:00 is index 14, 1-based = 15
     assert config.time_bad == 0
 
 
-def test_road_dust_initialise_time_with_save_dates():
-    """Test time initialization with save date configuration."""
-    date_data = create_test_date_data()
-    metadata = create_test_metadata()
-    metadata.start_date_save_str = "01.01.2023 03:00"
-    metadata.end_date_save_str = "01.01.2023 06:00"
+def test_road_dust_initialise_time_invalid_dates():
+    """Test road_dust_initialise_time with invalid dates."""
+    # Create sample date data
+    n_date = 5
+    n_roads = 1
+    date_data = np.zeros((constants.num_date_index, n_date, n_roads))
 
-    config = road_dust_initialise_time(date_data, 24, metadata)
+    # Fill with sample dates
+    base_date = datetime.datetime(2023, 3, 15, 10, 0, 0)
+    for i in range(n_date):
+        current_date = base_date + datetime.timedelta(hours=i)
+        date_data[constants.year_index, i, 0] = current_date.year
+        date_data[constants.month_index, i, 0] = current_date.month
+        date_data[constants.day_index, i, 0] = current_date.day
+        date_data[constants.hour_index, i, 0] = current_date.hour
+        date_data[constants.minute_index, i, 0] = current_date.minute
+        date_data[constants.datenum_index, i, 0] = (
+            current_date.toordinal() + 366 + current_date.hour / 24.0
+        )
 
-    # Check save time configuration
-    assert config.min_time_save == 3
-    assert config.max_time_save == 7  # Index 6 + 1 for exclusive range
+    # Create metadata with invalid start date
+    metadata = input_metadata()
+    metadata.start_date_str = "2023-03-16 10:00:00"  # Date not in data
 
-
-def test_road_dust_initialise_time_date_not_found():
-    """Test error handling when date is not found in data."""
-    date_data = create_test_date_data()
-    metadata = create_test_metadata()
-    metadata.start_date_str = "01.01.2024 10:00"  # Date not in data
-
-    config = road_dust_initialise_time(date_data, 24, metadata)
+    config = road_dust_initialise_time(date_data, n_date, metadata)
 
     assert config.time_bad == 1
 
 
 def test_road_dust_initialise_time_fortran_flag():
-    """Test that fortran flag overrides date restrictions."""
-    date_data = create_test_date_data()
-    metadata = create_test_metadata()
-    metadata.start_date_str = "01.01.2023 05:00"
-    metadata.end_date_str = "01.01.2023 10:00"
+    """Test road_dust_initialise_time with fortran flag."""
+    # Create sample date data
+    n_date = 10
+    n_roads = 1
+    date_data = np.zeros((constants.num_date_index, n_date, n_roads))
 
-    config = road_dust_initialise_time(date_data, 24, metadata, use_fortran_flag=True)
+    # Fill with sample dates
+    base_date = datetime.datetime(2023, 3, 15, 10, 0, 0)
+    for i in range(n_date):
+        current_date = base_date + datetime.timedelta(hours=i)
+        date_data[constants.year_index, i, 0] = current_date.year
+        date_data[constants.month_index, i, 0] = current_date.month
+        date_data[constants.day_index, i, 0] = current_date.day
+        date_data[constants.hour_index, i, 0] = current_date.hour
+        date_data[constants.minute_index, i, 0] = current_date.minute
+        date_data[constants.datenum_index, i, 0] = (
+            current_date.toordinal() + 366 + current_date.hour / 24.0
+        )
 
-    # Should run all data regardless of date strings
-    assert config.min_time == 0
-    assert config.max_time == 24
+    # Create metadata with date restrictions
+    metadata = input_metadata()
+    metadata.start_date_str = "2023-03-15 12:00:00"
+    metadata.end_date_str = "2023-03-15 15:00:00"
+
+    # Test with fortran flag (should override date restrictions)
+    config = road_dust_initialise_time(
+        date_data, n_date, metadata, use_fortran_flag=True
+    )
+
+    assert config.min_time == 1  # Should be reset to 1
+    assert config.max_time == n_date  # Should be reset to n_date
+    assert config.time_bad == 0
+
+
+def test_road_dust_initialise_time_subdate():
+    """Test road_dust_initialise_time with subdates."""
+    # Create sample date data
+    n_date = 24  # 24 hours of data
+    n_roads = 1
+    date_data = np.zeros((constants.num_date_index, n_date, n_roads))
+
+    # Fill with sample dates (hourly data from 2023-03-15 00:00 to 2023-03-15 23:00)
+    base_date = datetime.datetime(2023, 3, 15, 0, 0, 0)
+    for i in range(n_date):
+        current_date = base_date + datetime.timedelta(hours=i)
+        date_data[constants.year_index, i, 0] = current_date.year
+        date_data[constants.month_index, i, 0] = current_date.month
+        date_data[constants.day_index, i, 0] = current_date.day
+        date_data[constants.hour_index, i, 0] = current_date.hour
+        date_data[constants.minute_index, i, 0] = current_date.minute
+        date_data[constants.datenum_index, i, 0] = (
+            current_date.toordinal() + 366 + current_date.hour / 24.0
+        )
+
+    # Create metadata with subdates
+    metadata = input_metadata()
+    metadata.n_save_subdate = 2
+    metadata.start_subdate_save_str = ["2023-03-15 06:00:00", "2023-03-15 18:00:00"]
+    metadata.end_subdate_save_str = ["2023-03-15 12:00:00", "2023-03-15 22:00:00"]
+
+    config = road_dust_initialise_time(date_data, n_date, metadata)
+
+    assert len(config.min_subtime_save) == 2
+    assert len(config.max_subtime_save) == 2
+    assert config.min_subtime_save[0] == 7  # 06:00 is index 6, 1-based = 7
+    assert config.max_subtime_save[0] == 13  # 12:00 is index 12, 1-based = 13
+    assert config.min_subtime_save[1] == 19  # 18:00 is index 18, 1-based = 19
+    assert config.max_subtime_save[1] == 23  # 22:00 is index 22, 1-based = 23
+    assert config.time_bad == 0
+
+
+def test_road_dust_initialise_time_single_timestep():
+    """Test road_dust_initialise_time with only one timestep."""
+    # Create sample date data with single timestep
+    n_date = 1
+    n_roads = 1
+    date_data = np.zeros((constants.num_date_index, n_date, n_roads))
+
+    # Fill with single date
+    date_data[constants.year_index, 0, 0] = 2023
+    date_data[constants.month_index, 0, 0] = 3
+    date_data[constants.day_index, 0, 0] = 15
+    date_data[constants.hour_index, 0, 0] = 10
+    date_data[constants.minute_index, 0, 0] = 0
+    date_data[constants.datenum_index, 0, 0] = 738611.416667  # Example datenum
+
+    # Create metadata
+    metadata = input_metadata()
+
+    config = road_dust_initialise_time(date_data, n_date, metadata)
+
+    assert config.min_time == 1
+    assert config.max_time == 1
+    assert config.dt == 1.0  # Default when only one timestep
     assert config.time_bad == 0

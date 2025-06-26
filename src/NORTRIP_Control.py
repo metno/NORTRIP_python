@@ -30,14 +30,12 @@ def main():
     print(f"Read as inputs as text: {read_as_text}")
     print(f"Print results to terminal: {print_results}")
 
-    # Loading model parameters and flags
     paths = read_road_dust_paths(read_as_text=read_as_text)
 
     model_parameters, model_flags, model_activities = read_road_dust_parameters(
         paths.path_filename_inputparam, read_as_text=read_as_text
     )
 
-    # Read input data
     input_data = read_road_dust_input(
         paths.path_filename_inputdata,
         model_parameters,
@@ -54,12 +52,10 @@ def main():
         metadata_input,
     ) = input_data
 
-    # Convert individual input data classes to consolidated structure (matching MATLAB format)
     converted_data = convert_read_road_dust_input_output(
         input_data, nodata=metadata_input.nodata
     )
 
-    # Initialize time loop parameters
     time_config = road_dust_initialise_time(
         date_data=converted_data.date_data,
         n_date=converted_data.n_date,
