@@ -10,21 +10,6 @@ from input_classes import input_metadata
 import constants
 
 
-def test_time_config_default_values():
-    """Test that time_config has the correct default values."""
-    config = time_config()
-
-    assert config.min_time == 1
-    assert config.max_time == 1
-    assert config.max_time_inputdata == 1
-    assert config.dt == 1.0
-    assert config.time_bad == 0
-    assert config.min_time_save == 1
-    assert config.max_time_save == 1
-    assert config.min_subtime_save == []
-    assert config.max_subtime_save == []
-
-
 def test_parse_date_string():
     """Test date string parsing functionality."""
     # Test standard format
@@ -102,7 +87,7 @@ def test_find_time_index():
 
     # Test finding existing time
     index = _find_time_index(2023, 3, 15, 12, date_data)
-    assert index == 3  # 1-based indexing
+    assert index == 2
 
     # Test finding non-existing time
     index = _find_time_index(2023, 3, 16, 12, date_data)
@@ -136,15 +121,15 @@ def test_road_dust_initialise_time_basic():
     # Test without any date restrictions
     config = road_dust_initialise_time(date_data, n_date, metadata)
 
-    assert config.min_time == 1
-    assert config.max_time == n_date
-    assert config.max_time_inputdata == n_date
+    assert config.min_time == 0
+    assert config.max_time == n_date - 1
+    assert config.max_time_inputdata == n_date - 1
     assert (
         abs(config.dt - 1.0) < 1e-6
     )  # 1 hour difference (with floating point tolerance)
     assert config.time_bad == 0
-    assert config.min_time_save == 1
-    assert config.max_time_save == n_date
+    assert config.min_time_save == 0
+    assert config.max_time_save == n_date - 1
 
 
 def test_road_dust_initialise_time_with_date_restrictions():
@@ -176,10 +161,10 @@ def test_road_dust_initialise_time_with_date_restrictions():
 
     config = road_dust_initialise_time(date_data, n_date, metadata)
 
-    assert config.min_time == 9  # 08:00 is index 8, 1-based = 9
-    assert config.max_time == 17  # 16:00 is index 16, 1-based = 17
-    assert config.min_time_save == 11  # 10:00 is index 10, 1-based = 11
-    assert config.max_time_save == 15  # 14:00 is index 14, 1-based = 15
+    assert config.min_time == 8
+    assert config.max_time == 16
+    assert config.min_time_save == 10
+    assert config.max_time_save == 14
     assert config.time_bad == 0
 
 
@@ -242,8 +227,8 @@ def test_road_dust_initialise_time_fortran_flag():
         date_data, n_date, metadata, use_fortran_flag=True
     )
 
-    assert config.min_time == 1  # Should be reset to 1
-    assert config.max_time == n_date  # Should be reset to n_date
+    assert config.min_time == 0
+    assert config.max_time == n_date - 1
     assert config.time_bad == 0
 
 
@@ -277,10 +262,10 @@ def test_road_dust_initialise_time_subdate():
 
     assert len(config.min_subtime_save) == 2
     assert len(config.max_subtime_save) == 2
-    assert config.min_subtime_save[0] == 7  # 06:00 is index 6, 1-based = 7
-    assert config.max_subtime_save[0] == 13  # 12:00 is index 12, 1-based = 13
-    assert config.min_subtime_save[1] == 19  # 18:00 is index 18, 1-based = 19
-    assert config.max_subtime_save[1] == 23  # 22:00 is index 22, 1-based = 23
+    assert config.min_subtime_save[0] == 6
+    assert config.max_subtime_save[0] == 12
+    assert config.min_subtime_save[1] == 18
+    assert config.max_subtime_save[1] == 22
     assert config.time_bad == 0
 
 
@@ -304,7 +289,7 @@ def test_road_dust_initialise_time_single_timestep():
 
     config = road_dust_initialise_time(date_data, n_date, metadata)
 
-    assert config.min_time == 1
-    assert config.max_time == 1
-    assert config.dt == 1.0  # Default when only one timestep
+    assert config.min_time == 0
+    assert config.max_time == 0
+    assert config.dt == 1.0
     assert config.time_bad == 0

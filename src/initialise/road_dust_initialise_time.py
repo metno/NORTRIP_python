@@ -15,9 +15,9 @@ class time_config:
     """
 
     # Time loop indices
-    min_time: int = 1
-    max_time: int = 1
-    max_time_inputdata: int = 1
+    min_time: int = 0
+    max_time: int = 0
+    max_time_inputdata: int = 0
 
     # Time step for iteration (hours)
     dt: np.float64 = np.float64(1.0)
@@ -26,8 +26,8 @@ class time_config:
     time_bad: int = 0
 
     # Save time indices
-    min_time_save: int = 1
-    max_time_save: int = 1
+    min_time_save: int = 0
+    max_time_save: int = 0
 
     # Subdate save time indices
     min_subtime_save: list = field(default_factory=list)
@@ -104,12 +104,12 @@ def _find_time_index(
     )[0]
 
     if len(matches) == 1:
-        return int(matches[0]) + 1  # Convert to 1-based indexing like MATLAB
+        return int(matches[0])
     elif len(matches) > 1:
         logger.warning(
             f"Multiple matches found for date {year}-{month:02d}-{day:02d} {hour:02d}"
         )
-        return int(matches[0]) + 1  # Return first match
+        return int(matches[0])
     else:
         return -1
 
@@ -139,9 +139,9 @@ def road_dust_initialise_time(
     config = time_config()
 
     # Set time loop index
-    config.min_time = 1
-    config.max_time = n_date
-    config.max_time_inputdata = n_date
+    config.min_time = 0
+    config.max_time = n_date - 1  # 0-based indexing: last valid index is n_date - 1
+    config.max_time_inputdata = n_date - 1
 
     # Set time step for iteration based on the first time step of the input data
     if n_date > 1:
@@ -241,11 +241,9 @@ def road_dust_initialise_time(
 
     # Always run all the data when using fortran
     if use_fortran_flag:
-        config.min_time = 1
-        config.max_time = n_date
+        config.min_time = 0
+        config.max_time = n_date - 1
 
-    logger.info(
-        f"Time configuration initialized: min_time={config.min_time}, max_time={config.max_time}, dt={config.dt:.2f}h"
-    )
+    logger.info("Time configuration initialized.")
 
     return config
