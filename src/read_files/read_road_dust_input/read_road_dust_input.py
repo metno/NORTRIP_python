@@ -108,7 +108,15 @@ def read_road_dust_input(
         pressure_default=metadata_data.Pressure,
         print_results=print_results,
     )
-    activity_data = read_input_activity(activity_df)
+    activity_data = read_input_activity(
+        activity_df,
+        traffic_data.year,
+        traffic_data.month,
+        traffic_data.day,
+        traffic_data.hour,
+        traffic_data.minute,
+        print_results,
+    )
     airquality_data = read_input_airquality(airquality_df)
 
     return (
