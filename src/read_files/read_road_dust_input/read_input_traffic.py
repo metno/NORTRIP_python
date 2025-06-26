@@ -4,24 +4,10 @@ import datetime
 import logging
 from input_classes import input_traffic
 from pd_util import find_column_index, check_data_availability, forward_fill_missing
+from .traffic_utils import calculate_daily_averages
 import constants
 
 logger = logging.getLogger(__name__)
-
-
-def _calculate_daily_averages(
-    date_num: np.ndarray, data: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
-    """Calculate hourly averages for daily cycle (equivalent to MATLAB Average_data_func with type 3)."""
-    hours = np.array([int(((dn - int(dn)) * 24) % 24) for dn in date_num])
-
-    hourly_averages = np.full(24, np.nan)  # Initialize with NaN instead of zeros
-    for hour in range(24):
-        hour_mask = hours == hour
-        if np.any(hour_mask):
-            hourly_averages[hour] = np.mean(data[hour_mask])
-
-    return np.arange(24), hourly_averages
 
 
 def read_input_traffic(
@@ -240,7 +226,7 @@ def read_input_traffic(
 
     # Create missing traffic data using average daily cycles
     if len(N_total_nodata) > 0 and len(N_good_data) > 0:
-        xplot, yplot = _calculate_daily_averages(
+        xplot, yplot = calculate_daily_averages(
             loaded_traffic.date_num[N_good_data], loaded_traffic.N_total[N_good_data]
         )
 
@@ -264,7 +250,7 @@ def read_input_traffic(
     if any(len(sublist) > 0 for sublist in N_v_nodata) and len(N_good_data) > 0:
         for v in range(constants.num_veh):
             if len(N_v_nodata[v]) > 0:
-                xplot, yplot = _calculate_daily_averages(
+                xplot, yplot = calculate_daily_averages(
                     loaded_traffic.date_num[N_good_data],
                     loaded_traffic.N_v[v, N_good_data],
                 )

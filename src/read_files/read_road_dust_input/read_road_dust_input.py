@@ -4,6 +4,7 @@ from .read_input_meteorology import read_input_meteorology
 from .read_input_traffic import read_input_traffic
 from .read_input_initial import read_input_initial
 from .read_input_metadata import read_input_metadata
+from .traffic_utils import calculate_good_traffic_data_indices
 from config_classes import model_parameters
 import pandas as pd
 import os
@@ -39,7 +40,7 @@ def read_road_dust_input(
 
     activity_df = airquality_df = meteorology_df = traffic_df = initial_df = (
         metadata_df
-    ) = None
+    ) = ospm_df = None
 
     if read_as_text:
         # Extract directory and base filename without extension
@@ -53,6 +54,7 @@ def read_road_dust_input(
         traffic_path = os.path.join(text_dir, f"{base_name}_traffic.txt")
         initial_path = os.path.join(text_dir, f"{base_name}_initial.txt")
         metadata_path = os.path.join(text_dir, f"{base_name}_metadata.txt")
+        ospm_path = os.path.join(text_dir, f"{base_name}_ospm.txt")
 
         try:
             activity_df = read_txt(activity_path)
@@ -61,6 +63,12 @@ def read_road_dust_input(
             traffic_df = read_txt(traffic_path)
             initial_df = read_txt(initial_path)
             metadata_df = read_txt(metadata_path)
+
+            # OSPM is optional
+            try:
+                ospm_df = read_txt(ospm_path)
+            except FileNotFoundError:
+                ospm_df = None
 
         except FileNotFoundError as e:
             logger.error(f"File not found: {e.filename}")
@@ -80,6 +88,10 @@ def read_road_dust_input(
             traffic_df = all_sheets["Traffic"]
             initial_df = all_sheets["Initialconditions"]
             metadata_df = all_sheets["Metadata"]
+
+            # OSPM is optional
+            ospm_df = all_sheets.get("OSPM", None)
+
         except KeyError:
             logger.error(f"Sheet not found in file: {input_file_path}")
             exit(1)
@@ -117,7 +129,24 @@ def read_road_dust_input(
         traffic_data.minute,
         print_results,
     )
-    airquality_data = read_input_airquality(airquality_df)
+
+    # Calculate N_good_data from traffic data for emission data filling
+    N_good_data = None
+    if len(traffic_data.N_total_nodata) > 0:
+        N_good_data = calculate_good_traffic_data_indices(
+            traffic_data, metadata_data.nodata
+        )
+
+    airquality_data = read_input_airquality(
+        airquality_df,
+        ospm_df=ospm_df,
+        nodata=metadata_data.nodata,
+        traffic_date_num=traffic_data.date_num,
+        traffic_hour=traffic_data.hour,
+        N_total_nodata=traffic_data.N_total_nodata,
+        N_good_data=N_good_data,
+        print_results=print_results,
+    )
 
     return (
         activity_data,
