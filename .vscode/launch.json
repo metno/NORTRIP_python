@@ -1,0 +1,33 @@
+{
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "name": "Debug NORTRIP (text)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "NORTRIP_Control",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "args": [
+                "-t",
+                "1"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },
+        {
+            "name": "Debug NORTRIP (no args)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "NORTRIP_Control",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        }
+    ]
+}
