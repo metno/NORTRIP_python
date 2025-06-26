@@ -3,6 +3,7 @@ from .input_values_initial import input_values_initial
 from .input_initial import input_initial
 from .input_traffic import input_traffic
 from .input_meteorology import input_meteorology
+from .input_activity import input_activity
 
 __all__ = [
     "input_metadata",
@@ -10,4 +11,5 @@ __all__ = [
     "input_initial",
     "input_traffic",
     "input_meteorology",
+    "input_activity",
 ]
