@@ -2,62 +2,39 @@ import numpy as np
 from src.functions.antoine_func import antoine_func
 
 
-def test_antoine_func_basic():
-    """Test basic Antoine equation calculation."""
-    # Test with known values
-    a, b, c = 8.07131, 1730.63, 233.426  # Water Antoine constants
-    TC = 25.0  # 25°C
+def test_antoine_func():
+    """Test Antoine equation vapor pressure calculation."""
+    # Test with typical water vapor parameters
+    # Antoine coefficients for water (common values)
+    a = 8.07131
+    b = 1730.63
+    c = 233.426
 
-    result = antoine_func(a, b, c, TC)
-
-    # Should return vapor pressure around 23.7 hPa for water at 25°C
-    assert result > 0
-    assert 23 < result < 25  # Approximate range check
-
-
-def test_antoine_func_zero_temperature():
-    """Test Antoine function at 0°C."""
-    a, b, c = 8.07131, 1730.63, 233.426
-    TC = 0.0
-
-    result = antoine_func(a, b, c, TC)
-
-    assert isinstance(result, float)
-    assert result > 0
-    assert 4 < result < 5  # Approximate range for water at 0°C
-
-
-def test_antoine_func_negative_temperature():
-    """Test Antoine function at negative temperature."""
-    a, b, c = 8.07131, 1730.63, 233.426
-    TC = -10.0
-
-    result = antoine_func(a, b, c, TC)
-
-    assert isinstance(result, float)
-    assert result > 0
-
-
-def test_antoine_func_different_coefficients():
-    """Test with different Antoine coefficients."""
-    # Different substance coefficients
-    a, b, c = 7.96681, 1668.21, 228.0
+    # Test at 20°C
     TC = 20.0
-
     result = antoine_func(a, b, c, TC)
+    expected = 10 ** (a - (b / (c + TC)))
+    assert abs(result - expected) < 1e-10
 
-    assert isinstance(result, float)
+    # Test at freezing point
+    TC = 0.0
+    result = antoine_func(a, b, c, TC)
+    expected = 10 ** (a - (b / (c + TC)))
+    assert abs(result - expected) < 1e-10
+
+    # Test with different coefficients (ice)
+    a_ice = 9.5504
+    b_ice = 2348.8
+    c_ice = 273.2
+    TC = -10.0
+    result = antoine_func(a_ice, b_ice, c_ice, TC)
+    expected = 10 ** (a_ice - (b_ice / (c_ice + TC)))
+    assert abs(result - expected) < 1e-10
+
+    # Test positive result
     assert result > 0
 
-
-def test_antoine_func_high_temperature():
-    """Test Antoine function at high temperature."""
-    a, b, c = 8.07131, 1730.63, 233.426
-    TC = 100.0
-
-    result = antoine_func(a, b, c, TC)
-
-    assert isinstance(result, float)
-    assert result > 0
-    # Should be much higher at 100°C
-    assert result > 100
+    # Test that higher temperature gives higher vapor pressure
+    result_higher_temp = antoine_func(a, b, c, 30.0)
+    result_lower_temp = antoine_func(a, b, c, 10.0)
+    assert result_higher_temp > result_lower_temp

@@ -1,57 +1,63 @@
 from src.functions.energy_correction_func import energy_correction_func
 
 
-def test_energy_correction_func_basic():
-    """Test basic energy correction calculation."""
+def test_energy_correction_func():
+    """Test energy correction function."""
+
+    # Test with basic values
     dE1 = 100.0
     dE2 = 50.0
-
     result = energy_correction_func(dE1, dE2)
 
-    # With f=1.0, should equal dE1
-    assert isinstance(result, float)
+    # Since f = 1.0, result should equal dE1
     assert result == dE1
 
-
-def test_energy_correction_func_zero_values():
-    """Test energy correction with zero values."""
-    dE1 = 0.0
-    dE2 = 0.0
-
-    result = energy_correction_func(dE1, dE2)
-
-    assert isinstance(result, float)
+    # Test with zero values
+    result = energy_correction_func(0.0, 0.0)
     assert result == 0.0
 
-
-def test_energy_correction_func_negative_values():
-    """Test energy correction with negative values."""
+    # Test with negative values
     dE1 = -50.0
     dE2 = -25.0
-
     result = energy_correction_func(dE1, dE2)
+    assert result == dE1
 
-    assert isinstance(result, float)
-    assert result == dE1  # Should equal dE1 since f=1.0
-
-
-def test_energy_correction_func_mixed_signs():
-    """Test energy correction with mixed sign values."""
-    dE1 = 100.0
-    dE2 = -50.0
-
+    # Test with mixed positive/negative
+    dE1 = 75.0
+    dE2 = -30.0
     result = energy_correction_func(dE1, dE2)
+    assert result == dE1
 
-    assert isinstance(result, float)
+    # Test with very large values
+    dE1 = 1e6
+    dE2 = 1e5
+    result = energy_correction_func(dE1, dE2)
+    assert result == dE1
+
+    # Test with very small values
+    dE1 = 1e-6
+    dE2 = 1e-7
+    result = energy_correction_func(dE1, dE2)
     assert result == dE1
 
 
-def test_energy_correction_func_large_values():
-    """Test energy correction with large values."""
-    dE1 = 1000000.0
-    dE2 = 500000.0
+def test_energy_correction_func_formula():
+    """Test that the energy correction formula works as expected."""
 
-    result = energy_correction_func(dE1, dE2)
+    # The function uses: E_correction = f * dE1 + (1 - f) * dE2
+    # where f = 1.0, so E_correction = dE1
 
-    assert isinstance(result, float)
-    assert result == dE1
+    test_cases = [
+        (100.0, 200.0),
+        (-50.0, 75.0),
+        (0.0, 100.0),
+        (123.456, 789.012),
+        (-999.9, -111.1),
+    ]
+
+    for dE1, dE2 in test_cases:
+        result = energy_correction_func(dE1, dE2)
+        expected = 1.0 * dE1 + (1.0 - 1.0) * dE2  # f = 1.0
+        assert abs(result - expected) < 1e-10
+        # Since f = 1.0, result should always equal dE1
+        assert result == dE1
