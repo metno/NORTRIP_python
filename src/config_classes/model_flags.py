@@ -48,3 +48,5 @@ class model_flags:
     forecast_hour: int = 0
     use_traffic_turb_flag: int = 1
     use_ospm_flag: int = 0
+    use_observed_temperature_init_flag: int = 0
+    forecast_type_flag: int = 1

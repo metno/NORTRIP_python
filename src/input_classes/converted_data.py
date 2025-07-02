@@ -235,8 +235,8 @@ def convert_input_data_to_consolidated_structure(
     return converted
 
 
-def convert_read_road_dust_input_output(
-    input_data_tuple, nodata: float = -99.0
+def convert_read_road_dust_input(
+    input_data_tuple: tuple, nodata: float = -99.0
 ) -> converted_data:
     """
     Converts the output from read_road_dust_input to consolidated structure.

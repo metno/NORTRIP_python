@@ -8,7 +8,7 @@ from read_files import (
     read_road_dust_paths,
     read_road_dust_input,
 )
-from input_classes.converted_data import convert_read_road_dust_input_output
+from input_classes.converted_data import convert_read_road_dust_input
 from initialise import road_dust_initialise_time, road_dust_initialise_variables
 import logging
 from model_args import create_arg_parser
@@ -52,7 +52,7 @@ def main():
         metadata_input,
     ) = input_data
 
-    converted_data = convert_read_road_dust_input_output(
+    converted_data = convert_read_road_dust_input(
         input_data, nodata=metadata_input.nodata
     )
 
