@@ -4,13 +4,17 @@ Main script for the NORTRIP Road Dust Model in Python.
 
 from importlib.metadata import version
 import constants
+from functions import running_mean_temperature_func
 from read_files import (
     read_road_dust_parameters,
     read_road_dust_paths,
     read_road_dust_input,
 )
-from input_classes.converted_data import convert_read_road_dust_input
-from initialise import road_dust_initialise_time, road_dust_initialise_variables
+from initialise import (
+    road_dust_initialise_time,
+    road_dust_initialise_variables,
+    convert_road_dust_input,
+)
 from calculations import calc_radiation
 import logging
 from model_args import create_arg_parser
@@ -56,9 +60,7 @@ def main():
         metadata_input,
     ) = input_data
 
-    converted_data = convert_read_road_dust_input(
-        input_data, nodata=metadata_input.nodata
-    )
+    converted_data = convert_road_dust_input(input_data, nodata=metadata_input.nodata)
 
     time_config = road_dust_initialise_time(
         converted_data=converted_data,
@@ -99,6 +101,42 @@ def main():
             model_parameters=model_parameters,
             meteorology_data=meteorology_input,
         )
+
+        for tr in range(model_parameters.num_track):
+            if meteorology_input.T_sub_available:
+                model_variables.road_meteo_data[constants.T_sub_index, :, tr, ro] = (
+                    converted_data.meteo_data[constants.T_sub_input_index, :, ro]
+                )
+            else:
+                model_variables.road_meteo_data[constants.T_sub_index, :, tr, ro] = (
+                    running_mean_temperature_func(
+                        converted_data.meteo_data[constants.T_a_index, :, ro],
+                        model_parameters.sub_surf_average_time,
+                        0,
+                        time_config.max_time_inputdata,
+                        time_config.dt,
+                    )
+                )
+
+        logger.info("Starting time loop")
+
+        for tf in range(time_config.min_time, time_config.max_time):
+            if model_flags.forecast_hour == 0:
+                forecast_index = 0
+            else:
+                forecast_index = max(
+                    0, round(model_flags.forecast_hour / time_config.dt - 1)
+                )
+
+            # Print the date
+            if converted_data.date_data[constants.hour_index, tf, ro] == 1:
+                full_date_str = traffic_input.date_str[1, tf]
+                date_str = full_date_str[6:12].strip()
+
+                if forecast_index > 0:
+                    logger.info(f"{date_str} F: {model_flags.forecast_hour}")
+                else:
+                    logger.info(date_str)
 
     logger.info("End of NORTRIP_Control")
 
