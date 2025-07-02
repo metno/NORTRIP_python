@@ -33,6 +33,7 @@ def longwave_in_radiation_func(TC: float, RH: float, n_c: float, P: float) -> fl
 
     # Clear sky emissivity (Konzelman et al. 1994)
     # Convert e_a from Pa to hPa (hectopascals) for the formula
+    # FIXME: Some issue with the formula
     eps_cs = 0.23 + 0.48 * (e_a / 100.0 / TK_a) ** (1.0 / 8.0)
 
     # Cloud emissivity
