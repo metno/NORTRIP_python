@@ -14,6 +14,8 @@ from initialise import (
     road_dust_initialise_time,
     road_dust_initialise_variables,
     convert_road_dust_input,
+    set_activity_data_v2,
+    activity_state,
 )
 from calculations import calc_radiation
 import logging
@@ -87,6 +89,9 @@ def main():
         # Does nothing for now
         NORTRIP_fortran_control()
 
+    # Initialize activity state for tracking maintenance activities
+    state = activity_state()
+
     # Main model loop
 
     for ro in range(constants.n_roads):
@@ -137,6 +142,30 @@ def main():
                     logger.info(f"{date_str} F: {model_flags.forecast_hour}")
                 else:
                     logger.info(date_str)
+
+            for ti in range(tf, tf + forecast_index + 1):
+                if ti <= time_config.max_time:
+                    # Use road maintenance activity rules to determine activities
+                    set_activity_data_v2(
+                        ti=ti,
+                        ro=ro,
+                        time_config=time_config,
+                        converted_data=converted_data,
+                        model_variables=model_variables,
+                        model_flags=model_flags,
+                        model_activities=model_activities,
+                        model_parameters=model_parameters,
+                        state=state,
+                    )
+
+                    # Loop through the tracks. Future development since num_track=1
+                    for tr in range(model_parameters.num_track):
+                        # Calculate road surface conditions
+                        # road_dust_surface_wetness_v2 - TODO: Implement this function
+
+                        # Calculate road emissions and dust loading
+                        # road_dust_emission_model_v2 - TODO: Implement this function
+                        pass
 
     logger.info("End of NORTRIP_Control")
 
