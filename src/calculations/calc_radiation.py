@@ -46,42 +46,16 @@ def calc_radiation(
     """
     logger.info("Calculating radiation and running mean temperature")
 
-    # Extract parameters from inputs
-    min_time = time_config.min_time
-    max_time = time_config.max_time
-    nodata = metadata.nodata
-
-    # Get availability flags from meteorology data
-    short_rad_in_available = meteorology_data.short_rad_in_available == 1
-    cloud_cover_available = meteorology_data.cloud_cover_available == 1
-    long_rad_in_available = meteorology_data.long_rad_in_available == 1
-
     # Set search window in hours for calculating cloud cover
     dti = 11
 
     # Set the short wave calculation offset
     dt_day_sw = 0  # -dt_hour/2/24 - set in metadata file
 
-    # Extract location parameters from metadata
-    LAT = metadata.LAT
-    LON = metadata.LON
-    DIFUTC_H = metadata.DIFUTC_H
-    Z_SURF = metadata.Z_SURF
-    albedo_road = metadata.albedo_road
-    Pressure = metadata.Pressure
-
-    # Extract offsets from initial data
-    RH_offset = initial_data.RH_offset
-    T_a_offset = initial_data.T_2m_offset  # Using T_2m_offset as T_a_offset
-    long_rad_in_offset = initial_data.long_rad_in_offset
-
-    # Extract canyon parameters from metadata
-    b_road = metadata.b_road
-    b_canyon = metadata.b_canyon
-    h_canyon = metadata.h_canyon
-    ang_road = metadata.ang_road
-
-    # Extract flags
+    # Extract flags and convert to boolean
+    short_rad_in_available = meteorology_data.short_rad_in_available == 1
+    cloud_cover_available = meteorology_data.cloud_cover_available == 1
+    long_rad_in_available = meteorology_data.long_rad_in_available == 1
     canyon_shadow_flag = model_flags.canyon_shadow_flag
     canyon_long_rad_flag = model_flags.canyon_long_rad_flag
 
@@ -99,37 +73,42 @@ def calc_radiation(
     # Loop over roads (currently only ro=0 is used)
     for ro in range(constants.n_roads):
         # Add RH and temperature offset
-        for ti in range(min_time, max_time + 1):
+        for ti in range(time_config.min_time, time_config.max_time + 1):
             # Apply RH offset and clamp to 0-100%
-            rh_value = converted_data.meteo_data[constants.RH_index, ti, ro] + RH_offset
+            rh_value = (
+                converted_data.meteo_data[constants.RH_index, ti, ro]
+                + initial_data.RH_offset
+            )
             converted_data.meteo_data[constants.RH_index, ti, ro] = max(
                 0, min(100, rh_value)
             )
 
             # Apply temperature offset
-            converted_data.meteo_data[constants.T_a_index, ti, ro] += T_a_offset
+            converted_data.meteo_data[constants.T_a_index, ti, ro] += (
+                initial_data.T_2m_offset
+            )
 
         # Set initial cloud cover to default value if no data available
         cloud_cover_default = 0.5
-        if not cloud_cover_available:
-            for ti in range(min_time, max_time + 1):
+        if not (meteorology_data.cloud_cover_available == 1):
+            for ti in range(time_config.min_time, time_config.max_time + 1):
                 converted_data.meteo_data[constants.cloud_cover_index, ti, ro] = (
                     cloud_cover_default
                 )
 
         # Calculate short wave net radiation when global radiation is available
-        for ti in range(min_time, max_time + 1):
-            if short_rad_in_available:
+        for ti in range(time_config.min_time, time_config.max_time + 1):
+            if meteorology_data.short_rad_in_available == 1:
                 short_rad_net_value = converted_data.meteo_data[
                     constants.short_rad_in_index, ti, ro
-                ] * (1 - albedo_road)
+                ] * (1 - metadata.albedo_road)
                 for tr in range(model_parameters.num_track):
                     model_variables.road_meteo_data[
                         constants.short_rad_net_index, ti, tr, ro
                     ] = short_rad_net_value
 
             # Calculate short wave net radiation when global radiation is not available
-            if not short_rad_in_available:
+            if not (meteorology_data.short_rad_in_available == 1):
                 datenum_value = (
                     converted_data.date_data[constants.datenum_index, ti, 0] + dt_day_sw
                 )
@@ -139,13 +118,13 @@ def calc_radiation(
 
                 short_rad_net_temp, azimuth_ang[ti], zenith_ang[ti] = (
                     global_radiation_func(
-                        LAT,
-                        LON,
+                        metadata.LAT,
+                        metadata.LON,
                         datenum_value,
-                        DIFUTC_H,
-                        Z_SURF,
+                        metadata.DIFUTC_H,
+                        metadata.Z_SURF,
                         cloud_cover_value,
-                        albedo_road,
+                        metadata.albedo_road,
                     )
                 )
 
@@ -160,14 +139,26 @@ def calc_radiation(
             )
 
             short_rad_clearsky, azimuth_ang[ti], zenith_ang[ti] = global_radiation_func(
-                LAT, LON, datenum_value, DIFUTC_H, Z_SURF, 0.0, 0.0
+                metadata.LAT,
+                metadata.LON,
+                datenum_value,
+                metadata.DIFUTC_H,
+                metadata.Z_SURF,
+                0.0,
+                0.0,
             )
             converted_data.meteo_data[constants.short_rad_in_clearsky_index, ti, ro] = (
                 short_rad_clearsky
             )
 
             short_rad_net_clearsky, _, _ = global_radiation_func(
-                LAT, LON, datenum_value, DIFUTC_H, Z_SURF, 0.0, albedo_road
+                metadata.LAT,
+                metadata.LON,
+                datenum_value,
+                metadata.DIFUTC_H,
+                metadata.Z_SURF,
+                0.0,
+                metadata.albedo_road,
             )
             for tr in range(model_parameters.num_track):
                 model_variables.road_meteo_data[
@@ -177,10 +168,10 @@ def calc_radiation(
         # Calculate cloud cover when cloud cover is not available and global is available
         if not cloud_cover_available and short_rad_in_available:
             # Calculate running means to calculate cloud cover per hour
-            for ti in range(min_time, max_time + 1):
+            for ti in range(time_config.min_time, time_config.max_time + 1):
                 tr = 0  # Use first track for cloud cover calculation
-                ti1 = max(ti - dti, min_time)
-                ti2 = min(ti + dti, max_time)
+                ti1 = max(ti - dti, time_config.min_time)
+                ti2 = min(ti + dti, time_config.max_time)
                 ti_num = ti2 - ti1 + 1
 
                 short_rad_net_rmean[ti] = 0.0
@@ -214,14 +205,14 @@ def calc_radiation(
                 )
 
         elif not cloud_cover_available:
-            for ti in range(min_time, max_time + 1):
+            for ti in range(time_config.min_time, time_config.max_time + 1):
                 converted_data.meteo_data[constants.cloud_cover_index, ti, ro] = (
                     cloud_cover_default
                 )
 
         # Calculate incoming long wave radiation
         if not long_rad_in_available:
-            for ti in range(min_time, max_time + 1):
+            for ti in range(time_config.min_time, time_config.max_time + 1):
                 T_air = converted_data.meteo_data[constants.T_a_index, ti, ro]
                 RH = converted_data.meteo_data[constants.RH_index, ti, ro]
                 cloud_cover_val = converted_data.meteo_data[
@@ -229,24 +220,26 @@ def calc_radiation(
                 ]
 
                 longwave_in = longwave_in_radiation_func(
-                    T_air, RH, cloud_cover_val, Pressure
+                    T_air, RH, cloud_cover_val, metadata.Pressure
                 )
                 converted_data.meteo_data[constants.long_rad_in_index, ti, ro] = (
-                    longwave_in + long_rad_in_offset
+                    longwave_in + initial_data.long_rad_in_offset
                 )
 
         # Calculate the shadow fraction
         if canyon_shadow_flag:
             tau_cs_diffuse = 0.2
-            h_canyon_temp = [max(0.001, h) for h in h_canyon]  # Avoid division by 0
+            h_canyon_temp = [
+                max(0.001, h) for h in metadata.h_canyon
+            ]  # Avoid division by 0
 
-            for ti in range(min_time, max_time + 1):
+            for ti in range(time_config.min_time, time_config.max_time + 1):
                 shadow_fraction[ti] = road_shading_func(
                     azimuth_ang[ti],
                     zenith_ang[ti],
-                    ang_road,
-                    b_road,
-                    b_canyon,
+                    metadata.ang_road,
+                    metadata.b_road,
+                    metadata.b_canyon,
                     h_canyon_temp,
                 )
 
@@ -271,8 +264,10 @@ def calc_radiation(
         # Canyon building facade contribution to longwave radiation
         if canyon_long_rad_flag:
             # This is based on the integral of a cylinder of height h_canyon
-            h_canyon_temp = max(0.001, float(np.mean(h_canyon)))  # Avoid division by 0
-            theta = np.arctan(h_canyon_temp * 2 / b_canyon)
+            h_canyon_temp = max(
+                0.001, float(np.mean(metadata.h_canyon))
+            )  # Avoid division by 0
+            theta = np.arctan(h_canyon_temp * 2 / metadata.b_canyon)
             canyon_fraction = (
                 1 - np.cos(2 * theta / 2)
             ) / 2  # factor 2 for theta to get an average
@@ -280,7 +275,7 @@ def calc_radiation(
             sigma = 5.67e-8
             T0C = 273.15
 
-            for ti in range(min_time, max_time + 1):
+            for ti in range(time_config.min_time, time_config.max_time + 1):
                 T_air = converted_data.meteo_data[constants.T_a_index, ti, ro]
                 long_rad_canyon[ti] = sigma * (T0C + T_air) ** 4
 
