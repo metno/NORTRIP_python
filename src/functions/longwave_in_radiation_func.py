@@ -23,18 +23,21 @@ def longwave_in_radiation_func(TC: float, RH: float, n_c: float, P: float) -> fl
     sigma = 5.67e-8
 
     # Calculate saturation vapor pressure and related quantities
-    esat, qsat, s = q_sat_func(TC, P)
+    esat, qsat, d_qsat_dT = q_sat_func(TC, P)
 
     # Actual vapor pressure
-    e_a = esat * RH / 100.0
+    # The Python q_sat_func returns esat in Pa, but we need to work in hPa like MATLAB
+    # In MATLAB: e_a = esat * RH / 100, where esat is in hPa
+    esat_hPa = esat / 100.0  # Convert from Pa to hPa
+    e_a = esat_hPa * RH / 100.0  # e_a in hPa
 
     # Air temperature in Kelvin
     TK_a = T0C + TC
 
     # Clear sky emissivity (Konzelman et al. 1994)
-    # Convert e_a from Pa to hPa (hectopascals) for the formula
-    # FIXME: Some issue with the formula
-    eps_cs = 0.23 + 0.48 * (e_a / 100.0 / TK_a) ** (1.0 / 8.0)
+    # MATLAB: eps_cs=0.23+0.48*(e_a*100/TK_a)^(1/8)
+    # where e_a is in hPa, so e_a*100 converts it to Pa for the formula
+    eps_cs = 0.23 + 0.48 * (e_a * 100.0 / TK_a) ** (1.0 / 8.0)
 
     # Cloud emissivity
     eps_cl = 0.97

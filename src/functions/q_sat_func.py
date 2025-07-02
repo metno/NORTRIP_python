@@ -7,27 +7,36 @@ def q_sat_func(TC: float, P: float) -> tuple[float, float, float]:
 
     Args:
         TC: Temperature in Celsius
-        P: Pressure in Pa
+        P: Pressure in Pa (converted from hPa/mbar internally)
 
     Returns:
-        tuple: (esat, qsat, s) where:
+        tuple: (esat, qsat, d_qsat_dT) where:
             esat: Saturation vapor pressure in Pa
             qsat: Saturation specific humidity in kg/kg
-            s: Slope of saturation vapor pressure curve in Pa/K
+            d_qsat_dT: Temperature derivative of qsat in kg/kg/K
     """
     # Constants for Magnus formula
     a = 6.1121
     b = 17.67
     c = 243.5
 
-    # Saturation vapor pressure (Magnus formula) in Pa
-    esat = a * np.exp(b * TC / (c + TC))
+    # Convert pressure from Pa to hPa for calculations (MATLAB uses hPa/mbar)
+    P_hPa = P / 100.0
+
+    # Saturation vapor pressure (Magnus formula) in hPa
+    esat_hPa = a * np.exp(b * TC / (c + TC))
+
+    # Convert back to Pa for consistency
+    esat = esat_hPa * 100.0
 
     # Saturation specific humidity (Clausius-Clapeyron)
-    # q = 0.622 * e / (P - 0.378 * e)
-    qsat = 0.622 * esat / (P - 0.378 * esat)
+    # Using hPa for pressure in this calculation as in MATLAB
+    qsat = 0.622 * esat_hPa / (P_hPa - 0.378 * esat_hPa)
 
-    # Slope of saturation vapor pressure curve (Pa/K)
-    s = esat * b * c / ((c + TC) ** 2)
+    # Temperature derivative of saturation vapor pressure (hPa/K)
+    d_esat_dT_hPa = esat_hPa * b * c / ((c + TC) ** 2)
 
-    return esat, qsat, s
+    # Temperature derivative of saturation specific humidity (kg/kg/K)
+    d_qsat_dT = 0.622 * P_hPa / ((P_hPa - 0.378 * esat_hPa) ** 2) * d_esat_dT_hPa
+
+    return esat, qsat, d_qsat_dT
