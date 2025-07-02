@@ -239,7 +239,7 @@ def convert_read_road_dust_input_output(
     input_data_tuple, nodata: float = -99.0
 ) -> converted_data:
     """
-    Convenience function to convert the output from read_road_dust_input to consolidated structure.
+    Converts the output from read_road_dust_input to consolidated structure.
 
     Args:
         input_data_tuple: Tuple returned from read_road_dust_input containing:

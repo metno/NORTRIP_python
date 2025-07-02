@@ -5,7 +5,7 @@ from initialise.road_dust_initialise_time import (
     _parse_date_string,
     _find_time_index,
 )
-from input_classes import input_metadata
+from input_classes import converted_data, input_metadata
 import constants
 
 
@@ -114,11 +114,16 @@ def test_road_dust_initialise_time_basic():
             current_date.toordinal() + 366 + current_date.hour / 24.0
         )
 
+    # Create converted_data object
+    data = converted_data()
+    data.date_data = date_data
+    data.n_date = n_date
+
     # Create metadata
     metadata = input_metadata()
 
     # Test without any date restrictions
-    config = road_dust_initialise_time(date_data, n_date, metadata)
+    config = road_dust_initialise_time(data, metadata)
 
     assert config.min_time == 0
     assert config.max_time == n_date - 1
@@ -151,6 +156,11 @@ def test_road_dust_initialise_time_with_date_restrictions():
             current_date.toordinal() + 366 + current_date.hour / 24.0
         )
 
+    # Create converted_data object
+    data = converted_data()
+    data.date_data = date_data
+    data.n_date = n_date
+
     # Create metadata with date restrictions
     metadata = input_metadata()
     metadata.start_date_str = "2023-03-15 08:00:00"
@@ -158,7 +168,7 @@ def test_road_dust_initialise_time_with_date_restrictions():
     metadata.start_date_save_str = "2023-03-15 10:00:00"
     metadata.end_date_save_str = "2023-03-15 14:00:00"
 
-    config = road_dust_initialise_time(date_data, n_date, metadata)
+    config = road_dust_initialise_time(data, metadata)
 
     assert config.min_time == 8
     assert config.max_time == 16
@@ -187,11 +197,16 @@ def test_road_dust_initialise_time_invalid_dates():
             current_date.toordinal() + 366 + current_date.hour / 24.0
         )
 
+    # Create converted_data object
+    data = converted_data()
+    data.date_data = date_data
+    data.n_date = n_date
+
     # Create metadata with invalid start date
     metadata = input_metadata()
     metadata.start_date_str = "2023-03-16 10:00:00"  # Date not in data
 
-    config = road_dust_initialise_time(date_data, n_date, metadata)
+    config = road_dust_initialise_time(data, metadata)
 
     assert config.time_bad == 1
 
@@ -216,15 +231,18 @@ def test_road_dust_initialise_time_fortran_flag():
             current_date.toordinal() + 366 + current_date.hour / 24.0
         )
 
+    # Create converted_data object
+    data = converted_data()
+    data.date_data = date_data
+    data.n_date = n_date
+
     # Create metadata with date restrictions
     metadata = input_metadata()
     metadata.start_date_str = "2023-03-15 12:00:00"
     metadata.end_date_str = "2023-03-15 15:00:00"
 
     # Test with fortran flag (should override date restrictions)
-    config = road_dust_initialise_time(
-        date_data, n_date, metadata, use_fortran_flag=True
-    )
+    config = road_dust_initialise_time(data, metadata, use_fortran_flag=True)
 
     assert config.min_time == 0
     assert config.max_time == n_date - 1
@@ -251,13 +269,18 @@ def test_road_dust_initialise_time_subdate():
             current_date.toordinal() + 366 + current_date.hour / 24.0
         )
 
+    # Create converted_data object
+    data = converted_data()
+    data.date_data = date_data
+    data.n_date = n_date
+
     # Create metadata with subdates
     metadata = input_metadata()
     metadata.n_save_subdate = 2
     metadata.start_subdate_save_str = ["2023-03-15 06:00:00", "2023-03-15 18:00:00"]
     metadata.end_subdate_save_str = ["2023-03-15 12:00:00", "2023-03-15 22:00:00"]
 
-    config = road_dust_initialise_time(date_data, n_date, metadata)
+    config = road_dust_initialise_time(data, metadata)
 
     assert len(config.min_subtime_save) == 2
     assert len(config.max_subtime_save) == 2
@@ -283,10 +306,15 @@ def test_road_dust_initialise_time_single_timestep():
     date_data[constants.minute_index, 0, 0] = 0
     date_data[constants.datenum_index, 0, 0] = 738611.416667  # Example datenum
 
+    # Create converted_data object
+    data = converted_data()
+    data.date_data = date_data
+    data.n_date = n_date
+
     # Create metadata
     metadata = input_metadata()
 
-    config = road_dust_initialise_time(date_data, n_date, metadata)
+    config = road_dust_initialise_time(data, metadata)
 
     assert config.min_time == 0
     assert config.max_time == 0

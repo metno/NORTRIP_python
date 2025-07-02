@@ -57,8 +57,7 @@ def main():
     )
 
     time_config = road_dust_initialise_time(
-        date_data=converted_data.date_data,
-        n_date=converted_data.n_date,
+        converted_data=converted_data,
         metadata=metadata_input,
         use_fortran_flag=False,
     )

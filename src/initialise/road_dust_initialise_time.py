@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import logging
 import constants
-from input_classes import input_metadata
+from input_classes import converted_data, input_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -115,8 +115,7 @@ def _find_time_index(
 
 
 def road_dust_initialise_time(
-    date_data: np.ndarray,
-    n_date: int,
+    converted_data: converted_data,
     metadata: input_metadata,
     use_fortran_flag: bool = False,
 ) -> time_config:
@@ -126,8 +125,7 @@ def road_dust_initialise_time(
     This function sets the time loop indices, time step, and parses start/end dates from metadata.
 
     Args:
-        date_data: Date data array with shape [num_date_index, n_date, n_roads]
-        n_date: Number of time steps in the data
+        converted_data: Converted data containing intitalised input data
         metadata: Metadata containing date strings and other parameters
         use_fortran_flag: If True, always run all the data
 
@@ -142,15 +140,17 @@ def road_dust_initialise_time(
 
     # Set time loop index
     config.min_time = 0
-    config.max_time = n_date - 1  # 0-based indexing: last valid index is n_date - 1
-    config.max_time_inputdata = n_date - 1
+    config.max_time = (
+        converted_data.n_date - 1
+    )  # 0-based indexing: last valid index is n_date - 1
+    config.max_time_inputdata = converted_data.n_date - 1
 
     # Set time step for iteration based on the first time step of the input data
-    if n_date > 1:
+    if converted_data.n_date > 1:
         config.dt = np.round(
             (
-                date_data[constants.datenum_index, 1, 0]
-                - date_data[constants.datenum_index, 0, 0]
+                converted_data.date_data[constants.datenum_index, 1, 0]
+                - converted_data.date_data[constants.datenum_index, 0, 0]
             )
             * 24,
             decimals=6,
@@ -164,7 +164,7 @@ def road_dust_initialise_time(
     # Set start and end dates based on date string (if specified in metadata)
     if metadata.start_date_str:
         Y, M, D, H, MN, S = _parse_date_string(metadata.start_date_str)
-        rstart = _find_time_index(Y, M, D, H, date_data)
+        rstart = _find_time_index(Y, M, D, H, converted_data.date_data)
         if rstart != -1:
             config.min_time = rstart
         else:
@@ -174,7 +174,7 @@ def road_dust_initialise_time(
 
     if metadata.end_date_str:
         Y, M, D, H, MN, S = _parse_date_string(metadata.end_date_str)
-        rend = _find_time_index(Y, M, D, H, date_data)
+        rend = _find_time_index(Y, M, D, H, converted_data.date_data)
         if rend != -1:
             config.max_time = rend
         else:
@@ -185,7 +185,7 @@ def road_dust_initialise_time(
     # Set start and end dates for plotting and saving based on date string (if specified)
     if metadata.start_date_save_str:
         Y, M, D, H, MN, S = _parse_date_string(metadata.start_date_save_str)
-        rstart = _find_time_index(Y, M, D, H, date_data)
+        rstart = _find_time_index(Y, M, D, H, converted_data.date_data)
         if rstart != -1:
             config.min_time_save = rstart
         else:
@@ -197,7 +197,7 @@ def road_dust_initialise_time(
 
     if metadata.end_date_save_str:
         Y, M, D, H, MN, S = _parse_date_string(metadata.end_date_save_str)
-        rend = _find_time_index(Y, M, D, H, date_data)
+        rend = _find_time_index(Y, M, D, H, converted_data.date_data)
         if rend != -1:
             config.max_time_save = rend
         else:
@@ -217,7 +217,7 @@ def road_dust_initialise_time(
             if i_subdate < len(metadata.start_subdate_save_str):
                 start_subdate_str = metadata.start_subdate_save_str[i_subdate]
                 Y, M, D, H, MN, S = _parse_date_string(start_subdate_str)
-                rstart = _find_time_index(Y, M, D, H, date_data)
+                rstart = _find_time_index(Y, M, D, H, converted_data.date_data)
                 if rstart != -1:
                     config.min_subtime_save.append(rstart)
                 else:
@@ -231,7 +231,7 @@ def road_dust_initialise_time(
             if i_subdate < len(metadata.end_subdate_save_str):
                 end_subdate_str = metadata.end_subdate_save_str[i_subdate]
                 Y, M, D, H, MN, S = _parse_date_string(end_subdate_str)
-                rend = _find_time_index(Y, M, D, H, date_data)
+                rend = _find_time_index(Y, M, D, H, converted_data.date_data)
                 if rend != -1:
                     config.max_subtime_save.append(rend)
                 else:
@@ -244,7 +244,7 @@ def road_dust_initialise_time(
     # Always run all the data when using fortran
     if use_fortran_flag:
         config.min_time = 0
-        config.max_time = n_date - 1
+        config.max_time = converted_data.n_date - 1
 
     logger.info("Time configuration initialised.")
 
