@@ -12,7 +12,6 @@ from initialise.road_dust_initialise_time import time_config
 from initialise.road_dust_initialise_variables import model_variables
 from input_classes import converted_data, input_activity, input_metadata
 from config_classes import (
-    model_activities,
     model_parameters,
     model_flags,
 )
