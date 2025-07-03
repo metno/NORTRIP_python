@@ -1,4 +1,9 @@
-def f_susroad_func(f_0_susroad: float, V_veh: float, a_sus: list) -> float:
+import numpy as np
+
+
+def f_susroad_func(
+    f_0_susroad: np.ndarray, V_veh: float, a_sus: np.ndarray
+) -> np.ndarray:
     """
     Vehicle speed dependence function for suspension.
 

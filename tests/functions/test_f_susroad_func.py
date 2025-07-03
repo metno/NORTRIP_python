@@ -1,13 +1,14 @@
 from src.functions.f_susroad_func import f_susroad_func
+import numpy as np
 
 
 def test_f_susroad_func():
     """Test vehicle speed dependence function for suspension."""
 
     # Test basic case
-    f_0_susroad = 0.5
+    f_0_susroad = np.array(0.5)
     V_veh = 60.0
-    a_sus = [0.2, 0.8, 2.0, 50.0, 10.0]  # [a1, a2, a3, a4, a5]
+    a_sus = np.array([0.2, 0.8, 2.0, 50.0, 10.0])  # [a1, a2, a3, a4, a5]
 
     result = f_susroad_func(f_0_susroad, V_veh, a_sus)
 
@@ -20,7 +21,7 @@ def test_f_susroad_func():
     assert result >= 0
 
     # Test with zero base factor
-    result_zero = f_susroad_func(0.0, V_veh, a_sus)
+    result_zero = f_susroad_func(np.array(0.0), V_veh, a_sus)
     assert result_zero == 0.0
 
     # Test with zero vehicle speed
@@ -31,8 +32,8 @@ def test_f_susroad_func():
 def test_f_susroad_func_speed_limits():
     """Test speed limit handling (a5 parameter)."""
 
-    f_0_susroad = 1.0
-    a_sus = [0.1, 1.0, 1.5, 80.0, 30.0]  # a5 = 30.0 is minimum speed
+    f_0_susroad = np.array(1.0)
+    a_sus = np.array([0.1, 1.0, 1.5, 80.0, 30.0])  # a5 = 30.0 is minimum speed
 
     # Test with speed below minimum (should use minimum)
     V_veh_low = 20.0  # Below a5
@@ -56,10 +57,10 @@ def test_f_susroad_func_speed_limits():
 def test_f_susroad_func_negative_h_V():
     """Test case where h_V calculation could be negative."""
 
-    f_0_susroad = 0.8
+    f_0_susroad = np.array(0.8)
     V_veh = 10.0
     # Choose coefficients that could give negative h_V
-    a_sus = [-0.5, 0.2, 2.0, 100.0, 5.0]  # Negative a1
+    a_sus = np.array([-0.5, 0.2, 2.0, 100.0, 5.0])  # Negative a1
 
     result = f_susroad_func(f_0_susroad, V_veh, a_sus)
 
@@ -70,23 +71,23 @@ def test_f_susroad_func_negative_h_V():
 def test_f_susroad_func_parameter_effects():
     """Test effects of different parameters."""
 
-    f_0_susroad = 1.0
+    f_0_susroad = np.array(1.0)
     V_veh = 50.0
-    base_a_sus = [0.1, 0.5, 2.0, 60.0, 20.0]
+    base_a_sus = np.array([0.1, 0.5, 2.0, 60.0, 20.0])
 
     # Test effect of a1 (offset)
-    a_sus_high_a1 = [0.5, 0.5, 2.0, 60.0, 20.0]  # Higher a1
+    a_sus_high_a1 = np.array([0.5, 0.5, 2.0, 60.0, 20.0])  # Higher a1
     result_base = f_susroad_func(f_0_susroad, V_veh, base_a_sus)
     result_high_a1 = f_susroad_func(f_0_susroad, V_veh, a_sus_high_a1)
     assert result_high_a1 > result_base
 
     # Test effect of a2 (scaling factor)
-    a_sus_high_a2 = [0.1, 1.0, 2.0, 60.0, 20.0]  # Higher a2
+    a_sus_high_a2 = np.array([0.1, 1.0, 2.0, 60.0, 20.0])  # Higher a2
     result_high_a2 = f_susroad_func(f_0_susroad, V_veh, a_sus_high_a2)
     assert result_high_a2 > result_base
 
     # Test effect of a3 (exponent)
-    a_sus_high_a3 = [0.1, 0.5, 3.0, 60.0, 20.0]  # Higher a3
+    a_sus_high_a3 = np.array([0.1, 0.5, 3.0, 60.0, 20.0])  # Higher a3
     result_high_a3 = f_susroad_func(f_0_susroad, V_veh, a_sus_high_a3)
     # Effect depends on whether speed ratio is above or below 1
     assert result_high_a3 >= 0
@@ -95,8 +96,8 @@ def test_f_susroad_func_parameter_effects():
 def test_f_susroad_func_speed_scaling():
     """Test speed scaling behavior."""
 
-    f_0_susroad = 1.0
-    a_sus = [0.0, 1.0, 1.0, 50.0, 10.0]  # Simple linear relationship
+    f_0_susroad = np.array(1.0)
+    a_sus = np.array([0.0, 1.0, 1.0, 50.0, 10.0])  # Simple linear relationship
 
     speeds = [20.0, 40.0, 60.0, 80.0]
     results = []
@@ -109,3 +110,59 @@ def test_f_susroad_func_speed_scaling():
     # (when speed > reference speed a4)
     for i in range(len(results)):
         assert results[i] >= 0
+
+
+def test_f_susroad_func_basic():
+    """Test f_susroad_func with typical values."""
+    f_0_susroad = np.array([0.1, 0.2])
+    V_veh = 50.0
+    a_sus = np.array([0.5, 1.5, 2.0, 80.0, 10.0])
+
+    expected_h_V = 0.5 + 1.5 * (50.0 / 80.0) ** 2.0
+    expected_f = f_0_susroad * expected_h_V
+
+    result = f_susroad_func(f_0_susroad, V_veh, a_sus)
+
+    np.testing.assert_allclose(result, expected_f)
+
+
+def test_f_susroad_func_negative_term():
+    """Test f_susroad_func when the h_V calculation results in a negative value."""
+    f_0_susroad = np.array([0.1, 0.2])
+    V_veh = 20.0
+    a_sus = np.array([-2.0, 1.5, 2.0, 80.0, 10.0])
+
+    expected_f = np.array([0.0, 0.0])
+
+    result = f_susroad_func(f_0_susroad, V_veh, a_sus)
+
+    np.testing.assert_allclose(result, expected_f)
+
+
+def test_f_susroad_func_low_velocity():
+    """Test f_susroad_func when vehicle velocity is lower than V_min."""
+    f_0_susroad = np.array([0.1, 0.2])
+    V_veh = 5.0
+    a_sus = np.array([0.5, 1.5, 2.0, 80.0, 10.0])
+
+    expected_h_V = 0.5 + 1.5 * (10.0 / 80.0) ** 2.0
+    expected_f = f_0_susroad * expected_h_V
+
+    result = f_susroad_func(f_0_susroad, V_veh, a_sus)
+
+    np.testing.assert_allclose(result, expected_f)
+
+
+def test_f_susroad_func_zero_velocity():
+    """Test f_susroad_func with zero vehicle velocity."""
+    f_0_susroad = np.array([0.5, 1.0])
+    V_veh = 0.0
+    a_sus = np.array([0.5, 1.5, 2.0, 80.0, 10.0])
+
+    # V_veh (0) < V_min (10), so V_min is used.
+    expected_h_V = 0.5 + 1.5 * (10.0 / 80.0) ** 2.0
+    expected_f = f_0_susroad * expected_h_V
+
+    result = f_susroad_func(f_0_susroad, V_veh, a_sus)
+
+    np.testing.assert_allclose(result, expected_f)

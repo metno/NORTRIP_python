@@ -6,7 +6,7 @@ def w_func(
     h_pave: float,
     h_dc: float,
     V_veh: float,
-    a_wear: list,
+    a_wear: np.ndarray,
     s_road: float,
     s_roadwear_thresh: float,
     s: int,

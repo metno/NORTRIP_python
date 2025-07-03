@@ -4,6 +4,7 @@ Main script for the NORTRIP Road Dust Model in Python.
 
 from importlib.metadata import version
 import constants
+import copy
 from functions import running_mean_temperature_func
 from read_files import (
     read_road_dust_parameters,
@@ -20,8 +21,10 @@ from calculations import (
     road_dust_surface_wetness,
     set_activity_data,
     activity_state,
+    road_dust_emission_model,
 )
 import logging
+import numpy as np
 from model_args import create_arg_parser
 from fortran import NORTRIP_fortran_control
 
@@ -91,6 +94,12 @@ def main():
         model_parameters=model_parameters,
         model_flags=model_flags,
     )
+
+    # Make a deep copy for later comparison
+    logger.info(
+        "--- Making a deep copy of model variables for comparison after loop ---"
+    )
+    model_variables_before_loop = copy.deepcopy(model_variables)
 
     if use_fortran:
         # Does nothing for now
@@ -183,7 +192,57 @@ def main():
                         )
 
                         # Calculate road emissions and dust loading
-                        # road_dust_emission_model_v2 - TODO: Implement this function
+                        road_dust_emission_model(
+                            ti=ti,
+                            tr=tr,
+                            ro=ro,
+                            time_config=time_config,
+                            converted_data=converted_data,
+                            model_variables=model_variables,
+                            model_parameters=model_parameters,
+                            model_flags=model_flags,
+                            metadata=metadata_input,
+                            initial_data=initial_input,
+                            airquality_data=airquality_input,
+                        )
+
+    logger.info("--- Comparing model variables before and after main loop ---")
+    for attr in sorted(vars(model_variables).keys()):
+        val_before = getattr(model_variables_before_loop, attr)
+        val_after = getattr(model_variables, attr)
+
+        if isinstance(val_after, np.ndarray):
+            is_float = np.issubdtype(val_after.dtype, np.floating)
+            if is_float:
+                are_equal = np.allclose(val_before, val_after, equal_nan=True)
+            else:
+                are_equal = np.array_equal(val_before, val_after)
+
+            if not are_equal:
+                logger.info(f"'{attr}' has changed.")
+
+                if is_float:
+                    changed_indices = np.where(
+                        ~np.isclose(val_before, val_after, equal_nan=True)
+                    )
+                else:
+                    changed_indices = np.where(val_before != val_after)
+
+                num_changes_to_show = min(5, len(changed_indices[0]))
+                if num_changes_to_show > 0:
+                    logger.info(
+                        f"  Showing up to {num_changes_to_show} changes for '{attr}':"
+                    )
+                    for i in range(num_changes_to_show):
+                        idx = tuple(dim[i] for dim in changed_indices)
+                        val_b = val_before[idx]
+                        val_a = val_after[idx]
+
+                        if is_float:
+                            logger.info(f"    Index {idx}: {val_b:.4f} -> {val_a:.4f}")
+                        else:
+                            logger.info(f"    Index {idx}: {val_b} -> {val_a}")
+    logger.info("-------------------------------------------------------------")
 
     logger.info("End of NORTRIP_Control")
 
