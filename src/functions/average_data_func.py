@@ -46,7 +46,7 @@ def average_data_func(
     av_val = np.array([])
 
     # Convert MATLAB datenum to Python datetime for processing
-    def matlab_datenum_to_datetime(datenum):
+    def matlab_datenum_to_datetime(datenum: float) -> datetime:
         """Convert MATLAB datenum to Python datetime."""
         # MATLAB datenum 1 = January 1, year 0000
         # Python datetime reference is January 1, year 1
@@ -54,7 +54,7 @@ def average_data_func(
         days_since_epoch = datenum - 1
         return matlab_epoch + timedelta(days=days_since_epoch)
 
-    def datetime_to_matlab_datenum(dt):
+    def datetime_to_matlab_datenum(dt: datetime) -> float:
         """Convert Python datetime to MATLAB datenum."""
         matlab_epoch = datetime(1, 1, 1)
         delta = dt - matlab_epoch
