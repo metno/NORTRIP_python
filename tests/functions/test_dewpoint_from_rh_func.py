@@ -37,7 +37,9 @@ def test_dewpoint_from_rh_func():
     # Test with array inputs
     TC_array = np.array([0.0, 10.0, 20.0, 30.0])
     RH_array = np.array([50.0, 60.0, 70.0, 80.0])
-    result_array = dewpoint_from_rh_func(TC_array, RH_array)
+    result_array = []
+    for i in range(len(TC_array)):
+        result_array.append(dewpoint_from_rh_func(TC_array[i], RH_array[i]))
 
     # Ensure result is array
     result_array = np.asarray(result_array)
