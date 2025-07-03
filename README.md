@@ -125,7 +125,7 @@ NORTRIP-python/
 │   ├── calculations/       # Core calculation modules
 │   ├── config_classes/     # Configuration classes
 │   ├── constants/          # Physical constants
-│   ├── functions/          # Utility functions
+│   ├── functions/          # Mathematical functions
 │   ├── initialise/         # Initialization modules
 │   ├── input_classes/      # Input data classes
 │   ├── pd_util/           # Pandas utilities

@@ -80,7 +80,7 @@ def average_data_func(
         hourly_dates = []
         hourly_vals = []
 
-        while current_hour <= end_date + timedelta(hours=1):
+        while current_hour < end_date + timedelta(hours=1):
             next_hour = current_hour + timedelta(hours=1)
 
             # Find data within this hour

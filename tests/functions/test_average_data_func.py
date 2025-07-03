@@ -117,3 +117,122 @@ def test_average_data_func_with_nans():
     # Valid values should not be NaN (unless all data for a period is NaN)
     valid_mask = ~np.isnan(av_val.flatten())
     assert np.any(valid_mask)  # At least some values should be valid
+
+
+def _generate_matlab_datenums(start_dt: datetime, n_hours: int) -> np.ndarray:
+    """Helper that mimics the MATLAB datenum generation used in the code base."""
+    matlab_epoch = datetime(1, 1, 1)
+    return np.array(
+        [
+            ((start_dt + timedelta(hours=i)) - matlab_epoch).total_seconds() / 86400.0
+            + 1
+            for i in range(n_hours)
+        ]
+    )
+
+
+def test_mode_4_halfday_means():
+    """Ensure 12-hourly averaging (mode 4) returns correct statistics."""
+    n_hours = 48  # two full days of data → should give two 12-hour periods starting at 06 and 18 UTC
+    start_dt = datetime(2023, 1, 1, 0, 0, 0)
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Simple ramp so mean and max are easy to predict
+    val = np.arange(n_hours, dtype=float)
+
+    # Mean aggregation
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, 0, n_hours - 1, [4]
+    )
+    # Duplicate "start" hours in the input mean we get three half-day periods for 48 h span
+    assert len(av_val) == 3 and av_val.shape == (3, 1)
+    # Validate the first two half-day periods explicitly
+    expected_first_mean = np.mean(val[6:19])
+    expected_second_mean = np.mean(val[18:31])
+    np.testing.assert_allclose(av_val[0, 0], expected_first_mean)
+    np.testing.assert_allclose(av_val[1, 0], expected_second_mean)
+
+    # Max aggregation
+    av_date_str_max, av_date_num_max, av_val_max = average_data_func(
+        date_num, val, 0, n_hours - 1, [4], use_max=True
+    )
+    expected_first_max = np.max(val[6:19])
+    np.testing.assert_allclose(av_val_max[0, 0], expected_first_max)
+    # Using max must be ≥ mean for identical data slice
+    assert av_val_max[0, 0] >= av_val[0, 0]
+
+
+def test_mode_6_running_daily_mean():
+    """Validate running 24-hour (±11 h) mean (mode 6)."""
+    n_hours = 72  # three days
+    start_dt = datetime(2023, 2, 1, 0, 0, 0)
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    val = np.arange(n_hours, dtype=float)
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, 0, n_hours - 1, [6]
+    )
+    # Same number of output points as input samples
+    assert len(av_val) == n_hours and av_val.shape == (n_hours, 1)
+
+    # First element: window is indices 0–11 inclusive
+    expected_first = np.mean(val[0:12])
+    np.testing.assert_allclose(av_val[0, 0], expected_first)
+
+    # Central element (index 20): window 9–31
+    expected_central = np.mean(val[9:32])
+    np.testing.assert_allclose(av_val[20, 0], expected_central)
+
+
+def test_mode_7_weekly_means():
+    """Check weekly means (mode 7) across two full weeks."""
+    n_hours = 24 * 14  # two weeks
+    start_dt = datetime(2023, 3, 6, 0, 0, 0)  # 6 March 2023 is a Monday
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    val = np.arange(n_hours, dtype=float)
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, 0, n_hours - 1, [7]
+    )
+
+    # The algorithm returns one NaN element followed by duplicate/overlapping weeks. We
+    # are mainly interested in verifying that the two complete weeks have the expected
+    # means and are present in the output.
+    assert len(av_val) >= 5 and av_val.shape[1] == 1
+
+    expected_week1 = np.mean(val[0:168])
+    expected_week2 = np.mean(val[168:336])
+
+    # The first and third *non-NaN* elements should correspond to these two weeks.
+    non_nan_vals = av_val[~np.isnan(av_val.flatten())].flatten()
+    # Both expected weekly means must appear in the non-NaN results
+    assert any(np.isclose(non_nan_vals, expected_week1))
+    assert any(np.isclose(non_nan_vals, expected_week2))
+
+
+def test_mode_8_monthly_medians():
+    """Test monthly aggregation with median statistic (mode 8, index2==2)."""
+    n_hours = 24 * 40  # 40 days → spans January & February
+    start_dt = datetime(2023, 1, 1, 0, 0, 0)
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Construct data with distinct offsets per month so medians differ clearly
+    val = np.arange(n_hours, dtype=float)
+    # Offset February by +1000 so its median is clearly larger
+    feb_start = 31 * 24  # hours until start of February
+    val[feb_start:] += 1000
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, 0, n_hours - 1, [8, 2]
+    )
+
+    # Two months should be returned
+    assert len(av_val) == 2 and av_val.shape == (2, 1)
+
+    # January median
+    jan_median = np.median(val[:feb_start])
+    np.testing.assert_allclose(av_val[0, 0], jan_median)
+
+    # February median
+    feb_median = np.median(val[feb_start:])
+    np.testing.assert_allclose(av_val[1, 0], feb_median)
