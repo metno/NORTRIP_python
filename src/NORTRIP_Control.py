@@ -176,7 +176,6 @@ def main():
 
                         # Calculate road emissions and dust loading
                         # road_dust_emission_model_v2 - TODO: Implement this function
-                        pass
 
     logger.info("End of NORTRIP_Control")
 
