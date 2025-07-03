@@ -10,10 +10,10 @@ def r_aero_func_with_stability(
     z_T: float,
     z0: float,
     z0t: float,
-    V_veh: List[float],
-    N_v: List[float],
+    V_veh: np.ndarray,
+    N_v: np.ndarray,
     num_veh: int,
-    a_traffic: List[float],
+    a_traffic: np.ndarray,
 ) -> float:
     """
     Calculate aerodynamic resistance with atmospheric stability corrections.

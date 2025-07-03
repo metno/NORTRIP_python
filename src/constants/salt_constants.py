@@ -33,7 +33,9 @@ B_ANTOINE_ICE = 2600.0
 C_ANTOINE_ICE = 270.0
 
 # Salt-specific Antoine constants
-A_ANTOINE = np.array([7.40, 7.20, 7.28, 5.8, 10.3 * 0.975])  # [Na, Mg, CMA, Ca, PFO]
+A_ANTOINE: np.ndarray = np.array(
+    [7.40, 7.20, 7.28, 5.8, 10.3 * 0.975], dtype=np.float64
+)  # [Na, Mg, CMA, Ca, PFO]
 B_ANTOINE = np.array([1566.0, 1581.0, 1581.0, 1087.0, 2600.0])  # [Na, Mg, CMA, Ca, PFO]
 C_ANTOINE = np.array([228.0, 225.0, 225.0, 198.0, 270.0])  # [Na, Mg, CMA, Ca, PFO]
 

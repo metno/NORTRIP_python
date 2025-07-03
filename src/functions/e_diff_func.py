@@ -1,4 +1,3 @@
-import numpy as np
 from .energy_correction_func import energy_correction_func
 
 

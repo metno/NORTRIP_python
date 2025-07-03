@@ -17,7 +17,7 @@ from initialise import (
     set_activity_data_v2,
     activity_state,
 )
-from calculations import calc_radiation
+from calculations import calc_radiation, road_dust_surface_wetness
 import logging
 from model_args import create_arg_parser
 from fortran import NORTRIP_fortran_control
@@ -161,7 +161,18 @@ def main():
                     # Loop through the tracks. Future development since num_track=1
                     for tr in range(model_parameters.num_track):
                         # Calculate road surface conditions
-                        # road_dust_surface_wetness_v2 - TODO: Implement this function
+                        road_dust_surface_wetness(
+                            ti=ti,
+                            tr=tr,
+                            ro=ro,
+                            time_config=time_config,
+                            converted_data=converted_data,
+                            model_variables=model_variables,
+                            model_parameters=model_parameters,
+                            model_flags=model_flags,
+                            metadata=metadata_input,
+                            input_activity=activity_input,
+                        )
 
                         # Calculate road emissions and dust loading
                         # road_dust_emission_model_v2 - TODO: Implement this function

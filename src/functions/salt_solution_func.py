@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Tuple
+from typing import Tuple
 import constants as c
 from .antoine_func import antoine_func
 
@@ -9,7 +9,7 @@ def salt_solution_func(
     g_road: float,
     s_road: float,
     T_s: float,
-    salt_type: List[int],
+    salt_type: np.ndarray,
     dt_h: float,
     dissolution_flag: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float, float, float, float]:
@@ -138,13 +138,12 @@ def salt_solution_func(
         solution_salt[i] = max(0, N_moles_salt[i] / (N_moles_water + N_moles_salt[i]))
 
         vp_ice = antoine_func(c.A_ANTOINE_ICE, c.B_ANTOINE_ICE, c.C_ANTOINE_ICE, T_s)
-        vp_s = max(
-            0,
-            antoine_func(
-                c.A_ANTOINE[salt_idx], c.B_ANTOINE[salt_idx], c.C_ANTOINE[salt_idx], T_s
-            )
-            + c.VP_CORRECTION[salt_idx],
-        )
+        vp_s = antoine_func(
+            float(c.A_ANTOINE[salt_idx]),
+            float(c.B_ANTOINE[salt_idx]),
+            float(c.C_ANTOINE[salt_idx]),
+            T_s,
+        ) + float(c.VP_CORRECTION[salt_idx])
 
         antoine_scaling = vp_ice / vp_s if vp_s > 0 else 1.0
 
@@ -156,7 +155,7 @@ def salt_solution_func(
             ) ** salt_power + antoine_scaling
 
         RH_salt[i] = min(100, 100 * afactor[i] * vp_s / vp_ice)
-        RH_salt_saturated = min(100, 100 * vp_s / vp_ice)
+        RH_salt_saturated = min(100.0, 100 * vp_s / vp_ice)
         RH_salt[i] = max(RH_salt_saturated, RH_salt[i])
 
         melt_temperature_salt[i] = max(

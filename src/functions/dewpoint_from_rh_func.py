@@ -1,10 +1,10 @@
 import numpy as np
-from typing import Union
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def dewpoint_from_rh_func(
-    TC: Union[float, np.ndarray], RH: Union[float, np.ndarray]
-) -> Union[float, np.ndarray]:
+def dewpoint_from_rh_func(TC: float, RH: float) -> float:
     """
     Calculate dewpoint temperature from air temperature and relative humidity.
 
@@ -26,7 +26,9 @@ def dewpoint_from_rh_func(
     # Actual vapor pressure
     eair = RH / 100.0 * esat
 
+    if eair <= 0.0:
+        eair = 0.0001
+
     # Dewpoint temperature
     TC_dewpoint = c * np.log(eair / a) / (b - np.log(eair / a))
-
     return TC_dewpoint
