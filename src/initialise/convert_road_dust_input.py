@@ -1,16 +1,22 @@
 import constants
 import numpy as np
 import logging
-from input_classes import converted_data
+from input_classes import (
+    converted_data,
+    input_traffic,
+    input_meteorology,
+    input_activity,
+    input_airquality,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def convert_input_data_to_consolidated_structure(
-    traffic_data,
-    meteorology_data,
-    activity_data,
-    airquality_data,
+    traffic_data: input_traffic,
+    meteorology_data: input_meteorology,
+    activity_data: input_activity,
+    airquality_data: input_airquality,
     nodata: float = -99.0,
 ) -> converted_data:
     """
