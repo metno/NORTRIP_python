@@ -37,11 +37,15 @@ def main():
     args = create_arg_parser().parse_args()
     read_as_text = bool(args.text)
     print_results = bool(args.print)
-    use_fortran = False
+    use_fortran = bool(args.fortran)
 
+    print("-" * 33)
     print(f"Starting NORTRIP_python_v{version('nortrip-python')}...")
-    print(f"Read as inputs as text: {read_as_text}")
-    print(f"Print results to terminal: {print_results}")
+    print("-" * 33)
+
+    logger.info(f"Read as inputs as text: {read_as_text}")
+    logger.info(f"Print results to terminal: {print_results}")
+    logger.info(f"Run fortran model: {use_fortran}")
 
     paths = read_road_dust_paths(read_as_text=read_as_text)
 
@@ -98,7 +102,6 @@ def main():
     # Main model loop
 
     for ro in range(constants.n_roads):
-        logger.info("Calculating radiation and running mean temperature")
         calc_radiation(
             model_variables=model_variables,
             time_config=time_config,
@@ -111,6 +114,7 @@ def main():
         )
 
         for tr in range(model_parameters.num_track):
+            # Set the road meteo data
             if meteorology_input.T_sub_available:
                 model_variables.road_meteo_data[constants.T_sub_index, :, tr, ro] = (
                     converted_data.meteo_data[constants.T_sub_input_index, :, ro]
@@ -126,7 +130,7 @@ def main():
                     )
                 )
 
-        logger.info("Starting time loop")
+        logger.info("Starting time loop...")
 
         for tf in range(time_config.min_time, time_config.max_time):
             if model_flags.forecast_hour == 0:
@@ -143,6 +147,7 @@ def main():
 
                 if forecast_index > 0:
                     logger.info(f"{date_str} F: {model_flags.forecast_hour}")
+
                 else:
                     logger.info(date_str)
 

@@ -25,5 +25,13 @@ def create_arg_parser() -> argparse.ArgumentParser:
         default=0,
         help="Print model results to terminal (0=False, 1=True). Default is 0.",
     )
+    parser.add_argument(
+        "-f",
+        "--fortran",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help="Run fortran model (0=False, 1=True). Default is 0.",
+    )
 
     return parser
