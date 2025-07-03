@@ -46,7 +46,7 @@ class activity_state:
     )
 
 
-def set_activity_data_v2(
+def set_activity_data(
     ti: int,
     ro: int,
     time_config: time_config,

@@ -3,12 +3,8 @@ Tests for set_activity_data module.
 """
 
 import numpy as np
-from initialise import (
-    set_activity_data_v2,
-    activity_state,
-    time_config,
-    model_variables,
-)
+from initialise import time_config, model_variables
+from calculations import activity_state, set_activity_data
 from input_classes import converted_data
 from config_classes import model_flags, model_activities, model_parameters
 import constants
@@ -32,8 +28,8 @@ def test_activity_state_creation():
     assert np.all(state.time_since_last_cleaning == 0)
 
 
-def test_set_activity_data_v2_basic():
-    """Test basic functionality of set_activity_data_v2 function."""
+def test_set_activity_data_basic():
+    """Test basic functionality of set_activity_data function."""
     # Create minimal test data
     state = activity_state()
 
@@ -106,7 +102,7 @@ def test_set_activity_data_v2_basic():
     ro = 0
 
     # This should not raise an exception
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -144,7 +140,7 @@ def test_set_activity_data_v2_basic():
     ti_salt = 6
     converted_data_mock.date_data[constants.hour_index, ti_salt, ro] = 6  # Salting hour
 
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti_salt,
         ro=ro,
         time_config=time_config_mock,
@@ -186,7 +182,7 @@ def test_set_activity_data_v2_basic():
     )
 
 
-def test_set_activity_data_v2_ploughing():
+def test_set_activity_data_ploughing():
     """Test ploughing functionality."""
     state = activity_state()
 
@@ -245,7 +241,7 @@ def test_set_activity_data_v2_ploughing():
     state.time_since_last_ploughing[ro] = 3.0  # > delay of 2.0
 
     # First call - should trigger ploughing since snow > threshold and delay is met
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -263,7 +259,7 @@ def test_set_activity_data_v2_ploughing():
 
     # Second call immediately after - should NOT trigger ploughing (delay not met: 0.0 < 2.0)
     ti_next = 6
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti_next,
         ro=ro,
         time_config=time_config_mock,
@@ -283,7 +279,7 @@ def test_set_activity_data_v2_ploughing():
     assert state.time_since_last_ploughing[ro] == 1.0  # dt added
 
 
-def test_set_activity_data_v2_weather_conditions():
+def test_set_activity_data_weather_conditions():
     """Test that weather conditions properly control salting."""
     state = activity_state()
 
@@ -345,7 +341,7 @@ def test_set_activity_data_v2_weather_conditions():
     ti = 5
     ro = 0
 
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -369,7 +365,7 @@ def test_set_activity_data_v2_weather_conditions():
     )
 
 
-def test_set_activity_data_v2_sanding():
+def test_set_activity_data_sanding():
     """Test sanding functionality."""
     state = activity_state()
 
@@ -436,7 +432,7 @@ def test_set_activity_data_v2_sanding():
     ti = 5
     ro = 0
 
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -463,7 +459,7 @@ def test_set_activity_data_v2_sanding():
     )
 
 
-def test_set_activity_data_v2_cleaning():
+def test_set_activity_data_cleaning():
     """Test cleaning functionality."""
     state = activity_state()
 
@@ -526,7 +522,7 @@ def test_set_activity_data_v2_cleaning():
     # Set time since last cleaning to meet delay requirement
     state.time_since_last_cleaning[ro] = 200.0  # > 168 hours
 
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -552,7 +548,7 @@ def test_set_activity_data_v2_cleaning():
     )
 
 
-def test_set_activity_data_v2_binding():
+def test_set_activity_data_binding():
     """Test binding functionality."""
     state = activity_state()
 
@@ -623,7 +619,7 @@ def test_set_activity_data_v2_binding():
     ti = 5
     ro = 0
 
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -655,7 +651,7 @@ def test_set_activity_data_v2_binding():
     )
 
 
-def test_set_activity_data_v2_salting_mode_2():
+def test_set_activity_data_salting_mode_2():
     """Test salting with auto_salting_flag = 2 (builds on existing data)."""
     state = activity_state()
 
@@ -720,7 +716,7 @@ def test_set_activity_data_v2_salting_mode_2():
     parameters = model_parameters()
     parameters.ploughing_thresh_moisture = np.ones(constants.num_moisture) * 0.1
 
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -748,7 +744,7 @@ def test_set_activity_data_v2_salting_mode_2():
     )
 
 
-def test_set_activity_data_v2_initialization_at_min_time():
+def test_set_activity_data_initialization_at_min_time():
     """Test initialization logic when ti == time_config.min_time."""
     state = activity_state()
 
@@ -803,7 +799,7 @@ def test_set_activity_data_v2_initialization_at_min_time():
     # Store initial datenum for comparison
     initial_datenum = converted_data_mock.date_data[constants.datenum_index, ti, ro]
 
-    set_activity_data_v2(
+    set_activity_data(
         ti=ti,
         ro=ro,
         time_config=time_config_mock,
@@ -822,16 +818,3 @@ def test_set_activity_data_v2_initialization_at_min_time():
     # Note: ploughing timer gets incremented by dt even at initialization if no ploughing occurs
     assert state.time_since_last_ploughing[ro] == time_config_mock.dt
     assert state.time_since_last_cleaning[ro] == time_config_mock.dt
-
-
-if __name__ == "__main__":
-    test_activity_state_creation()
-    test_set_activity_data_v2_basic()
-    test_set_activity_data_v2_ploughing()
-    test_set_activity_data_v2_weather_conditions()
-    test_set_activity_data_v2_sanding()
-    test_set_activity_data_v2_cleaning()
-    test_set_activity_data_v2_binding()
-    test_set_activity_data_v2_salting_mode_2()
-    test_set_activity_data_v2_initialization_at_min_time()
-    print("All tests passed!")

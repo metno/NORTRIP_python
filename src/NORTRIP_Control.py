@@ -14,10 +14,13 @@ from initialise import (
     road_dust_initialise_time,
     road_dust_initialise_variables,
     convert_road_dust_input,
-    set_activity_data_v2,
+)
+from calculations import (
+    calc_radiation,
+    road_dust_surface_wetness,
+    set_activity_data,
     activity_state,
 )
-from calculations import calc_radiation, road_dust_surface_wetness
 import logging
 from model_args import create_arg_parser
 from fortran import NORTRIP_fortran_control
@@ -146,7 +149,7 @@ def main():
             for ti in range(tf, tf + forecast_index + 1):
                 if ti <= time_config.max_time:
                     # Use road maintenance activity rules to determine activities
-                    set_activity_data_v2(
+                    set_activity_data(
                         ti=ti,
                         ro=ro,
                         time_config=time_config,

@@ -18,9 +18,9 @@ from config_classes import (
 
 
 def road_dust_surface_wetness(
-    ti,
-    tr,
-    ro,
+    ti: int,
+    tr: int,
+    ro: int,
     time_config: time_config,
     converted_data: converted_data,
     model_variables: model_variables,

@@ -4,7 +4,6 @@ from initialise.convert_road_dust_input import (
     convert_road_dust_input,
 )
 from input_classes import (
-    converted_data,
     input_traffic,
     input_meteorology,
     input_activity,
