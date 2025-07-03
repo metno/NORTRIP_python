@@ -38,6 +38,6 @@ def find_column_index(
 
     if matches.any():
         # Get the integer position, not the index label
-        return matches.argmax()
+        return int(matches.argmax())
 
     return -1
