@@ -468,6 +468,7 @@ def road_dust_initialise_variables(
                     variables.E_road_bin_data[
                         constants.exhaust_index, x, constants.E_total_index, ti, tr, 0
                     ] += (
+                        # TODO: Something wring with traffic data, can be in read_input_traffic.py
                         converted_data.traffic_data[constants.N_v_index[v], ti, 0]
                         * metadata.exhaust_EF[v]
                     )
