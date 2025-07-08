@@ -4,6 +4,7 @@ NORTRIP model road dust emission model
 
 import numpy as np
 import constants
+import logging
 
 from functions import (
     w_func,
@@ -21,6 +22,8 @@ from input_classes import (
     input_airquality,
 )
 from config_classes import model_parameters, model_flags
+
+logger = logging.getLogger(__name__)
 
 
 def road_dust_emission_model(
@@ -89,8 +92,8 @@ def road_dust_emission_model(
                 
                 wear_temp = w_func(
                     model_parameters.W_0[s, t, v],
-                    model_parameters.h_pave[int(metadata.p_index)],
-                    model_parameters.h_drivingcycle[int(metadata.d_index)],
+                    model_parameters.h_pave[int(metadata.p_index) - 1],
+                    model_parameters.h_drivingcycle[int(metadata.d_index) - 1],
                     converted_data.traffic_data[constants.V_veh_index[v], ti, ro],
                     model_parameters.a_wear[s, :],
                     snow_ice_sum,
@@ -100,6 +103,27 @@ def road_dust_emission_model(
                     constants.tyre_index,
                     constants.brake_index
                 )
+
+                if ti == 2209 and s == 0 and t == 0 and v == 0:
+                    logger.info("--- DEBUGGING WR_time_data CALCULATION ---")
+                    logger.info(f"ti={ti}, s={s}, t={t}, v={v}, tr={tr}, ro={ro}")
+                    logger.info(f"--- Indices used ---")
+                    logger.info(f"metadata.p_index: {metadata.p_index}")
+                    logger.info(f"metadata.d_index: {metadata.d_index}")
+                    logger.info(f"V_veh_index for v={v}: {constants.V_veh_index[v]}")
+                    logger.info(f"N_t_v_index for (t={t}, v={v}): {constants.N_t_v_index[(t, v)]}")
+                    logger.info(f"--- Values ---")
+                    logger.info(f"1. model_parameters.W_0[s, t, v]: {model_parameters.W_0[s, t, v]}")
+                    logger.info(f"2. model_parameters.h_pave[int(metadata.p_index) - 1]: {model_parameters.h_pave[int(metadata.p_index) - 1]}")
+                    logger.info(f"3. model_parameters.h_drivingcycle[int(metadata.d_index) - 1]: {model_parameters.h_drivingcycle[int(metadata.d_index) - 1]}")
+                    logger.info(f"4. converted_data.traffic_data[constants.V_veh_index[v] - 1, ti, ro]: {converted_data.traffic_data[constants.V_veh_index[v] - 1, ti, ro]}")
+                    logger.info(f"5. model_parameters.a_wear[s, :]: {model_parameters.a_wear[s, :]}")
+                    logger.info(f"6. snow_ice_sum: {snow_ice_sum}")
+                    logger.info(f"7. model_parameters.s_roadwear_thresh: {model_parameters.s_roadwear_thresh}")
+                    logger.info(f"8. wear_temp (from w_func): {wear_temp}")
+                    logger.info(f"9. converted_data.traffic_data[N_t_v_index]: {converted_data.traffic_data[constants.N_t_v_index[(t, v)], ti, ro]}")
+                    logger.info(f"10. model_parameters.veh_track[tr]: {model_parameters.veh_track[tr]}")
+                    logger.info(f"11. wear_flags[s]: {wear_flags[s]}")
                 
                 WR_array[s, t, v] = (
                     converted_data.traffic_data[constants.N_t_v_index[(t, v)], ti, ro]
@@ -107,6 +131,11 @@ def road_dust_emission_model(
                     * wear_temp
                     * wear_flags[s]
                 )
+
+                if ti == 2209 and s == 0 and t == 0 and v == 0:
+                    logger.info(f"12. WR_array[s, t, v]: {WR_array[s, t, v]}")
+                    logger.info("--- END DEBUGGING ---")
+
                 WR_temp += WR_array[s, t, v]
         
         model_variables.WR_time_data[s, ti, tr, ro] = WR_temp
@@ -177,7 +206,7 @@ def road_dust_emission_model(
                         f_abrasion_temp[:] = (
                             f_abrasion_func(
                                 model_parameters.f_0_abrasion[t, v],
-                                model_parameters.h_pave[int(metadata.p_index)],
+                                model_parameters.h_pave[int(metadata.p_index) - 1],
                                 converted_data.traffic_data[constants.V_veh_index[v], ti, ro],
                                 snow_ice_sum,
                                 model_parameters.V_ref_abrasion,
