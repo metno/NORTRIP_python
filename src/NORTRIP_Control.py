@@ -243,7 +243,9 @@ def main():
                         else:
                             logger.info(f"    Index {idx}: {val_b} -> {val_a}")
     logger.info("-------------------------------------------------------------")
-
+    logger.info(f"WR_time_data (np.int64(0), np.int64(2209), np.int64(0), np.int64(0)): {model_variables.WR_time_data[0, 2209, 0, 0]}")
+    logger.info(f"WR_time_data (np.int64(1), np.int64(2209), np.int64(0), np.int64(0)): {model_variables.WR_time_data[1, 2209, 0, 0]}")
+    logger.info(f"WR_time_data (np.int64(2), np.int64(2209), np.int64(0), np.int64(0)): {model_variables.WR_time_data[2, 2209, 0, 0]}")
     logger.info("End of NORTRIP_Control")
 
 
