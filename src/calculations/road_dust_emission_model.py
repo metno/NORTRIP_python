@@ -65,17 +65,18 @@ def road_dust_emission_model(
         WR_temp = 0
         for t in range(constants.num_tyre):
             for v in range(constants.num_veh):
+                snow_ice_sum = np.sum(
+                    model_variables.g_road_data[
+                        constants.snow_ice_index, ti, tr, ro
+                    ]
+                )
                 wear_temp = w_func(
                     model_parameters.W_0[s, t, v],
                     model_parameters.h_pave[int(metadata.p_index) - 1],
                     model_parameters.h_drivingcycle[int(metadata.d_index) - 1],
                     converted_data.traffic_data[constants.V_veh_index[v], ti, ro],
                     model_parameters.a_wear[s, :],
-                    np.sum(
-                        model_variables.g_road_data[
-                            constants.snow_ice_index, ti, tr, ro
-                        ]
-                    ),
+                    snow_ice_sum,
                     model_parameters.s_roadwear_thresh,
                     s,
                     constants.road_index,
@@ -87,12 +88,51 @@ def road_dust_emission_model(
                 traffic_key = (t, v)
                 traffic_idx = constants.N_t_v_index.get(traffic_key)
 
+                if ti == 2210 and s == 0 and t == 0 and v == 0:
+                    print("--- DEBUGGING WR_time_data CALCULATION ---")
+                    print(f"ti={ti}, s={s}, t={t}, v={v}, tr={tr}, ro={ro}")
+                    print("--- Indices used ---")
+                    print(f"p_index: {metadata.p_index}")
+                    print(f"d_index: {metadata.d_index}")
+                    print(f"V_veh_index for v={v}: {constants.V_veh_index[v]}")
+                    print(f"N_t_v_index for (t={t}, v={v}): {traffic_idx}")
+                    print("--- Values ---")
+                    print(f"1. W_0(s,t,v): {model_parameters.W_0[s, t, v]}")
+                    print(
+                        "2. h_pave(p_index): "
+                        f"{model_parameters.h_pave[int(metadata.p_index) - 1]}"
+                    )
+                    print(
+                        "3. h_drivingcycle(d_index): "
+                        f"{model_parameters.h_drivingcycle[int(metadata.d_index) - 1]}"
+                    )
+                    print(
+                        "4. traffic_data(V_veh_index(v),ti,ro): "
+                        f"{converted_data.traffic_data[constants.V_veh_index[v], ti, ro]}"
+                    )
+                    print(f"5. a_wear(s,:): {model_parameters.a_wear[s, :]}")
+                    print(f"6. snow_ice_sum: {snow_ice_sum}")
+                    print(
+                        "7. s_roadwear_thresh: "
+                        f"{model_parameters.s_roadwear_thresh}"
+                    )
+                    print(f"8. wear_temp (from W_func): {wear_temp}")
+                    print(
+                        f"9. traffic_data(N_t_v_index(t,v),ti,ro): "
+                        f"{converted_data.traffic_data[traffic_idx, ti, ro]}"
+                    )
+                    print(f"10. veh_track(tr): {model_parameters.veh_track[tr]}")
+                    print(f"11. wear_flag(s): {wear_flag[s]}")
+
                 WR_array[s, t, v] = (
                     converted_data.traffic_data[traffic_idx, ti, ro]
                     * model_parameters.veh_track[tr]
                     * wear_temp
                     * wear_flag[s]
                 )
+                if ti == 2210 and s == 0 and t == 0 and v == 0:
+                    print(f"12. WR_array(s,t,v): {WR_array[s, t, v]}")
+                    print("--- END DEBUGGING ---")
                 WR_temp += WR_array[s, t, v]
         model_variables.WR_time_data[s, ti, tr, ro] = WR_temp
 
