@@ -11,12 +11,12 @@ from .input_traffic import input_traffic
 class input_data:
     """
     Dataclass containing all input data classes for NORTRIP model.
-    
+
     This class consolidates all the individual input dataclasses that are
     read from the input files into a single container for better organization
     and type safety.
     """
-    
+
     activity: input_activity
     airquality: input_airquality
     meteorology: input_meteorology
