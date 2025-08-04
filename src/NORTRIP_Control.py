@@ -95,12 +95,6 @@ def main():
         model_flags=model_flags,
     )
 
-    # Make a deep copy for later comparison
-    logger.info(
-        "--- Making a deep copy of model variables for comparison after loop ---"
-    )
-    model_variables_before_loop = copy.deepcopy(model_variables)
-
     if use_fortran:
         # Does nothing for now
         NORTRIP_fortran_control()
@@ -206,46 +200,6 @@ def main():
                             airquality_data=airquality_input,
                         )
 
-    logger.info("--- Comparing model variables before and after main loop ---")
-    for attr in sorted(vars(model_variables).keys()):
-        val_before = getattr(model_variables_before_loop, attr)
-        val_after = getattr(model_variables, attr)
-
-        if isinstance(val_after, np.ndarray):
-            is_float = np.issubdtype(val_after.dtype, np.floating)
-            if is_float:
-                are_equal = np.allclose(val_before, val_after, equal_nan=True)
-            else:
-                are_equal = np.array_equal(val_before, val_after)
-
-            if not are_equal:
-                logger.info(f"'{attr}' has changed.")
-
-                if is_float:
-                    changed_indices = np.where(
-                        ~np.isclose(val_before, val_after, equal_nan=True)
-                    )
-                else:
-                    changed_indices = np.where(val_before != val_after)
-
-                num_changes_to_show = min(5, len(changed_indices[0]))
-                if num_changes_to_show > 0:
-                    logger.info(
-                        f"  Showing up to {num_changes_to_show} changes for '{attr}':"
-                    )
-                    for i in range(num_changes_to_show):
-                        idx = tuple(dim[i] for dim in changed_indices)
-                        val_b = val_before[idx]
-                        val_a = val_after[idx]
-
-                        if is_float:
-                            logger.info(f"    Index {idx}: {val_b:.4f} -> {val_a:.4f}")
-                        else:
-                            logger.info(f"    Index {idx}: {val_b} -> {val_a}")
-    logger.info("-------------------------------------------------------------")
-    logger.info(f"WR_time_data (np.int64(0), np.int64(2209), np.int64(0), np.int64(0)): {model_variables.WR_time_data[0, 2209, 0, 0]}")
-    logger.info(f"WR_time_data (np.int64(1), np.int64(2209), np.int64(0), np.int64(0)): {model_variables.WR_time_data[1, 2209, 0, 0]}")
-    logger.info(f"WR_time_data (np.int64(2), np.int64(2209), np.int64(0), np.int64(0)): {model_variables.WR_time_data[2, 2209, 0, 0]}")
     logger.info("End of NORTRIP_Control")
 
 
