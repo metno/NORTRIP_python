@@ -221,9 +221,8 @@ def road_dust_initialise_variables(
         variables.E_corr_array = np.zeros((1, n_date))
         variables.forecast_T_s = np.full(n_date, nodata)
 
-    # NOTE: +2 in g_road_data dimension (as in MATLAB comment "WHY IS THIS +2 ???")
     variables.g_road_data = np.zeros(
-        (constants.num_moisture + 2, n_date, constants.num_track_max, n_roads)
+        (constants.num_moisture, n_date, constants.num_track_max, n_roads)
     )
 
     # Initialize quality factor arrays

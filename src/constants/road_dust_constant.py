@@ -27,6 +27,7 @@ pfo = 4
 water_index = 0
 snow_index = 1
 ice_index = 2
+# Rime and frost are not used in the model. They are allocated to snow.
 rime_index = 3
 frost_index = 4
 num_moisture = 3
