@@ -3,8 +3,10 @@ Main script for the NORTRIP Road Dust Model in Python.
 """
 
 from importlib.metadata import version
+from ospm import OSPM_Main
 import constants
 import numpy as np
+from constants.road_dust_constant import T_s_index
 from functions import running_mean_temperature_func
 from read_files import (
     read_road_dust_parameters,
@@ -22,6 +24,9 @@ from calculations import (
     set_activity_data,
     activity_state,
     road_dust_emission_model,
+    road_dust_dispersion,
+    road_dust_concentrations,
+    road_dust_convert_variables,
 )
 import logging
 from model_args import create_arg_parser
@@ -258,6 +263,45 @@ def main():
 
             # Redistribute mass and moisture between tracks.
             # Not implemented yet
+
+        # Put forecast surface temperature into the normal road temperature
+        if model_flags.forecast_hour > 0:
+            model_variables.road_meteo_data[
+                T_s_index, time_config.min_time : time_config.max_time, tr, ro
+            ] = model_variables.forecast_T_s[
+                time_config.min_time : time_config.max_time
+            ]
+
+        # Calculate dispersion factors using ospm or NOx
+        if model_flags.use_ospm_flag:
+            OSPM_Main()
+        else:
+            road_dust_dispersion(
+                time_config=time_config,
+                converted_data=converted_data,
+                model_variables=model_variables,
+                model_parameters=model_parameters,
+                metadata=metadata_input,
+                airquality_data=airquality_input,
+                ro=ro,
+            )
+
+        # Calculate concentrations
+        road_dust_concentrations(
+            time_config=time_config,
+            model_variables=model_variables,
+            metadata=metadata_input,
+            ro=ro,
+        )
+
+        # Put binned balance data into normal arrays
+        road_dust_convert_variables(
+            model_variables=model_variables,
+            metadata=metadata_input,
+            ro=ro,
+        )
+
+    # End road loop
 
     logger.info("End of NORTRIP_Control")
 
