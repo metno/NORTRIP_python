@@ -4,7 +4,6 @@ Main script for the NORTRIP Road Dust Model in Python.
 
 from importlib.metadata import version
 import constants
-import copy
 from functions import running_mean_temperature_func
 from read_files import (
     read_road_dust_parameters,
@@ -63,14 +62,12 @@ def main():
         print_results,
     )
 
-    (
-        activity_input,
-        airquality_input,
-        meteorology_input,
-        traffic_input,
-        initial_input,
-        metadata_input,
-    ) = input_data
+    activity_input = input_data.activity
+    airquality_input = input_data.airquality
+    meteorology_input = input_data.meteorology
+    traffic_input = input_data.traffic
+    initial_input = input_data.initial
+    metadata_input = input_data.metadata
 
     converted_data = convert_road_dust_input(input_data, nodata=metadata_input.nodata)
 

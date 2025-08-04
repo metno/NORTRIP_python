@@ -7,6 +7,7 @@ from input_classes import (
     input_meteorology,
     input_activity,
     input_airquality,
+    input_data,
 )
 
 logger = logging.getLogger(__name__)
@@ -78,8 +79,12 @@ def convert_input_data_to_consolidated_structure(
         )
         # Fill vehicle type traffic volumes - each vehicle type separately
         for v in range(constants.num_veh):
-            converted.traffic_data[constants.N_v_index[v], :n_date, ro] = traffic_data.N_v[v, :n_date]
-            converted.traffic_data[constants.V_veh_index[v], :n_date, ro] = traffic_data.V_veh[v, :n_date]
+            converted.traffic_data[constants.N_v_index[v], :n_date, ro] = (
+                traffic_data.N_v[v, :n_date]
+            )
+            converted.traffic_data[constants.V_veh_index[v], :n_date, ro] = (
+                traffic_data.V_veh[v, :n_date]
+            )
 
         # Fill tyre-specific traffic data
         for t in range(constants.num_tyre):
@@ -189,28 +194,23 @@ def convert_input_data_to_consolidated_structure(
 
 
 def convert_road_dust_input(
-    input_data_tuple: tuple, nodata: float = -99.0
+    input_data: input_data, nodata: float = -99.0
 ) -> converted_data:
     """
     Converts the output from read_road_dust_input to consolidated structure.
 
     Args:
-        input_data_tuple: Tuple returned from read_road_dust_input containing:
-            (activity_data, airquality_data, meteorology_data, traffic_data, initial_data, metadata_data)
+        input_data: input_data dataclass returned from read_road_dust_input containing:
+            activity, airquality, meteorology, traffic, initial, and metadata dataclasses
         nodata: Missing data value
 
     Returns:
         converted_data: Consolidated data structure
     """
-    (
-        activity_data,
-        airquality_data,
-        meteorology_data,
-        traffic_data,
-        initial_data,
-        metadata_data,
-    ) = input_data_tuple
-
     return convert_input_data_to_consolidated_structure(
-        traffic_data, meteorology_data, activity_data, airquality_data, nodata
+        input_data.traffic,
+        input_data.meteorology,
+        input_data.activity,
+        input_data.airquality,
+        nodata,
     )

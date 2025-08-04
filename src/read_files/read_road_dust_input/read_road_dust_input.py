@@ -6,6 +6,7 @@ from .read_input_initial import read_input_initial
 from .read_input_metadata import read_input_metadata
 from .traffic_utils import calculate_good_traffic_data_indices
 from config_classes import model_parameters
+from input_classes import input_data
 import pandas as pd
 import os
 import logging
@@ -28,13 +29,13 @@ def read_road_dust_input(
         read_as_text (bool, optional): If True, read the file as text. Will reformat input_file_path to text format.
         print_results (bool, optional): If True, print the results to the console
     Returns:
-        tuple: A tuple containing the following dataclasses:
-            activity_data: input_activity dataclass
-            airquality_data: input_airquality dataclass
-            meteorology_data: input_meteorology dataclass
-            traffic_data: input_traffic dataclass
-            initial_data: input_initial dataclass
-            metadata_data: input_metadata dataclass
+        input_data: A dataclass containing all input dataclasses:
+            activity: input_activity dataclass
+            airquality: input_airquality dataclass
+            meteorology: input_meteorology dataclass
+            traffic: input_traffic dataclass
+            initial: input_initial dataclass
+            metadata: input_metadata dataclass
 
     """
 
@@ -148,11 +149,11 @@ def read_road_dust_input(
         print_results=print_results,
     )
 
-    return (
-        activity_data,
-        airquality_data,
-        meteorology_data,
-        traffic_data,
-        initial_data,
-        metadata_data,
+    return input_data(
+        activity=activity_data,
+        airquality=airquality_data,
+        meteorology=meteorology_data,
+        traffic=traffic_data,
+        initial=initial_data,
+        metadata=metadata_data,
     )

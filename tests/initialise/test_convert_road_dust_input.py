@@ -8,6 +8,7 @@ from input_classes import (
     input_meteorology,
     input_activity,
     input_airquality,
+    input_data,
 )
 import constants
 
@@ -261,18 +262,18 @@ def test_convert_road_dust_input():
     airquality_data.n_date = n_traffic
     airquality_data.f_dis_input = np.full(n_traffic, 1.0)
 
-    # Create input tuple (as returned by read_road_dust_input)
-    input_data_tuple = (
-        activity_data,
-        airquality_data,
-        meteorology_data,
-        traffic_data,
-        None,  # initial_data
-        None,  # metadata_data
+    # Create input_data dataclass (as returned by read_road_dust_input)
+    input_data_obj = input_data(
+        activity=activity_data,
+        airquality=airquality_data,
+        meteorology=meteorology_data,
+        traffic=traffic_data,
+        initial=None,  # initial_data
+        metadata=None,  # metadata_data
     )
 
     # Test the wrapper function
-    converted = convert_road_dust_input(input_data_tuple, nodata=-99.0)
+    converted = convert_road_dust_input(input_data_obj, nodata=-99.0)
 
     # Check basic properties
     assert converted.n_date == n_traffic
