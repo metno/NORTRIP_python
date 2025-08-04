@@ -41,6 +41,8 @@ class model_variables:
     # Forecast and correction arrays
     forecast_hours: np.ndarray = field(default_factory=lambda: np.array([]))
     E_corr_array: np.ndarray = field(default_factory=lambda: np.array([]))
+    forecast_T_s: np.ndarray = field(default_factory=lambda: np.array([]))
+    original_bias_T_s: float = 0.0
 
     # Quality factor arrays
     f_q: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -90,8 +92,8 @@ def road_dust_initialise_variables(
     # Initialize model variables dataclass
     variables = model_variables()
 
-    # Initialize forecast missing if forecast mode is used
-    variables.road_temperature_forecast_missing = []
+    # Initialize forecast missing array
+    variables.road_temperature_forecast_missing = np.ones(n_date, dtype=int)
 
     # Initialize all main arrays
     variables.M_road_data = np.zeros(
@@ -213,9 +215,11 @@ def road_dust_initialise_variables(
         forecast_steps = int(forecast_hour / dt) + 1
         variables.forecast_hours = np.zeros((forecast_steps, n_date))
         variables.E_corr_array = np.zeros((int(forecast_hour / dt), n_date))
+        variables.forecast_T_s = np.full(n_date, nodata)
     else:
         variables.forecast_hours = np.zeros((1, n_date))
         variables.E_corr_array = np.zeros((1, n_date))
+        variables.forecast_T_s = np.full(n_date, nodata)
 
     # NOTE: +2 in g_road_data dimension (as in MATLAB comment "WHY IS THIS +2 ???")
     variables.g_road_data = np.zeros(

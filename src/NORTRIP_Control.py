@@ -4,6 +4,7 @@ Main script for the NORTRIP Road Dust Model in Python.
 
 from importlib.metadata import version
 import constants
+import numpy as np
 from functions import running_mean_temperature_func
 from read_files import (
     read_road_dust_parameters,
@@ -150,6 +151,7 @@ def main():
                 else:
                     logger.info(date_str)
 
+            # Forecast loop. This is not a loop if forecast_hour=0 or 1
             for ti in range(tf, tf + forecast_index + 1):
                 if ti <= time_config.max_time:
                     # Use road maintenance activity rules to determine activities
@@ -179,6 +181,8 @@ def main():
                             model_flags=model_flags,
                             metadata=metadata_input,
                             input_activity=activity_input,
+                            tf=tf,
+                            meteorology_input=meteorology_input,
                         )
 
                         # Calculate road emissions and dust loading
@@ -195,6 +199,65 @@ def main():
                             initial_data=initial_input,
                             airquality_data=airquality_input,
                         )
+
+            # Save the forecast surface temperature into the forecast index
+            if (
+                model_flags.forecast_type_flag > 0
+                and tf > time_config.min_time
+                and tf + forecast_index <= time_config.max_time
+            ):
+                forecast_ti = tf + forecast_index
+                # Use the first track (tr=0) since num_track is typically 1
+                tr_forecast = 0
+
+                # Modelled forecast
+                if model_flags.forecast_type_flag == 1:
+                    model_variables.forecast_T_s[forecast_ti] = (
+                        model_variables.road_meteo_data[
+                            constants.T_s_index, forecast_ti, tr_forecast, ro
+                        ]
+                    )
+
+                # Persistence forecast
+                elif model_flags.forecast_type_flag == 2:
+                    model_variables.forecast_T_s[forecast_ti] = (
+                        model_variables.road_meteo_data[
+                            constants.T_s_index, tf - 1, tr_forecast, ro
+                        ]
+                    )
+
+                # Bias correction forecast. Set use_observed_temperature_init_flag=0
+                elif model_flags.forecast_type_flag == 3:
+                    model_variables.forecast_T_s[forecast_ti] = (
+                        model_variables.road_meteo_data[
+                            constants.T_s_index, forecast_ti, tr_forecast, ro
+                        ]
+                        - model_variables.original_bias_T_s
+                    )
+
+                # Linear extrapolation. Set use_observed_temperature_init_flag=0
+                elif (
+                    model_flags.forecast_type_flag == 4
+                    and tf - 1 > time_config.min_time
+                ):
+                    # Get datenum values for interpolation
+                    x_dates = converted_data.date_data[
+                        constants.datenum_index, tf - 2 : tf, ro
+                    ]
+                    y_temps = model_variables.road_meteo_data[
+                        constants.T_s_index, tf - 2 : tf, tr_forecast, ro
+                    ]
+                    target_date = converted_data.date_data[
+                        constants.datenum_index, forecast_ti, ro
+                    ]
+
+                    # Linear extrapolation using numpy.interp
+                    model_variables.forecast_T_s[forecast_ti] = np.interp(
+                        target_date, x_dates, y_temps
+                    )
+
+            # Redistribute mass and moisture between tracks.
+            # Not implemented yet
 
     logger.info("End of NORTRIP_Control")
 

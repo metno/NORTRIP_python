@@ -7,10 +7,17 @@ from functions import (
     f_spray_func,
     mass_balance_func,
     surface_energy_model_4_func,
+    e_diff_func,
+    relax_func,
 )
 from initialise.road_dust_initialise_time import time_config
 from initialise.road_dust_initialise_variables import model_variables
-from input_classes import converted_data, input_activity, input_metadata
+from input_classes import (
+    converted_data,
+    input_activity,
+    input_metadata,
+    input_meteorology,
+)
 from config_classes import (
     model_parameters,
     model_flags,
@@ -28,6 +35,8 @@ def road_dust_surface_wetness(
     model_flags: model_flags,
     metadata: input_metadata,
     input_activity: input_activity,
+    tf: int = None,
+    meteorology_input: "input_meteorology" = None,
 ):
     """
     Calculate road surface wetness and energy balance.
@@ -52,9 +61,55 @@ def road_dust_surface_wetness(
         Model flags
     metadata : input_metadata
         Metadata including road geometry and settings
-    model_activities : model_activities
-        Activity parameters
+    input_activity : input_activity
+        Activity input data
+    tf : int, optional
+        Current forecast time index for bias correction
+    meteorology_input : input_meteorology, optional
+        Meteorology input data for road temperature observations
     """
+
+    # Forecast bias correction logic
+    if (
+        tf is not None
+        and meteorology_input is not None
+        and tf > time_config.min_time + 1
+        and tf == ti
+    ):
+        # Set the previous (initial) model surface temperature to the observed surface temperature in forecast mode
+        forecast_index = (
+            max(0, round(model_flags.forecast_hour / time_config.dt - 1))
+            if model_flags.forecast_hour > 0
+            else 0
+        )
+        if tf + forecast_index < len(model_variables.road_temperature_forecast_missing):
+            model_variables.road_temperature_forecast_missing[tf + forecast_index] = 1
+
+            # Check if observed temperature data is available for previous time step
+            prev_time = tf - 1
+            if prev_time not in meteorology_input.road_temperature_obs_missing:
+                # Calculate bias correction
+                model_variables.original_bias_T_s = (
+                    model_variables.road_meteo_data[
+                        constants.T_s_index, prev_time, tr, ro
+                    ]
+                    - model_variables.road_meteo_data[
+                        constants.road_temperature_obs_index, prev_time, tr, ro
+                    ]
+                )
+
+                # Apply observed temperature if flag is set
+                if model_flags.use_observed_temperature_init_flag:
+                    model_variables.road_meteo_data[
+                        constants.T_s_index, prev_time, tr, ro
+                    ] = model_variables.road_meteo_data[
+                        constants.road_temperature_obs_index, prev_time, tr, ro
+                    ]
+
+                model_variables.road_temperature_forecast_missing[
+                    tf + forecast_index
+                ] = 0
+            # else: road_temperature_forecast_missing will be 1 (true) and the modelled temperature will be used
 
     # Set minimum allowable total surface wetness (avoid division by 0)
     surface_moisture_min = 1e-6
@@ -310,11 +365,74 @@ def road_dust_surface_wetness(
                 / (1 - metadata.albedo_road)
             )
 
-        E_corr = 0.0
         if model_flags.forecast_hour > 0:
-            # Energy correction calculations would go here
-            # This is complex and may need additional functions
-            pass
+            # This part calculates the energy correction. Should be placed deeper in the code
+            if (
+                model_flags.use_energy_correction_flag
+                and tf is not None
+                and tf > time_config.min_time + 1
+                and tf == ti
+            ):
+                # Call E_diff_func for energy correction
+                (
+                    model_variables.road_meteo_data[constants.E_index, tf - 1, tr, ro],
+                    model_variables.road_meteo_data[
+                        constants.E_correction_index, tf, tr, ro
+                    ],
+                    model_variables.road_meteo_data[
+                        constants.T_s_index, tf - 1, tr, ro
+                    ],
+                ) = e_diff_func(
+                    model_variables.road_meteo_data[
+                        constants.road_temperature_obs_index, tf - 1, tr, ro
+                    ],
+                    model_variables.road_meteo_data[
+                        constants.T_s_index, tf - 2, tr, ro
+                    ],
+                    converted_data.meteo_data[constants.T_a_index, tf - 1, ro],
+                    model_variables.road_meteo_data[
+                        constants.T_sub_index, tf - 1, tr, ro
+                    ],
+                    model_variables.road_meteo_data[
+                        constants.E_correction_index, tf - 1, tr, ro
+                    ],
+                    converted_data.meteo_data[constants.pressure_index, tf - 1, ro],
+                    model_parameters.dzs,
+                    time_config.dt,
+                    model_variables.road_meteo_data[
+                        constants.r_aero_index, tf - 1, tr, ro
+                    ],
+                    short_rad_net_temp,
+                    converted_data.meteo_data[constants.long_rad_in_index, tf - 1, ro],
+                    model_variables.road_meteo_data[
+                        constants.H_traffic_index, tf - 1, tr, ro
+                    ],
+                    model_variables.road_meteo_data[constants.L_index, tf - 1, tr, ro],
+                    model_variables.road_meteo_data[
+                        constants.G_freeze_index, tf - 1, tr, ro
+                    ],
+                    model_variables.road_meteo_data[
+                        constants.G_melt_index, tf - 1, tr, ro
+                    ],
+                    model_parameters.sub_surf_param,
+                    model_flags.use_subsurface_flag,
+                )
+
+            # Calculate energy correction factor
+            if model_flags.use_energy_correction_flag and tf is not None:
+                E_corr = model_variables.road_meteo_data[
+                    constants.E_correction_index, tf, tr, ro
+                ] * relax_func(time_config.dt, (ti - tf) + 1)
+            else:
+                E_corr = 0.0
+
+            # Update T_s_0 for forecast mode
+            if tf is not None:
+                T_s_0 = model_variables.road_meteo_data[
+                    constants.T_s_index, ti - 1, tr, ro
+                ]
+        else:
+            E_corr = 0.0
 
         # Call surface energy model
         (
