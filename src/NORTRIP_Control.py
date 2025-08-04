@@ -23,7 +23,6 @@ from calculations import (
     road_dust_emission_model,
 )
 import logging
-import numpy as np
 from model_args import create_arg_parser
 from fortran import NORTRIP_fortran_control
 

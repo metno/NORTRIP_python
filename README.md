@@ -4,7 +4,7 @@ Single road python version of NORTRIP
 
 Containing scripts, example data and documentation for running NORTRIP in Python
 
-## Installation
+## Setup
 
 ### Prerequisites
 
@@ -144,7 +144,7 @@ After installation, you can run NORTRIP using:
 # If installed with uv
 uv run nortrip
 
-# If installed with pip
+# Or just
 nortrip
 ```
 
