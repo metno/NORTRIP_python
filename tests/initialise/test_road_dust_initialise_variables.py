@@ -136,7 +136,7 @@ def test_road_dust_initialise_variables():
 
     assert isinstance(result.g_road_data, np.ndarray)
     assert result.g_road_data.shape == (
-        constants.num_moisture + 2,
+        constants.num_moisture,
         n_date,
         constants.num_track_max,
         n_roads,
