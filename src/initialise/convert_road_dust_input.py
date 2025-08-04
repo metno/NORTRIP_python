@@ -76,12 +76,10 @@ def convert_input_data_to_consolidated_structure(
         converted.traffic_data[constants.N_total_index, :n_date, ro] = (
             traffic_data.N_total[:n_date]
         )
-        converted.traffic_data[constants.N_v_index, :n_date, ro] = traffic_data.N_v[
-            :, :n_date
-        ]
-        converted.traffic_data[constants.V_veh_index, :n_date, ro] = traffic_data.V_veh[
-            :, :n_date
-        ]
+        # Fill vehicle type traffic volumes - each vehicle type separately
+        for v in range(constants.num_veh):
+            converted.traffic_data[constants.N_v_index[v], :n_date, ro] = traffic_data.N_v[v, :n_date]
+            converted.traffic_data[constants.V_veh_index[v], :n_date, ro] = traffic_data.V_veh[v, :n_date]
 
         # Fill tyre-specific traffic data
         for t in range(constants.num_tyre):

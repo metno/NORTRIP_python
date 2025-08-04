@@ -117,7 +117,7 @@ def read_input_traffic(
     # Vehicle speeds
     for v, veh_type in enumerate(["he", "li"]):
         col_idx = find_column_index(
-            f"V_veh({veh_type})", header_text, print_results, exact_match=True
+            f"V_veh({veh_type})", header_text, print_results, exact_match=False
         )
         if col_idx != -1:
             loaded_traffic.V_veh[v, :] = traffic_df.iloc[:, col_idx].values.astype(

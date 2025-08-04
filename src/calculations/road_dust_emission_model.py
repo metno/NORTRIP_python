@@ -104,6 +104,14 @@ def road_dust_emission_model(
                     constants.brake_index
                 )
 
+                
+                WR_array[s, t, v] = (
+                    converted_data.traffic_data[constants.N_t_v_index[(t, v)], ti, ro]
+                    * model_parameters.veh_track[tr]
+                    * wear_temp
+                    * wear_flags[s]
+                )
+
                 if ti == 2209 and s == 0 and t == 0 and v == 0:
                     logger.info("--- DEBUGGING WR_time_data CALCULATION ---")
                     logger.info(f"ti={ti}, s={s}, t={t}, v={v}, tr={tr}, ro={ro}")
@@ -116,7 +124,7 @@ def road_dust_emission_model(
                     logger.info(f"1. model_parameters.W_0[s, t, v]: {model_parameters.W_0[s, t, v]}")
                     logger.info(f"2. model_parameters.h_pave[int(metadata.p_index) - 1]: {model_parameters.h_pave[int(metadata.p_index) - 1]}")
                     logger.info(f"3. model_parameters.h_drivingcycle[int(metadata.d_index) - 1]: {model_parameters.h_drivingcycle[int(metadata.d_index) - 1]}")
-                    logger.info(f"4. converted_data.traffic_data[constants.V_veh_index[v] - 1, ti, ro]: {converted_data.traffic_data[constants.V_veh_index[v] - 1, ti, ro]}")
+                    logger.info(f"4. converted_data.traffic_data[constants.V_veh_index[v], ti, ro]: {converted_data.traffic_data[constants.V_veh_index[v], ti, ro]}")
                     logger.info(f"5. model_parameters.a_wear[s, :]: {model_parameters.a_wear[s, :]}")
                     logger.info(f"6. snow_ice_sum: {snow_ice_sum}")
                     logger.info(f"7. model_parameters.s_roadwear_thresh: {model_parameters.s_roadwear_thresh}")
@@ -124,15 +132,6 @@ def road_dust_emission_model(
                     logger.info(f"9. converted_data.traffic_data[N_t_v_index]: {converted_data.traffic_data[constants.N_t_v_index[(t, v)], ti, ro]}")
                     logger.info(f"10. model_parameters.veh_track[tr]: {model_parameters.veh_track[tr]}")
                     logger.info(f"11. wear_flags[s]: {wear_flags[s]}")
-                
-                WR_array[s, t, v] = (
-                    converted_data.traffic_data[constants.N_t_v_index[(t, v)], ti, ro]
-                    * model_parameters.veh_track[tr]
-                    * wear_temp
-                    * wear_flags[s]
-                )
-
-                if ti == 2209 and s == 0 and t == 0 and v == 0:
                     logger.info(f"12. WR_array[s, t, v]: {WR_array[s, t, v]}")
                     logger.info("--- END DEBUGGING ---")
 

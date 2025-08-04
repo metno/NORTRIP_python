@@ -60,4 +60,5 @@ def w_func(
     # Calculate final wear factor
     f = W_0 * h_pave_adj * h_dc_adj * f_V * f_snow_adj
 
+
     return f
