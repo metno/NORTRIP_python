@@ -48,6 +48,9 @@ class model_variables:
     f_q: np.ndarray = field(default_factory=lambda: np.array([]))
     f_q_obs: np.ndarray = field(default_factory=lambda: np.array([]))
 
+    # Dispersion factor array
+    f_conc: np.ndarray = field(default_factory=lambda: np.array([]))
+
     # Initial mass data
     M_road_0_data: np.ndarray = field(default_factory=lambda: np.array([]))
 
@@ -220,6 +223,9 @@ def road_dust_initialise_variables(
         variables.forecast_hours = np.zeros((1, n_date))
         variables.E_corr_array = np.zeros((1, n_date))
         variables.forecast_T_s = np.full(n_date, nodata)
+
+    # Initialize dispersion factor array
+    variables.f_conc = np.full((n_date, n_roads), nodata)
 
     variables.g_road_data = np.zeros(
         (constants.num_moisture, n_date, constants.num_track_max, n_roads)

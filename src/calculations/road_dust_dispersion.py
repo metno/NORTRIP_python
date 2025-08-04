@@ -4,7 +4,6 @@ Converts emissions to concentrations using NOX as a tracer
 """
 
 import numpy as np
-import constants
 import logging
 
 from initialise import time_config, model_variables
@@ -41,12 +40,6 @@ def road_dust_dispersion(
     """
 
     logger.info("Calculating dispersion using NOX")
-
-    # Initialize f_conc array if not already done
-    if not hasattr(model_variables, "f_conc"):
-        model_variables.f_conc = np.full(
-            (time_config.max_time_inputdata, constants.n_roads), metadata.nodata
-        )
 
     # Extract NOX data from airquality input
     NOX_obs_net = airquality_data.NOX_obs_net

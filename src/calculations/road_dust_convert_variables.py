@@ -7,7 +7,7 @@ import numpy as np
 import constants
 import logging
 
-from initialise import time_config, model_variables
+from initialise import model_variables
 from input_classes import input_metadata
 
 logger = logging.getLogger(__name__)
@@ -63,12 +63,9 @@ def road_dust_convert_variables(
             model_variables.C_bin_data[:, x : constants.num_size, :, :, :, ro], axis=1
         )
 
-    # Set concentration data to nodata when f_conc not available
-    if hasattr(model_variables, "f_conc"):
-        # Find indices where f_conc is nodata
-        nodata_indices = np.where(model_variables.f_conc[:, ro] == metadata.nodata)[0]
+    nodata_indices = np.where(model_variables.f_conc[:, ro] == metadata.nodata)[0]
 
-        # Set concentration data to nodata for those time indices
-        for ti in nodata_indices:
-            if ti < model_variables.C_data.shape[3]:
-                model_variables.C_data[:, :, :, ti, :, ro] = metadata.nodata
+    # Set concentration data to nodata for those time indices
+    for ti in nodata_indices:
+        if ti < model_variables.C_data.shape[3]:
+            model_variables.C_data[:, :, :, ti, :, ro] = metadata.nodata

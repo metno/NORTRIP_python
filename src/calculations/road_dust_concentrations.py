@@ -35,8 +35,7 @@ def road_dust_concentrations(
     # Convert emissions to concentrations
     for ti in range(time_config.min_time, time_config.max_time + 1):
         if (
-            hasattr(model_variables, "f_conc")
-            and ti < model_variables.f_conc.shape[0]
+            ti < model_variables.f_conc.shape[0]
             and model_variables.f_conc[ti, ro] != metadata.nodata
         ):
             # Apply dispersion factor to convert emissions to concentrations
