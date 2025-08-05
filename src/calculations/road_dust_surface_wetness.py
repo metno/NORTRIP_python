@@ -195,11 +195,11 @@ def road_dust_surface_wetness(
     if ti > time_config.min_time and model_flags.use_subsurface_flag == 2:
         model_variables.road_meteo_data[constants.T_sub_index, ti, tr, ro] = (
             model_variables.road_meteo_data[
-                constants.T_sub_index, max(1, ti - 1), tr, ro
+                constants.T_sub_index, max(0, ti - 1), tr, ro
             ]
             * (1.0 - time_config.dt / model_parameters.sub_surf_average_time)
             + model_variables.road_meteo_data[
-                constants.T_s_index, max(1, ti - 1), tr, ro
+                constants.T_s_index, max(0, ti - 1), tr, ro
             ]
             * time_config.dt
             / model_parameters.sub_surf_average_time
@@ -208,10 +208,10 @@ def road_dust_surface_wetness(
     if ti > time_config.min_time and model_flags.use_subsurface_flag == 3:
         model_variables.road_meteo_data[constants.T_sub_index, ti, tr, ro] = (
             model_variables.road_meteo_data[
-                constants.T_sub_index, max(1, ti - 1), tr, ro
+                constants.T_sub_index, max(0, ti - 1), tr, ro
             ]
             * (1.0 - time_config.dt / model_parameters.sub_surf_average_time)
-            + converted_data.meteo_data[constants.T_a_index, max(1, ti - 1), ro]
+            + converted_data.meteo_data[constants.T_a_index, max(0, ti - 1), ro]
             * time_config.dt
             / model_parameters.sub_surf_average_time
         )
@@ -429,7 +429,7 @@ def road_dust_surface_wetness(
             # Update T_s_0 for forecast mode
             if tf is not None:
                 T_s_0 = model_variables.road_meteo_data[
-                    constants.T_s_index, ti - 1, tr, ro
+                    constants.T_s_index, max(0, ti - 1), tr, ro
                 ]
         else:
             E_corr = 0.0

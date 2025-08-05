@@ -137,7 +137,7 @@ def main():
 
         logger.info("Starting time loop...")
 
-        for tf in range(time_config.min_time, time_config.max_time):
+        for tf in range(time_config.min_time, time_config.max_time + 1):
             if model_flags.forecast_hour == 0:
                 forecast_index = 0
             else:
