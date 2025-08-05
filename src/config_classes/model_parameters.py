@@ -108,7 +108,7 @@ class model_parameters:
     # Activity efficiency factors - h_eff[efficiency_type, source_index, size]
     h_eff: np.ndarray = field(
         default_factory=lambda: np.zeros(
-            (4, constants.num_source_all, constants.num_size)
+            (4, constants.num_source_all - 1, constants.num_size)
         )
     )
 
