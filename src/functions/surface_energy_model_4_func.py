@@ -90,7 +90,7 @@ def surface_energy_model_4_func(
     set_limit_noevap = 1
     limit_evap = 1
     limit_condens = 1
-    dissolution_flag = True
+    dissolution_flag = 1
 
     # Set time step in seconds
     dt_sec = dt_h_in * 3600.0
@@ -136,7 +136,7 @@ def surface_energy_model_4_func(
     # Set atmospheric temperature in Kelvin
     TK_a = T0C + TC
 
-    # Set air density
+    # Set air density (P is in hPa, convert to Pa by multiplying by 100)
     rho = P * 100.0 / (RD * TK_a)
 
     # Initialize surface temperature
@@ -263,9 +263,13 @@ def surface_energy_model_4_func(
             L_ice = max(L_min, min(L_max, L_ice))
             L = g_surf_fraction * L_water + s_surf_fraction * L_ice
 
-            # Set evaporation
-            evap_water = L_water / lambda_val * dt_sec
-            evap_ice = L_ice / lambda_ice * dt_sec
+            # Set evaporation (convert from W/m² to mm over time step)
+            # L_water is in W/m² = kg/s³, lambda_val is in J/kg = m²/s²
+            # L_water/lambda_val gives kg/m²/s
+            # Multiply by dt_sec to get kg/m² over time step
+            # Since water density is 1000 kg/m³, kg/m² = mm
+            evap_water = L_water / lambda_val * dt_sec  # mm
+            evap_ice = L_ice / lambda_ice * dt_sec  # mm
             evap = g_surf_fraction * evap_water + s_surf_fraction * evap_ice
 
             # Limit evaporation to the amount of water available
@@ -286,14 +290,14 @@ def surface_energy_model_4_func(
             if limit_evap:
                 if evap >= (g_s_surf - g_equil) / dt_h and evap >= 0:
                     evap = max(0.0, (g_s_surf - g_equil) / dt_h)
-                    L = evap * lambda_mixed * dt_h / dt_sec
+                    L = evap * lambda_mixed * dt_h / dt_sec  # Convert mm to W/m²
                     L = max(L_min, min(L_max, L))
 
             if limit_condens:
                 if g_equil <= g_min and evap < 0:
                     if evap <= (g_s_surf - g_equil) / dt_h and evap < 0:
                         evap = min(0.0, (g_s_surf - g_equil) / dt_h)
-                        L = evap * lambda_mixed * dt_h / dt_sec
+                        L = evap * lambda_mixed * dt_h / dt_sec  # Convert mm to W/m²
                         L = max(L_min, min(L_max, L))
 
             # Calculate surface temperature implicitly to avoid instabilities
@@ -322,9 +326,11 @@ def surface_energy_model_4_func(
             # Diagnose potential evaporation
             L_pot_water = -rho * lambda_val * (q - qsats_water) / r_aero
             L_pot_ice = -rho * lambda_ice * (q - qsats_ice) / r_aero
-            evap_pot_water = L_pot_water / lambda_val * dt_sec
-            evap_pot_ice = L_pot_ice / lambda_ice * dt_sec
+            evap_pot_water = L_pot_water / lambda_val * dt_sec  # mm
+            evap_pot_ice = L_pot_ice / lambda_ice * dt_sec  # mm
             evap_pot = g_surf_fraction * evap_pot_water + s_surf_fraction * evap_pot_ice
+
+            # Note: evap_pot calculation matches MATLAB - no scaling needed
 
             # Diagnose radiation based on current average temperature
             long_out = eps_s * sigma * (T0C + TCs) ** 4
@@ -380,8 +386,8 @@ def surface_energy_model_4_func(
         RH_salt_final,
         RHs,
         M_road_dissolved_ratio_temp,
-        evap,
-        evap_pot,
+        evap / dt_h,  # Convert to mm/hr
+        evap_pot / dt_h,  # Convert to mm/hr
         melt,
         freeze,
         H,

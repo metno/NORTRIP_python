@@ -10,11 +10,11 @@ def q_sat_ice_func(TC: float, P: float) -> tuple[float, float, float]:
 
     Args:
         TC: Temperature in Celsius
-        P: Pressure in Pa (converted from mbar/hPa internally)
+        P: Pressure in hPa/mbar (same as MATLAB)
 
     Returns:
         tuple: (esat, qsat, d_qsat_dT) where:
-            esat: Saturation vapor pressure over ice in Pa
+            esat: Saturation vapor pressure over ice in hPa
             qsat: Saturation specific humidity in kg/kg
             d_qsat_dT: Temperature derivative of qsat in kg/kg/K
     """
@@ -23,23 +23,19 @@ def q_sat_ice_func(TC: float, P: float) -> tuple[float, float, float]:
     b = 22.46
     c = 272.62
 
-    # Convert pressure from Pa to hPa for calculations
-    P_hPa = P / 100.0
+    # Pressure is already in hPa/mbar (same as MATLAB)
+    P_hPa = P
 
     # Saturation vapor pressure over ice (Magnus formula) in hPa
-    esat_hPa = a * np.exp(b * TC / (c + TC))
-
-    # Convert back to Pa
-    esat = esat_hPa * 100.0
+    esat = a * np.exp(b * TC / (c + TC))
 
     # Saturation specific humidity (Clausius-Clapeyron)
-    # q = 0.622 * e / (P - 0.378 * e)
-    qsat = 0.622 * esat / (P - 0.378 * esat)
+    qsat = 0.622 * esat / (P_hPa - 0.378 * esat)
 
-    # Temperature derivative of saturation vapor pressure (Pa/K)
+    # Temperature derivative of saturation vapor pressure (hPa/K)
     d_esat_dT = esat * b * c / ((c + TC) ** 2)
 
     # Temperature derivative of saturation specific humidity (kg/kg/K)
-    d_qsat_dT = 0.622 * P / ((P - 0.378 * esat) ** 2) * d_esat_dT
+    d_qsat_dT = 0.622 * P_hPa / ((P_hPa - 0.378 * esat) ** 2) * d_esat_dT
 
     return esat, qsat, d_qsat_dT
