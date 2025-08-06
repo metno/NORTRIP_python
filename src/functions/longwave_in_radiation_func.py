@@ -26,9 +26,9 @@ def longwave_in_radiation_func(TC: float, RH: float, n_c: float, P: float) -> fl
     esat, qsat, d_qsat_dT = q_sat_func(TC, P)
 
     # Actual vapor pressure
-    # The Python q_sat_func returns esat in Pa, but we need to work in hPa like MATLAB
+    # The Python q_sat_func now returns esat in hPa (same as MATLAB)
     # In MATLAB: e_a = esat * RH / 100, where esat is in hPa
-    esat_hPa = esat / 100.0  # Convert from Pa to hPa
+    esat_hPa = esat  # Already in hPa
     e_a = esat_hPa * RH / 100.0  # e_a in hPa
 
     # Air temperature in Kelvin
