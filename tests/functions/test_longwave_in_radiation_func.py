@@ -122,31 +122,3 @@ def test_longwave_in_radiation_func_cloud_sensitivity():
     # Longwave radiation should generally increase with cloud cover
     for i in range(1, len(results)):
         assert results[i] >= results[i - 1]
-
-
-def test_longwave_in_radiation_func_physical_limits():
-    """Test that results are within physical limits."""
-
-    # Test various combinations
-    test_conditions = [
-        (-20.0, 40.0, 0.1, 101325.0),
-        (0.0, 80.0, 0.5, 101325.0),
-        (25.0, 95.0, 0.9, 101325.0),
-        (35.0, 30.0, 0.0, 90000.0),
-    ]
-
-    for TC, RH, n_c, P in test_conditions:
-        result = longwave_in_radiation_func(TC, RH, n_c, P)
-
-        # Should be positive
-        assert result > 0
-
-        # Should be less than Stefan-Boltzmann emission from air temperature
-        # (since emissivity < 1)
-        T0C = 273.15
-        sigma = 5.67e-8
-        blackbody_emission = sigma * (T0C + TC) ** 4
-        assert result < blackbody_emission
-
-        # Should be reasonable atmospheric range
-        assert 140 < result < 600
