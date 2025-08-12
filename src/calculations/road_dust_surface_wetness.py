@@ -405,7 +405,7 @@ def road_dust_surface_wetness(
             if tf > time_config.min_time + 1 and tf == ti:
                 # Set the previous (initial) model surface temperature to the observed surface temperature in forecast mode
                 model_variables.road_temperature_forecast_missing[
-                    tf + forecast_index
+                    tf + forecast_index - 1
                 ] = 1
 
                 # Find if road temperature observation is missing
@@ -429,7 +429,7 @@ def road_dust_surface_wetness(
                             ]
                         )
                     model_variables.road_temperature_forecast_missing[
-                        tf + forecast_index
+                        tf + forecast_index - 1
                     ] = 0
                 # else: road_temperature_forecast_missing will be 1 (true) and the modelled temperature will be used
 
