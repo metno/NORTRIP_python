@@ -31,6 +31,7 @@ from calculations import (
 import logging
 from model_args import create_arg_parser
 from fortran import NORTRIP_fortran_control
+from plots import plot_road_dust_result
 
 
 logging.basicConfig(
@@ -302,6 +303,23 @@ def main():
         )
 
     # End road loop
+
+    # Generate plots (summary for now)
+    try:
+        plot_road_dust_result(
+            time_config=time_config,
+            converted_data=converted_data,
+            initial_data=initial_input,
+            metadata=metadata_input,
+            airquality_data=airquality_input,
+            model_parameters=model_parameters,
+            model_flags=model_flags,
+            model_variables=model_variables,
+            paths=paths,
+            ro=0,
+        )
+    except Exception as e:
+        logger.exception(f"Plotting failed: {e}")
 
     logger.info("End of NORTRIP_Control")
 
