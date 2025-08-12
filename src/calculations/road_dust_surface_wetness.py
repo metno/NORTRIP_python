@@ -38,8 +38,8 @@ def road_dust_surface_wetness(
     model_flags: model_flags,
     metadata: input_metadata,
     input_activity: input_activity,
-    tf: int = None,
-    meteorology_input: "input_meteorology" = None,
+    tf: int,
+    meteorology_input: input_meteorology,
 ):
     """
     Calculate road surface moisture and retention in the NORTRIP model.
@@ -440,38 +440,38 @@ def road_dust_surface_wetness(
 
             T_s_0 = model_variables.road_meteo_data[C.T_s_index, ti - 1, tr, ro]
 
-        # DEBUG: Print surface energy model inputs
-        if ti >= 745 and ti <= 750:
-            logger.info("=== SURFACE ENERGY MODEL INPUTS ===")
-            logger.info(f"short_rad_net_temp: {short_rad_net_temp:.6f}")
-            logger.info(
-                f"long_rad_in: {converted_data.meteo_data[C.long_rad_in_index, ti, ro]:.6f}"
-            )
-            logger.info(
-                f"H_traffic: {model_variables.road_meteo_data[C.H_traffic_index, ti, tr, ro]:.6f}"
-            )
-            logger.info(
-                f"r_aero: {model_variables.road_meteo_data[C.r_aero_index, ti, tr, ro]:.6f}"
-            )
-            logger.info(f"T_a: {converted_data.meteo_data[C.T_a_index, ti, ro]:.6f}")
-            logger.info(f"T_s_0: {T_s_0:.6f}")
-            logger.info(
-                f"T_sub: {model_variables.road_meteo_data[C.T_sub_index, ti, tr, ro]:.6f}"
-            )
-            logger.info(f"RH: {converted_data.meteo_data[C.RH_index, ti, ro]:.6f}")
-            logger.info(
-                f"RH_s: {model_variables.road_meteo_data[C.RH_s_index, ti, tr, ro]:.6f}"
-            )
-            logger.info(f"RH_s_0: {RH_s_0:.6f}")
-            logger.info(
-                f"pressure: {converted_data.meteo_data[C.pressure_index, ti, ro]:.6f}"
-            )
-            logger.info(f"g_water: {g_road_0_data[C.water_index]:.6f}")
-            logger.info(
-                f"g_ice_snow: {g_road_0_data[C.ice_index] + g_road_0_data[C.snow_index]:.6f}"
-            )
-            logger.info(f"dt: {time_config.dt:.6f}")
-            logger.info(f"E_corr: {E_corr:.6f}")
+        # # DEBUG: Print surface energy model inputs
+        # if ti >= 745 and ti <= 750:
+        #     logger.info("=== SURFACE ENERGY MODEL INPUTS ===")
+        #     logger.info(f"short_rad_net_temp: {short_rad_net_temp:.6f}")
+        #     logger.info(
+        #         f"long_rad_in: {converted_data.meteo_data[C.long_rad_in_index, ti, ro]:.6f}"
+        #     )
+        #     logger.info(
+        #         f"H_traffic: {model_variables.road_meteo_data[C.H_traffic_index, ti, tr, ro]:.6f}"
+        #     )
+        #     logger.info(
+        #         f"r_aero: {model_variables.road_meteo_data[C.r_aero_index, ti, tr, ro]:.6f}"
+        #     )
+        #     logger.info(f"T_a: {converted_data.meteo_data[C.T_a_index, ti, ro]:.6f}")
+        #     logger.info(f"T_s_0: {T_s_0:.6f}")
+        #     logger.info(
+        #         f"T_sub: {model_variables.road_meteo_data[C.T_sub_index, ti, tr, ro]:.6f}"
+        #     )
+        #     logger.info(f"RH: {converted_data.meteo_data[C.RH_index, ti, ro]:.6f}")
+        #     logger.info(
+        #         f"RH_s: {model_variables.road_meteo_data[C.RH_s_index, ti, tr, ro]:.6f}"
+        #     )
+        #     logger.info(f"RH_s_0: {RH_s_0:.6f}")
+        #     logger.info(
+        #         f"pressure: {converted_data.meteo_data[C.pressure_index, ti, ro]:.6f}"
+        #     )
+        #     logger.info(f"g_water: {g_road_0_data[C.water_index]:.6f}")
+        #     logger.info(
+        #         f"g_ice_snow: {g_road_0_data[C.ice_index] + g_road_0_data[C.snow_index]:.6f}"
+        #     )
+        #     logger.info(f"dt: {time_config.dt:.6f}")
+        #     logger.info(f"E_corr: {E_corr:.6f}")
 
         # Call the surface energy model
         (
@@ -521,18 +521,18 @@ def road_dust_surface_wetness(
             E_corr,
         )
 
-        # DEBUG: Print surface energy model outputs
-        if ti >= 745 and ti <= 750:
-            logger.info(f"=== SURFACE ENERGY MODEL OUTPUT ===")
-            logger.info(
-                f"evap_rate: {model_variables.road_meteo_data[C.evap_index, ti, tr, ro]:.6f}"
-            )
-            logger.info(
-                f"T_s: {model_variables.road_meteo_data[C.T_s_index, ti, tr, ro]:.6f}"
-            )
-            logger.info(
-                f"RH_s_final: {model_variables.road_meteo_data[C.RH_s_index, ti, tr, ro]:.6f}"
-            )
+        # # DEBUG: Print surface energy model outputs
+        # if ti >= 745 and ti <= 750:
+        #     logger.info(f"=== SURFACE ENERGY MODEL OUTPUT ===")
+        #     logger.info(
+        #         f"evap_rate: {model_variables.road_meteo_data[C.evap_index, ti, tr, ro]:.6f}"
+        #     )
+        #     logger.info(
+        #         f"T_s: {model_variables.road_meteo_data[C.T_s_index, ti, tr, ro]:.6f}"
+        #     )
+        #     logger.info(
+        #         f"RH_s_final: {model_variables.road_meteo_data[C.RH_s_index, ti, tr, ro]:.6f}"
+        #     )
 
         # Redistribute melting between snow and ice
         snow_ice_sum = np.sum(g_road_0_data[C.snow_ice_index])
@@ -566,7 +566,7 @@ def road_dust_surface_wetness(
     )
 
     if model_variables.road_meteo_data[C.evap_index, ti, tr, ro] > 0:  # Evaporation
-        # # Debug the calculation to identify the issue
+        # # Debug
         # evap_rate = model_variables.road_meteo_data[C.evap_index, ti, tr, ro]
         # if ti >= 745 and ti <= 750:
         #     logger.info("DEBUG EVAPORATION CALCULATION:")
