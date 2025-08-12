@@ -1,6 +1,6 @@
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Tuple, List, Optional, Union
+from typing import Tuple, List
 
 
 def average_data_func(
@@ -125,20 +125,19 @@ def average_data_func(
         daily_vals = []
 
         for i_day in range(start_day, end_day + 1):
-            # Find indices for this day
+            # Find indices for this day within [i_min, i_max] inclusive
             day_mask = np.floor(date_num) == i_day
             day_indices = np.where(day_mask)[0]
-            day_indices = day_indices[(day_indices > i_min) & (day_indices < i_max)]
+            day_indices = day_indices[(day_indices >= i_min) & (day_indices <= i_max)]
 
             if len(day_indices) >= 12:
                 day_vals = val[day_indices]
                 valid_vals = day_vals[~np.isnan(day_vals)]
 
-                if len(valid_vals) > min_num:
-                    if use_max:
-                        daily_vals.append(np.max(valid_vals))
-                    else:
-                        daily_vals.append(np.mean(valid_vals))
+                if len(valid_vals) >= min_num:
+                    daily_vals.append(
+                        np.max(valid_vals) if use_max else np.mean(valid_vals)
+                    )
                 else:
                     daily_vals.append(np.nan)
             else:
@@ -278,7 +277,10 @@ def average_data_func(
             i1 = max(i - di, 0)
             i2 = min(i + di, len(av_date_num) - 1)
             window_vals = val[i_min + i1 : i_min + i2 + 1]
-            running_vals.append(np.mean(window_vals))
+            # Ignore NaNs when averaging; NaN if all NaN
+            running_vals.append(
+                np.nanmean(window_vals) if np.any(~np.isnan(window_vals)) else np.nan
+            )
 
         av_val = np.array(running_vals).reshape(-1, 1)
         av_date_str = [
