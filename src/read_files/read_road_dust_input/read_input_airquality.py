@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 def read_input_airquality(
     airquality_df: pd.DataFrame,
-    ospm_df: pd.DataFrame | None = None,
-    nodata: float = -99.0,
-    traffic_date_num: np.ndarray | None = None,
-    traffic_hour: np.ndarray | None = None,
-    N_total_nodata: list | None = None,
-    N_good_data: np.ndarray | None = None,
+    ospm_df: pd.DataFrame | None,
+    nodata: float,
+    traffic_date_num: np.ndarray,
+    traffic_hour: np.ndarray,
+    N_total_nodata: list,
+    N_good_data: np.ndarray,
     print_results: bool = False,
 ) -> input_airquality:
     """
@@ -159,12 +159,10 @@ def read_input_airquality(
 
     # Replace emission data when there is no traffic data (as this is usually coupled)
     if (
-        N_total_nodata is not None
-        and len(N_total_nodata) > 0
-        and N_good_data is not None
+        len(N_total_nodata) > 0
         and len(N_good_data) > 0
-        and traffic_date_num is not None
         and traffic_hour is not None
+        and N_good_data is not None
     ):
         # Fill NOX emissions using daily averages
         if NOX_emis_available:

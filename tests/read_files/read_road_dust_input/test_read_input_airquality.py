@@ -18,7 +18,16 @@ def test_read_input_airquality_basic():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check basic structure
     assert result.n_date == 3
@@ -49,7 +58,16 @@ def test_read_input_airquality_basic():
 def test_read_input_airquality_empty_data():
     """Test handling of empty air quality data."""
     df = pd.DataFrame()
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Should return default initialized dataclass
     assert result.n_date == 0
@@ -69,7 +87,16 @@ def test_read_input_airquality_minimal_data():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that basic data is read
     assert result.n_date == 2
@@ -99,7 +126,16 @@ def test_read_input_airquality_missing_columns():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that data is read correctly
     assert result.n_date == 3
@@ -125,7 +161,16 @@ def test_read_input_airquality_nan_handling():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that NaN values are converted to 0.0 by safe_float, then we don't have special logic for 0.0 here
     # The "NaN" string gets converted to 0.0 by safe_float, not to nodata
@@ -155,7 +200,16 @@ def test_read_input_airquality_net_concentration_calculation():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check positive net concentrations
     np.testing.assert_almost_equal(
@@ -209,6 +263,7 @@ def test_read_input_airquality_daily_average_filling():
     df = pd.DataFrame(test_data)
     result = read_input_airquality(
         df,
+        ospm_df=None,
         nodata=-99.0,
         traffic_date_num=traffic_date_num,
         traffic_hour=traffic_hour,
@@ -248,7 +303,14 @@ def test_read_input_airquality_ospm_data():
     osmp_df = pd.DataFrame(osmp_data)
 
     result = read_input_airquality(
-        airquality_df, ospm_df=osmp_df, nodata=-99.0, print_results=False
+        airquality_df,
+        ospm_df=osmp_df,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
     )
 
     # Check that OSPM data exists
@@ -292,7 +354,14 @@ def test_read_input_airquality_osmp_missing_data():
     osmp_df = pd.DataFrame(osmp_data)
 
     result = read_input_airquality(
-        airquality_df, ospm_df=osmp_df, nodata=-99.0, print_results=False
+        airquality_df,
+        ospm_df=osmp_df,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
     )
 
     # Check that OSMP data exists
@@ -315,7 +384,16 @@ def test_read_input_airquality_no_osmp_data():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, ospm_df=None, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that OSMP data does not exist
     assert result.OSPM_data_exists == 0
@@ -339,7 +417,16 @@ def test_read_input_airquality_salt_observations():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check salt data availability
     assert result.Salt_obs_available[constants.na] == 1
@@ -364,7 +451,16 @@ def test_read_input_airquality_emission_availability():
     # fmt: on
 
     df = pd.DataFrame(test_data_no_emis)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that emission data is marked as unavailable
     assert result.NOX_emis_available == 0
@@ -380,7 +476,16 @@ def test_read_input_airquality_emission_availability():
     # fmt: on
 
     df2 = pd.DataFrame(test_data_some_emis)
-    result2 = read_input_airquality(df2, nodata=-99.0, print_results=False)
+    result2 = read_input_airquality(
+        df2,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that emission data with some valid values is marked as available
     assert result2.NOX_emis_available == 1
@@ -399,7 +504,16 @@ def test_read_input_airquality_array_dimensions():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     n_date = result.n_date
 
@@ -432,7 +546,16 @@ def test_read_input_airquality_edge_cases():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check zero concentrations
     assert result.PM_obs[constants.pm_10, 0] == 0.0
@@ -455,7 +578,16 @@ def test_read_input_airquality_data_consistency():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that net concentrations are calculated consistently
     for i in range(result.n_date):
@@ -494,7 +626,16 @@ def test_read_input_airquality_comprehensive_missing_data():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_airquality(df, nodata=-99.0, print_results=False)
+    result = read_input_airquality(
+        df,
+        ospm_df=None,
+        nodata=-99.0,
+        traffic_date_num=np.array([]),
+        traffic_hour=np.array([]),
+        N_total_nodata=[],
+        N_good_data=np.array([]),
+        print_results=False,
+    )
 
     # Check that missing data is properly handled
     assert result.PM_obs[constants.pm_10, 1] == -99.0
