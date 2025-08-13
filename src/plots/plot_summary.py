@@ -1,63 +1,21 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 from matplotlib.gridspec import GridSpec
 
 import constants
 from config_classes import model_parameters, model_flags, model_file_paths
 from input_classes import converted_data, input_metadata, input_airquality
 from initialise import time_config, model_variables
-from functions import average_data_func
+from .style import shrink_y_labels
+from .helpers import (
+    matlab_datenum_to_datetime_array as _matlab_datenum_to_datetime_array,
+    prepare_series as _prepare_series,
+    format_time_axis as _format_time_axis,
+)
 
-
-def _matlab_datenum_to_datetime_array(nums: np.ndarray) -> list:
-    """Convert MATLAB datenums to Python datetimes for axis plotting."""
-    # MATLAB datenum 1 = year 0000-01-01, Python has no year 0; Average_data_func uses year 1 base.
-    # We'll mirror that logic.
-    from datetime import datetime, timedelta
-
-    def convert_one(d: float):
-        matlab_epoch = datetime(1, 1, 1)
-        return matlab_epoch + timedelta(days=float(d) - 1.0)
-
-    return [convert_one(d) for d in np.asarray(nums).ravel()]
-
-
-def _prepare_series(
-    *,
-    date_num: np.ndarray,
-    series: np.ndarray,
-    time_config: time_config,
-    av: Tuple[int, ...],
-) -> Tuple[list, np.ndarray, np.ndarray]:
-    i_min = time_config.min_time
-    i_max = time_config.max_time
-    return average_data_func(date_num, series, i_min, i_max, list(av))
-
-
-def _format_time_axis(
-    ax: plt.Axes, dt_x: list, av_index: int, day_tick_limit: int = 150
-):
-    if av_index in (3, 5):
-        return  # handled separately using string ticks
-    if not dt_x:
-        return
-    # Ensure sensible limits
-    ax.set_xlim(dt_x[0], dt_x[-1])
-    span_days = (dt_x[-1] - dt_x[0]).days if len(dt_x) >= 2 else 0
-    if span_days > day_tick_limit:
-        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
-        ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=1))
-    else:
-        step = max(1, span_days // 12 or 1)
-        ax.xaxis.set_major_locator(mdates.DayLocator(interval=step))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
-    for label in ax.get_xticklabels():
-        label.set_rotation(0)
-        label.set_ha("center")
+# Helpers moved to plots.helpers for reuse and clarity
 
 
 def plot_summary(
@@ -92,31 +50,13 @@ def plot_summary(
         model_variables.M_road_data[:, :, :, : model_parameters.num_track, ro], axis=3
     )
 
-    # Additional temporary arrays mirroring MATLAB structure (for future panels)
-    # The following temporary arrays are prepared for parity with MATLAB code and future panels.
-    # Uncomment when needed.
-    # E_road_data_temp = np.sum(
-    #     model_variables.E_road_data[:, :, :, :, : model_parameters.num_track, ro],
-    #     axis=4,
-    # )
-    # M_road_balance_data_temp = np.sum(
-    #     model_variables.M_road_balance_data[:, :, :, :, : model_parameters.num_track, ro],
-    #     axis=4,
-    # )
-    # WR_time_data_temp = np.sum(
-    #     model_variables.WR_time_data[:, :, : model_parameters.num_track, ro], axis=2
-    # )
-
-    # Per-road slices for convenience
-    # meteo_data_temp = converted_data.meteo_data[:, :, ro]
-    # traffic_data_temp = converted_data.traffic_data[:, :, ro]
-    # activity_data_temp = converted_data.activity_data[:, :, ro]
-    # f_conc_temp = model_variables.f_conc[:, ro]
-
-    # Other temporary arrays can be computed similarly if/when needed by additional panels
-    # E_road_data_temp = _track_weighted_sum(model_variables.E_road_data[:, :, :, :, :, ro], np.array(model_parameters.f_track))
-    # g_road_data_temp = _track_weighted_sum(model_variables.g_road_data[:, :, :, ro], np.array(model_parameters.f_track))
-    # activity_data_temp = converted_data.activity_data[:, :, ro]
+    # Additional per-road and track-collapsed data needed across panels
+    E_road_data_temp = np.sum(
+        model_variables.E_road_data[:, :, :, :, : model_parameters.num_track, ro],
+        axis=4,
+    )
+    traffic_data_temp = converted_data.traffic_data[:, :, ro]
+    activity_data_temp = converted_data.activity_data[:, :, ro]
 
     # Observations
     PM_obs_net = airquality_data.PM_obs_net
@@ -222,41 +162,46 @@ def plot_summary(
             time_config=time_config,
             av=av,
         )
-        _, _, y_obs = _prepare_series(
-            date_num=date_num,
-            series=PM_obs_net_temp[x, :],
-            time_config=time_config,
-            av=av,
-        )
-        _, _, y_salt_na = _prepare_series(
-            date_num=date_num,
-            series=C_data_temp2[constants.salt_index[0], x, constants.C_total_index, :],
-            time_config=time_config,
-            av=av,
-        )
-        _, _, y_salt_2 = _prepare_series(
-            date_num=date_num,
-            series=C_data_temp2[constants.salt_index[1], x, constants.C_total_index, :],
-            time_config=time_config,
-            av=av,
-        )
-        _, _, y_wear = _prepare_series(
-            date_num=date_num,
-            series=np.nansum(
-                C_data_temp2[constants.wear_index, x, constants.C_total_index, :],
-                axis=0,
-            ),
-            time_config=time_config,
-            av=av,
-        )
-        _, _, y_sand = _prepare_series(
-            date_num=date_num,
-            series=C_data_temp2[constants.sand_index, x, constants.C_total_index, :],
-            time_config=time_config,
-            av=av,
-        )
+    _, _, y_obs = _prepare_series(
+        date_num=date_num,
+        series=PM_obs_net_temp[x, :],
+        time_config=time_config,
+        av=av,
+    )
+    _, _, y_salt_na = _prepare_series(
+        date_num=date_num,
+        series=C_data_temp2[constants.salt_index[0], x, constants.C_total_index, :],
+        time_config=time_config,
+        av=av,
+    )
+    _, _, y_salt_2 = _prepare_series(
+        date_num=date_num,
+        series=C_data_temp2[constants.salt_index[1], x, constants.C_total_index, :],
+        time_config=time_config,
+        av=av,
+    )
+    _, _, y_wear = _prepare_series(
+        date_num=date_num,
+        series=np.nansum(
+            C_data_temp2[constants.wear_index, x, constants.C_total_index, :],
+            axis=0,
+        ),
+        time_config=time_config,
+        av=av,
+    )
+    _, _, y_sand = _prepare_series(
+        date_num=date_num,
+        series=C_data_temp2[constants.sand_index, x, constants.C_total_index, :],
+        time_config=time_config,
+        av=av,
+    )
 
-    fig = plt.figure(figsize=(12, 10))
+    fig = plt.figure()
+    # Set window title if backend supports it
+    try:
+        fig.canvas.manager.set_window_title("Figure 13: Summary")
+    except Exception:
+        pass
     gs = GridSpec(4, 3, figure=fig)
     # Expose indices/masks for potential external use
     fig._pm_valid_indices = valid_indices  # type: ignore[attr-defined]
@@ -278,7 +223,7 @@ def plot_summary(
         # Use string ticks for daily cycle or weekday plots
         ax1.plot(xplot, y_obs, "k--", linewidth=1, label="Observed")
         ax1.plot(xplot, y_salt_na, "g-", linewidth=1, label="Modelled salt(na)")
-        ax1.plot(xplot, y_salt_2, "g--", linewidth=1, label="Modelled salt(2)")
+        ax1.plot(xplot, y_salt_2, "g--", linewidth=1, label="Modelled salt(mg)")
         ax1.plot(xplot, y_wear, "r:", linewidth=1, label="Modelled wear")
         ax1.plot(xplot, y_sand, "m--", linewidth=1, label="Modelled sand")
         ax1.plot(xplot, y_total, "b-", linewidth=1, label="Modelled total")
@@ -288,24 +233,24 @@ def plot_summary(
         dt_x = _matlab_datenum_to_datetime_array(xplot)
         ax1.plot(dt_x, y_obs, "k--", linewidth=1, label="Observed")
         ax1.plot(dt_x, y_salt_na, "g-", linewidth=1, label="Modelled salt(na)")
-        ax1.plot(dt_x, y_salt_2, "g--", linewidth=1, label="Modelled salt(2)")
+        ax1.plot(dt_x, y_salt_2, "g--", linewidth=1, label="Modelled salt(mg)")
         ax1.plot(dt_x, y_wear, "r:", linewidth=1, label="Modelled wear")
         ax1.plot(dt_x, y_sand, "m--", linewidth=1, label="Modelled sand")
         ax1.plot(dt_x, y_total, "b-", linewidth=1, label="Modelled total")
         _format_time_axis(ax1, dt_x, av_index)
-    ax1.set_ylabel(f"{pm_text} concentration (µg/m^3)")
+    ax1.set_ylabel(f"{pm_text} concentration (µg/m³)")
     y_max_1 = float(
         np.nanmax(np.vstack([y_total, y_obs, y_salt_na, y_salt_2, y_wear, y_sand]))
     )
     if np.isfinite(y_max_1) and y_max_1 > 0:
         ax1.set_ylim(0, y_max_1 * 1.1)
-    ax1.legend(loc="upper left", fontsize=8)
+    ax1.legend(loc="upper left")
     ax1.grid(True, alpha=0.2)
 
     # Subplot 2: Mass loading
     # Convert linear mass per road width (mg/m) to areal mass (g/m^2)
     # MATLAB: b_factor = 1/1000/b_road_lanes
-    lanes_width = getattr(metadata, "b_road_lanes", 0.0) or 0.0
+    lanes_width = metadata.b_road_lanes
     b_factor = 1.0 / 1000.0 / max(float(lanes_width), 1.0)
     x_load = constants.pm_200
     x_str2, xplot2, y_dust = _prepare_series(
@@ -336,7 +281,7 @@ def plot_summary(
     if av_index in (3, 5):
         ax2.plot(xplot2, y_dust, "k-", linewidth=1, label="Suspendable dust")
         ax2.plot(xplot2, y_salt_na_m, "g-", linewidth=1, label="Salt(na)")
-        ax2.plot(xplot2, y_salt_2_m, "g--", linewidth=1, label="Salt(2)")
+        ax2.plot(xplot2, y_salt_2_m, "g--", linewidth=1, label="Salt(mg)")
         ax2.plot(xplot2, y_sand_m, "r--", linewidth=1, label="Suspendable sand")
         ax2.set_xticks(xplot2)
         ax2.set_xticklabels(x_str2)
@@ -344,40 +289,16 @@ def plot_summary(
         dt_x2 = _matlab_datenum_to_datetime_array(xplot2)
         ax2.plot(dt_x2, y_dust, "k-", linewidth=1, label="Suspendable dust")
         ax2.plot(dt_x2, y_salt_na_m, "g-", linewidth=1, label="Salt(na)")
-        ax2.plot(dt_x2, y_salt_2_m, "g--", linewidth=1, label="Salt(2)")
+        ax2.plot(dt_x2, y_salt_2_m, "g--", linewidth=1, label="Salt(mg)")
         ax2.plot(dt_x2, y_sand_m, "r--", linewidth=1, label="Suspendable sand")
         _format_time_axis(ax2, dt_x2, av_index)
-    ax2.set_ylabel("Mass loading (g/m^2)")
+    ax2.set_ylabel("Mass loading (g/m²)")
     y_max_2 = float(np.nanmax(np.vstack([y_dust, y_salt_na_m, y_salt_2_m, y_sand_m])))
     if np.isfinite(y_max_2) and y_max_2 > 0:
         ax2.set_ylim(0, y_max_2 * 1.1)
 
-    ax2.legend(loc="upper left", fontsize=8)
+    ax2.legend(loc="upper left")
     ax2.grid(True, alpha=0.2)
-
-    # Additional panels and statistics (matching MATLAB summary)
-    # Build track-collapsed emissions and quality factor arrays
-    E_road_data_temp = np.sum(
-        model_variables.E_road_data[:, :, :, :, : model_parameters.num_track, ro],
-        axis=4,
-    )
-    traffic_data_temp = converted_data.traffic_data[:, :, ro]
-    activity_data_temp = converted_data.activity_data[:, :, ro]
-
-    # Weighted averages over tracks
-    # weights = np.asarray(model_parameters.f_track[: model_parameters.num_track], dtype=float)
-    # Weighted track means (currently unused in panels below; keep for parity or future use)
-    # road_meteo_data_temp = np.tensordot(
-    #     model_variables.road_meteo_data[:, :, : model_parameters.num_track, ro],
-    #     weights,
-    #     axes=(2, 0),
-    # )  # -> [num_road_meteo, time]
-    # f_q_temp = np.tensordot(
-    #     model_variables.f_q[:, :, : model_parameters.num_track, ro], weights, axes=(2, 0)
-    # )  # -> [source_all, time]
-    # f_q_obs_temp = np.tensordot(
-    #     model_variables.f_q_obs[:, : model_parameters.num_track, ro], weights, axes=(1, 0)
-    # )  # -> [time]
 
     # Subplot: Scatter daily mean observed vs modelled concentrations
     ax_scatter = fig.add_subplot(gs[2, 0])
@@ -425,7 +346,7 @@ def plot_summary(
         ax_scatter.text(
             0.05,
             0.95,
-            f"r^2 = {r_sq:4.2f}, FB = {fb:4.2f}",
+            f"r² = {r_sq:4.2f}, FB = {fb:4.2f}",
             transform=ax_scatter.transAxes,
         )
         ax_scatter.text(
@@ -445,8 +366,8 @@ def plot_summary(
         )
         ax_scatter.text(0.55, 0.18, f"a_0 = {a0:4.1f}", transform=ax_scatter.transAxes)
         ax_scatter.text(0.55, 0.10, f"a_1 = {a1:4.2f}", transform=ax_scatter.transAxes)
-    ax_scatter.set_xlabel(f"{pm_text} modelled concentration (µg/m^3)")
-    ax_scatter.set_ylabel(f"{pm_text} observed concentration (µg/m^3)")
+    ax_scatter.set_xlabel(f"{pm_text} modelled concentration (µg/m³)")
+    ax_scatter.set_ylabel(f"{pm_text} observed concentration (µg/m³)")
 
     # Subplot: Mean concentrations bar chart and emissions EF bar chart
     time_slice = slice(time_config.min_time, time_config.max_time + 1)
@@ -506,12 +427,15 @@ def plot_summary(
         exhaust_conc,
     ]
     bar_conc = ax_concbar.bar(range(len(conc_vals)), conc_vals, color="r")
+    # Observed bar in black
+    if len(bar_conc) > 0:
+        bar_conc[0].set_color("k")
     ax_concbar.set_xticks(range(len(conc_vals)))
     ax_concbar.set_xticklabels(
-        ["obs", "mod", "road", "tyre", "brake", "sand", "na", "salt2", "exh"]
+        ["obs", "mod", "road", "tyre", "brake", "sand", "na", "mg", "exh"]
     )
     ax_concbar.set_title("Mean concentrations")
-    ax_concbar.set_ylabel(f"Concentration {pm_text} (µg/m^3)")
+    ax_concbar.set_ylabel(f"Concentration {pm_text} (µg/m³)")
     for rect, val in zip(bar_conc, conc_vals, strict=False):
         if np.isfinite(val):
             ax_concbar.text(
@@ -520,18 +444,85 @@ def plot_summary(
                 f"{val:5.1f}",
                 ha="center",
                 va="bottom",
-                fontsize=8,
             )
 
     # Emission factor bars
     ax_emis = fig.add_subplot(gs[2, 1])
-    E_all = _nanmean_or_nan(
-        E_road_data_temp[
+    # Build emissions series according to selected size (handle coarse as PM10-PM2.5)
+    if x == constants.pm_course:
+        E_total_series = (
+            E_road_data_temp[
+                constants.total_dust_index,
+                constants.pm_10,
+                constants.E_total_index,
+                time_slice,
+            ]
+            - E_road_data_temp[
+                constants.total_dust_index,
+                constants.pm_25,
+                constants.E_total_index,
+                time_slice,
+            ]
+        )
+        E_dir_series = np.nansum(
+            E_road_data_temp[
+                constants.dust_noexhaust_index,
+                constants.pm_10,
+                constants.E_direct_index,
+                time_slice,
+            ],
+            axis=0,
+        ) - np.nansum(
+            E_road_data_temp[
+                constants.dust_noexhaust_index,
+                constants.pm_25,
+                constants.E_direct_index,
+                time_slice,
+            ],
+            axis=0,
+        )
+        E_susp_series = np.nansum(
+            E_road_data_temp[
+                constants.dust_noexhaust_index,
+                constants.pm_10,
+                constants.E_suspension_index,
+                time_slice,
+            ],
+            axis=0,
+        ) - np.nansum(
+            E_road_data_temp[
+                constants.dust_noexhaust_index,
+                constants.pm_25,
+                constants.E_suspension_index,
+                time_slice,
+            ],
+            axis=0,
+        )
+        E_exh_series = (
+            E_road_data_temp[
+                constants.exhaust_index,
+                constants.pm_10,
+                constants.E_total_index,
+                time_slice,
+            ]
+            - E_road_data_temp[
+                constants.exhaust_index,
+                constants.pm_25,
+                constants.E_total_index,
+                time_slice,
+            ]
+        )
+    else:
+        E_total_series = E_road_data_temp[
             constants.total_dust_index, x, constants.E_total_index, time_slice
         ]
-    )
-    E_susp_all = _nanmean_or_nan(
-        np.nansum(
+        E_dir_series = np.nansum(
+            E_road_data_temp[
+                constants.dust_noexhaust_index, x, constants.E_direct_index, time_slice
+            ],
+            axis=0,
+        )
+        E_susp_series = np.nansum(
             E_road_data_temp[
                 constants.dust_noexhaust_index,
                 x,
@@ -540,41 +531,64 @@ def plot_summary(
             ],
             axis=0,
         )
-    )
-    E_dir_all = _nanmean_or_nan(
-        np.nansum(
-            E_road_data_temp[
-                constants.dust_noexhaust_index, x, constants.E_direct_index, time_slice
-            ],
-            axis=0,
-        )
-    )
-    E_exh = _nanmean_or_nan(
-        E_road_data_temp[
+        E_exh_series = E_road_data_temp[
             constants.exhaust_index, x, constants.E_total_index, time_slice
         ]
-    )
-    mean_N_total_val = _nanmean_or_nan(
-        traffic_data_temp[constants.N_total_index, time_slice]
-    )
-    mean_N_total = max(
-        float(mean_N_total_val) if np.isfinite(mean_N_total_val) else 0.0, 1e-9
-    )
-    mean_f_conc_val = _nanmean_or_nan(f_conc_temp[time_slice])
+
+    # Fill NaNs with 0 to emulate MATLAB behavior (arrays are initialized to 0)
+    E_all = float(np.mean(np.nan_to_num(E_total_series, nan=0.0)))
+    E_dir_all = float(np.mean(np.nan_to_num(E_dir_series, nan=0.0)))
+    E_susp_all = float(np.mean(np.nan_to_num(E_susp_series, nan=0.0)))
+    E_exh = float(np.mean(np.nan_to_num(E_exh_series, nan=0.0)))
+    # If modeled exhaust is unavailable/zero, fall back to EP_emis if provided (MATLAB uses EP_emis when available)
+    if (not np.isfinite(E_exh)) or E_exh <= 0:
+        if getattr(airquality_data, "EP_emis_available", 0):
+            ep_slice = airquality_data.EP_emis[
+                time_config.min_time : time_config.max_time + 1
+            ]
+            ep_slice = np.asarray(ep_slice, dtype=float)
+            # mask nodata
+            ep_mask = (ep_slice != metadata.nodata) & ~np.isnan(ep_slice)
+            if np.any(ep_mask):
+                ep_mean = float(np.nanmean(ep_slice[ep_mask]))
+                if np.isfinite(ep_mean) and ep_mean > 0:
+                    E_exh = ep_mean
+
+    # Mean hourly traffic (match MATLAB mean_AHT calculation)
+    dt = time_config.dt
+    mean_ADT_all_ef = np.zeros((constants.num_tyre, constants.num_veh))
+    for t in range(constants.num_tyre):
+        for v in range(constants.num_veh):
+            idx = constants.N_t_v_index[(t, v)]
+            mean_ADT_all_ef[t, v] = (
+                float(np.nanmean(traffic_data_temp[idx, time_slice])) * 24.0 * dt
+            )
+    mean_ADT_ef = np.nansum(mean_ADT_all_ef, axis=0)
+    mean_AHT = float(np.nansum(mean_ADT_ef)) / 24.0
+    denom_ef = max(mean_AHT, 1e-9)
+    f_conc_slice = f_conc_temp[time_slice]
+    mask_f = (f_conc_slice != metadata.nodata) & ~np.isnan(f_conc_slice)
+    mean_f_conc_val = _nanmean_or_nan(f_conc_slice[mask_f])
     obs_emission = (
         observed_conc / mean_f_conc_val
         if (np.isfinite(mean_f_conc_val) and mean_f_conc_val > 0)
         else float("nan")
     )
-    emis_vals = [
-        obs_emission,
-        E_all,
-        E_dir_all,
-        E_susp_all,
-        E_exh,
-    ]
-    emis_bar_heights = (np.array(emis_vals) / mean_N_total) * 1000.0
+    # Model emission from modeled concentrations if E_all is zero/NaN (fallback to match MATLAB intent)
+    mod_emission_from_conc = (
+        total_conc / mean_f_conc_val
+        if (np.isfinite(mean_f_conc_val) and mean_f_conc_val > 0)
+        else float("nan")
+    )
+    mod_emission_val = (
+        E_all if (np.isfinite(E_all) and E_all > 0) else mod_emission_from_conc
+    )
+    emis_vals = [obs_emission, mod_emission_val, E_dir_all, E_susp_all, E_exh]
+    emis_bar_heights = (np.array(emis_vals) / denom_ef) * 1000.0
     bar_emis = ax_emis.bar([0, 1, 2, 3, 4], emis_bar_heights, color="g")
+    # Observed bar in black
+    if len(bar_emis) > 0:
+        bar_emis[0].set_color("k")
     ax_emis.set_xticks([0, 1, 2, 3, 4])
     ax_emis.set_xticklabels(["Obs.", "Mod.", "Dir.", "Sus.", "Exh."])
     ax_emis.set_title("Mean emission factor")
@@ -587,10 +601,10 @@ def plot_summary(
                 f"{val:5.0f}",
                 ha="center",
                 va="bottom",
-                fontsize=8,
             )
 
     # Bottom row: three text panels
+    # Use global style's font sizes for panel text (no local overrides)
     # Traffic and activity
     ax_text1 = fig.add_subplot(gs[3, 0])
     ax_text1.axis("off")
@@ -652,7 +666,7 @@ def plot_summary(
         f"Mean ADT (li / he) = {float(mean_ADT[constants.li] / max(np.nansum(mean_ADT), 1e-9) * 100):4.1f} / {float(mean_ADT[constants.he] / max(np.nansum(mean_ADT), 1e-9) * 100):4.1f} (%)",
         f"Mean speed (li / he) = {mean_speed_li:4.1f} / {mean_speed_he:4.1f} (km/hr)",
         f"Number of days = {num_days:4.1f}",
-        f"Number salting events (na/salt2) = {len(rsalting1):3.0f}/{len(rsalting2):3.0f}",
+        f"Number salting events (na/mg) = {len(rsalting1):3.0f}/{len(rsalting2):3.0f}",
         f"Number sanding events = {len(rsanding):4.0f}",
         f"Number cleaning events = {len(rcleaning):4.0f}",
         f"Number ploughing events = {len(rploughing):4.0f}",
@@ -714,7 +728,7 @@ def plot_summary(
         "Meteorology",
         f"Mean Temp (C) = {mean_Ta:4.2f}",
         f"Mean RH (%) = {mean_RH:4.1f}",
-        f"Mean global/net (W/m^2) = {mean_short_rad:4.1f}/{mean_short_rad_net:4.1f}",
+        f"Mean global/net (W/m²) = {mean_short_rad:4.1f}/{mean_short_rad_net:4.1f}",
         f"Mean cloud cover (%) = {mean_cloud * 100:4.1f}",
         f"Total precip (mm) = {total_precip:4.1f}",
         f"Frequency precip (%) = {freq_precip * 100:4.1f}",
@@ -775,6 +789,9 @@ def plot_summary(
         lines3 = ["Concentration stats unavailable"]
     for i, tline in enumerate(lines3):
         ax_text3.text(0.0, 1 - i * 0.12, tline)
+
+    # Make y-axis labels slightly smaller than the global label size
+    shrink_y_labels([ax1, ax2, ax_scatter, ax_concbar, ax_emis], points=2)
 
     fig.tight_layout()
     plt.show()

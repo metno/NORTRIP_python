@@ -13,6 +13,7 @@ from initialise.road_dust_initialise_variables import (
     model_variables as ModelVariables,
 )
 from .plot_summary import plot_summary
+from .style import apply_plot_style
 
 
 def plot_road_dust_result(
@@ -48,6 +49,12 @@ def plot_road_dust_result(
         ro: Road index to plot.
         plot_size_fraction: Size fraction index to plot (defaults to PM10).
     """
+
+    # Apply global plot style once per session
+    try:
+        apply_plot_style()
+    except Exception:
+        pass
 
     # Configure which figures to render (aligns with MATLAB order)
     # [1..14] where index 13 (0-based 12) is the Summary figure
