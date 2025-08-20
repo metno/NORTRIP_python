@@ -41,7 +41,7 @@ def average_data_func(
     index = index_in[0]
     index2 = index_in[1] if len(index_in) >= 2 else np.nan
 
-    av_date_str = []
+    av_date_str: List[str] = []
     av_date_num = np.array([])
     av_val = np.array([])
 
@@ -70,43 +70,45 @@ def average_data_func(
 
     # Hourly means
     elif index == 9:
-        min_num = index2 if not np.isnan(index2) else 1
+        # Hourly means - match MATLAB behavior
+        min_num = int(index2) if not np.isnan(index2) else 1
 
-        # Create hourly time grid
-        start_date = matlab_datenum_to_datetime(date_num[i_min])
-        end_date = matlab_datenum_to_datetime(date_num[i_max])
+        start_dt = matlab_datenum_to_datetime(date_num[i_min])
+        end_dt = matlab_datenum_to_datetime(date_num[i_max])
 
-        current_hour = start_date.replace(minute=0, second=0, microsecond=0)
+        # Build hourly grid from start to end inclusive of the last hour
+        current_hour = start_dt.replace(minute=0, second=0, microsecond=0)
         hourly_dates = []
         hourly_vals = []
 
-        while current_hour < end_date + timedelta(hours=1):
-            next_hour = current_hour + timedelta(hours=1)
+        # Precompute vectors
+        all_dt = [matlab_datenum_to_datetime(d) for d in date_num]
 
-            # Find data within this hour
-            hour_mask = np.array(
-                [
-                    current_hour <= matlab_datenum_to_datetime(d) < next_hour
-                    for d in date_num[i_min : i_max + 1]
-                ]
-            )
+        while current_hour <= end_dt + timedelta(hours=1):
+            # Find indices exactly matching this Y-M-D-H
+            matches = [
+                idx
+                for idx, dt in enumerate(all_dt)
+                if dt.year == current_hour.year
+                and dt.month == current_hour.month
+                and dt.day == current_hour.day
+                and dt.hour == current_hour.hour
+            ]
+            # Apply strict window bounds (r > i_min & r < i_max)
+            r2 = [idx for idx in matches if (idx > i_min and idx < i_max)]
 
-            if np.any(hour_mask):
-                hour_vals = val[i_min : i_max + 1][hour_mask]
-                valid_vals = hour_vals[~np.isnan(hour_vals)]
-
-                if len(valid_vals) >= min_num:
-                    if use_max:
-                        hourly_vals.append(np.max(valid_vals))
-                    else:
-                        hourly_vals.append(np.mean(valid_vals))
+            if len(r2) >= 1:
+                vals = val[r2]
+                valid = vals[~np.isnan(vals)]
+                if len(valid) > min_num:
+                    hourly_vals.append(np.max(valid) if use_max else np.mean(valid))
                 else:
                     hourly_vals.append(np.nan)
             else:
                 hourly_vals.append(np.nan)
 
             hourly_dates.append(datetime_to_matlab_datenum(current_hour))
-            current_hour = next_hour
+            current_hour += timedelta(hours=1)
 
         av_date_num = np.array(hourly_dates)
         av_val = np.array(hourly_vals).reshape(-1, 1)
@@ -116,7 +118,8 @@ def average_data_func(
 
     # Daily means
     elif index == 2:
-        min_num = index2 if not np.isnan(index2) else 6
+        # Daily means - match MATLAB behavior
+        min_num = int(index2) if not np.isnan(index2) else 6
 
         start_day = int(np.floor(date_num[i_min]))
         end_day = int(np.floor(date_num[i_max]))
@@ -125,19 +128,14 @@ def average_data_func(
         daily_vals = []
 
         for i_day in range(start_day, end_day + 1):
-            # Find indices for this day within [i_min, i_max] inclusive
-            day_mask = np.floor(date_num) == i_day
-            day_indices = np.where(day_mask)[0]
-            day_indices = day_indices[(day_indices >= i_min) & (day_indices <= i_max)]
-
-            if len(day_indices) >= 12:
-                day_vals = val[day_indices]
-                valid_vals = day_vals[~np.isnan(day_vals)]
-
-                if len(valid_vals) >= min_num:
-                    daily_vals.append(
-                        np.max(valid_vals) if use_max else np.mean(valid_vals)
-                    )
+            r = np.where(np.floor(date_num) == i_day)[0]
+            # Strict bounds (r > i_min & r < i_max)
+            r2 = r[(r > i_min) & (r < i_max)]
+            if len(r2) >= 12:
+                vals = val[r2]
+                valid = vals[~np.isnan(vals)]
+                if len(valid) > min_num:
+                    daily_vals.append(np.max(valid) if use_max else np.mean(valid))
                 else:
                     daily_vals.append(np.nan)
             else:
@@ -216,7 +214,7 @@ def average_data_func(
             halfday_dates = date_subset[halfday_indices]
             halfday_vals = []
 
-            for i, idx in enumerate(halfday_indices):
+            for idx in halfday_indices:
                 period_vals = val_subset[idx : idx + 13]  # 12 hours + 1
                 valid_vals = period_vals[~np.isnan(period_vals)]
 
@@ -244,10 +242,6 @@ def average_data_func(
         weekday_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
         for j in range(7):
-            # Python weekday: Monday=0, Sunday=6
-            # MATLAB weekday: Sunday=1, Saturday=7
-            matlab_weekday = j + 2 if j < 6 else 1
-
             weekday_mask = np.array(
                 [matlab_datenum_to_datetime(d).weekday() == j for d in date_subset]
             )
@@ -269,6 +263,7 @@ def average_data_func(
 
     # Daily running means
     elif index == 6:
+        # Daily running means (MATLAB: no NaN traps, so NaN in window yields NaN)
         av_date_num = date_num[i_min : i_max + 1]
         di = 11
         running_vals = []
@@ -277,10 +272,8 @@ def average_data_func(
             i1 = max(i - di, 0)
             i2 = min(i + di, len(av_date_num) - 1)
             window_vals = val[i_min + i1 : i_min + i2 + 1]
-            # Ignore NaNs when averaging; NaN if all NaN
-            running_vals.append(
-                np.nanmean(window_vals) if np.any(~np.isnan(window_vals)) else np.nan
-            )
+            # Use plain mean (propagates NaN like MATLAB)
+            running_vals.append(np.mean(window_vals))
 
         av_val = np.array(running_vals).reshape(-1, 1)
         av_date_str = [
@@ -344,57 +337,40 @@ def average_data_func(
 
     # Monthly means
     elif index == 8:
+        # Monthly means - match MATLAB behavior
         date_subset = date_num[i_min : i_max + 1]
         val_subset = val[i_min : i_max + 1]
 
-        start_dt = matlab_datenum_to_datetime(date_subset[0])
-        end_dt = matlab_datenum_to_datetime(date_subset[-1])
+        # Year-month arrays
+        Y = np.array([matlab_datenum_to_datetime(d).year for d in date_subset])
+        M = np.array([matlab_datenum_to_datetime(d).month for d in date_subset])
 
-        n_av = 24 * 30  # Month in hours (approximate)
+        n_av = 24 * 30
         monthly_dates = []
         monthly_vals = []
 
-        for year in range(start_dt.year, end_dt.year + 1):
+        start_year = Y[0]
+        end_year = Y[-1]
+        for year in range(start_year, end_year + 1):
             for month in range(1, 13):
-                if (
-                    (year == start_dt.year and month >= start_dt.month)
-                    and (year == end_dt.year and month <= end_dt.month)
-                ) or (start_dt.year < year < end_dt.year):
-                    month_mask = np.array(
-                        [
-                            (
-                                matlab_datenum_to_datetime(d).year == year
-                                and matlab_datenum_to_datetime(d).month == month
-                            )
-                            for d in date_subset
-                        ]
-                    )
-
-                    if np.any(month_mask):
-                        month_vals = val_subset[month_mask]
-                        valid_vals = month_vals[~np.isnan(month_vals)]
-
-                        if len(valid_vals) > n_av // 4:
-                            if index2 == 2:
-                                monthly_vals.append(np.median(valid_vals))
-                            else:
-                                monthly_vals.append(np.mean(valid_vals))
+                r_month = np.where((M == month) & (Y == year))[0]
+                if r_month.size > 0:
+                    val_temp2 = val_subset[r_month]
+                    valid = val_temp2[~np.isnan(val_temp2)]
+                    if len(valid) > n_av // 4:
+                        if index2 == 2:
+                            monthly_vals.append(np.median(valid))
                         else:
-                            monthly_vals.append(np.nan)
-
-                        first_day_month = datetime(year, month, 1)
-                        monthly_dates.append(
-                            datetime_to_matlab_datenum(first_day_month)
-                        )
+                            monthly_vals.append(np.mean(valid))
+                    else:
+                        monthly_vals.append(np.nan)
+                    # Use the first sample time in that month
+                    monthly_dates.append(date_subset[r_month[0]])
 
         av_date_num = np.array(monthly_dates)
         av_val = np.array(monthly_vals).reshape(-1, 1)
-
-        # Filter out NaN dates
-        valid_mask = ~np.isnan(av_date_num)
         av_date_str = [
-            matlab_datenum_to_datetime(d).strftime("%b %Y")
-            for d in av_date_num[valid_mask]
+            matlab_datenum_to_datetime(d).strftime("%b %Y") for d in av_date_num
         ]
 
     return av_date_str, av_date_num, av_val
