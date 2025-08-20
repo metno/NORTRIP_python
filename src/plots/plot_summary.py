@@ -19,7 +19,6 @@ from .helpers import (
 
 
 def plot_summary(
-    *,
     time_config: time_config,
     converted_data: converted_data,
     metadata: input_metadata,
