@@ -349,9 +349,9 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     num_sanding = int(np.nansum(sanding > 0))
     num_cleaning = int(np.nansum(cleaning > 0))
     num_ploughing = int(np.nansum(ploughing > 0))
-    # Number of days (unique dates)
-    unique_days = np.unique(np.floor(shared.date_num))
-    num_days = float(len(unique_days))
+    # Number of days based on time steps and dt (match MATLAB: length * dt / 24)
+    num_steps = int(shared.i_max - shared.i_min + 1)
+    num_days = float(num_steps * dt_h / 24.0)
     # Compose text
     y0 = 1.0
     dy = 0.12

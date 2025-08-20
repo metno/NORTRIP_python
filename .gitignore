@@ -10,7 +10,9 @@ wheels/
 .venv
 
 .DS_Store
-matlab-version/
 .vscode/settings.json
 .pytest_cache/
 .coverage
+
+
+matlab-version/
