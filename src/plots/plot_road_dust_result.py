@@ -11,6 +11,7 @@ from .plot_summary import plot_summary
 from .style import apply_plot_style
 from .plot_traffic import plot_traffic
 from .plot_meteorology import plot_meteorology
+from .plot_emissions_mass import plot_emissions_mass
 from .init_shared_data import init_shared_data
 import matplotlib.pyplot as plt
 
@@ -55,8 +56,8 @@ def plot_road_dust_result(
         pass
 
     # Configure which figures to render (aligns with MATLAB order)
-    # Index 0: Traffic, Index 1: Meteorology, Index 12: Summary
-    plot_figure = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # Index 0: Traffic, Index 1: Meteorology, Index 2: Emissions & Mass, Index 12: Summary
+    plot_figure = [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # Prepare shared data that all plots will consume
     shared = init_shared_data(
@@ -78,6 +79,10 @@ def plot_road_dust_result(
     # Meteorology figure (plot_figure index 1)
     if plot_figure[1]:
         plot_meteorology(shared, paths)
+
+    # Emissions and mass balance figure (plot_figure index 2)
+    if plot_figure[2]:
+        plot_emissions_mass(shared, paths)
 
     # Summary figure
     if plot_figure[12]:
