@@ -66,6 +66,11 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    pip install -e .
    ```
 
+5. **Run the package**:
+   ```bash
+   nortrip
+   ```
+
 ## Development Setup
 
 ### Using uv (Recommended)
