@@ -70,12 +70,11 @@ def plot_road_dust_result(
     )
 
     # Traffic figure (plot_figure index 0)
-    if len(plot_figure) >= 1 and plot_figure[0] == 1:
+    if plot_figure[0]:
         plot_traffic(shared, paths)
 
     # Summary figure
-    if len(plot_figure) >= 13 and plot_figure[12] == 1:
+    if plot_figure[12]:
         plot_summary(shared, paths)
 
-    # Return shared data for downstream use/testing
     plt.show()

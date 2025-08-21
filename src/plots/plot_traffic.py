@@ -106,6 +106,12 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 5), sharex=False)
     fig.subplots_adjust(hspace=0.35)
 
+    # Set window title for the figure window
+    try:
+        fig.canvas.manager.set_window_title("Figure 1: Traffic")
+    except Exception:
+        pass
+
     # Panel 1: traffic volume
     ax1.set_title(
         f"{paths.title_str}: Traffic" if getattr(paths, "title_str", "") else "Traffic"

@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -106,6 +103,11 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     # Plot figure arranged as MATLAB: 4 rows x 3 cols grid
     fig = plt.figure(figsize=(10, 8))
+    # Set window title for the figure window
+    try:
+        fig.canvas.manager.set_window_title("Figure 13: Summary")
+    except Exception:
+        pass
     gs = fig.add_gridspec(
         4, 3, height_ratios=[1.2, 1.0, 1.0, 0.9], hspace=0.6, wspace=0.4
     )
@@ -705,4 +707,3 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     )
 
     plt.tight_layout()
-    plt.show()
