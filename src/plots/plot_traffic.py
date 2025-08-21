@@ -1,19 +1,11 @@
 from __future__ import annotations
-
-import numpy as np
 import matplotlib.pyplot as plt
 
 import constants
 from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
-from .helpers import matlab_datenum_to_datetime_array, format_time_axis
-
-
-def _mask_nodata(arr: np.ndarray, nodata: float) -> np.ndarray:
-    a = arr.astype(float).copy()
-    a[a == nodata] = np.nan
-    return a
+from .helpers import matlab_datenum_to_datetime_array, format_time_axis, mask_nodata
 
 
 def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
@@ -32,10 +24,8 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     av = list(shared.av)
 
     # Local masked copies
-    traffic = shared.traffic_data_ro.copy()
-    activity = shared.activity_data_ro.copy()
-    traffic = _mask_nodata(traffic, nodata)
-    activity = _mask_nodata(activity, nodata)
+    traffic = mask_nodata(shared.traffic_data_ro.copy(), nodata)
+    activity = mask_nodata(shared.activity_data_ro.copy(), nodata)
 
     # Prepare series for panel 1: traffic volume
     x_str, xplot, y_total = average_data_func(

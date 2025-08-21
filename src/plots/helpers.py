@@ -52,3 +52,13 @@ def format_time_axis(
     for label in ax.get_xticklabels():
         label.set_rotation(0)
         label.set_ha("center")
+
+
+def mask_nodata(arr: np.ndarray, nodata: float) -> np.ndarray:
+    """Return a float copy of arr with nodata values replaced by NaN.
+
+    Centralized helper for plotting modules.
+    """
+    a = np.asarray(arr, dtype=float).copy()
+    a[a == nodata] = np.nan
+    return a
