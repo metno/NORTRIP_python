@@ -16,9 +16,7 @@ Containing scripts, example data and documentation for running NORTRIP in Python
 [uv](https://docs.astral.sh/uv/) is a fast Python package installer and resolver, written in Rust.
 
 1. **Install uv** (if not already installed):
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
+   [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/)
 
 2. **Clone the repository**:
    ```bash
@@ -35,11 +33,9 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    uv sync
    ```
 
-4. **Activate the virtual environment**:
+4. **Run the package**:
    ```bash
-   source .venv/bin/activate  # On Unix/macOS
-   # or
-   .venv\Scripts\activate     # On Windows
+   uv run nortrip
    ```
 
 ### Option 2: Using pip and venv
@@ -53,12 +49,15 @@ Containing scripts, example data and documentation for running NORTRIP in Python
 2. **Create a virtual environment**:
    ```bash
    python -m venv .venv
+   ```
+3. **Activate the virtual environment**:
+   ```bash
    source .venv/bin/activate  # On Unix/macOS
    # or
    .venv\Scripts\activate     # On Windows
    ```
 
-3. **Install the package**:
+4. **Install the package**:
    ```bash
    # Install in development mode with all dependencies
    pip install -e ".[dev]"
@@ -78,18 +77,19 @@ Containing scripts, example data and documentation for running NORTRIP in Python
 
 2. **Run tests**:
    ```bash
+   # Run all tests
    uv run pytest
-   
-   # Run tests with coverage
-   uv run pytest --cov=src
-   
    # Run specific test file
    uv run pytest tests/functions/test_antoine_func.py
    ```
 
 3. **Run linting**:
+
+   Recomended to configure ruff in your editor to run linting and formatting automatically.
    ```bash
+   # Run linting
    uv run ruff check src tests
+   # Run formatting
    uv run ruff format src tests
    ```
 
@@ -119,22 +119,6 @@ Containing scripts, example data and documentation for running NORTRIP in Python
 
 ## Project Structure
 
-```
-NORTRIP-python/
-├── src/                    # Source code
-│   ├── calculations/       # Core calculation modules
-│   ├── config_classes/     # Configuration classes
-│   ├── constants/          # Physical constants
-│   ├── functions/          # Mathematical functions
-│   ├── initialise/         # Initialization modules
-│   ├── input_classes/      # Input data classes
-│   ├── pd_util/           # Pandas utilities
-│   └── read_files/        # File reading modules
-├── tests/                 # Test suite
-├── input_data/           # Example input data
-├── model_parameters/     # Model parameter files
-└── model_paths/          # Model path configurations
-```
 
 ## Usage
 
@@ -144,7 +128,7 @@ After installation, you can run NORTRIP using:
 # If installed with uv
 uv run nortrip
 
-# Or just
+# Or if venv is active
 nortrip
 ```
 
