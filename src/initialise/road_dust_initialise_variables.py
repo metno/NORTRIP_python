@@ -104,7 +104,7 @@ def road_dust_initialise_variables(
             constants.num_source_all,
             constants.num_size,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -114,7 +114,7 @@ def road_dust_initialise_variables(
             constants.num_source_all,
             constants.num_size,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -125,7 +125,7 @@ def road_dust_initialise_variables(
             constants.num_size,
             constants.num_dustbalance,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -136,13 +136,13 @@ def road_dust_initialise_variables(
             constants.num_size,
             constants.num_dustbalance,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
 
     variables.WR_time_data = np.zeros(
-        (constants.num_wear, n_date, constants.num_track_max, n_roads)
+        (constants.num_wear, n_date, model_parameters.num_track, n_roads)
     )
 
     variables.road_salt_data = np.zeros(
@@ -150,7 +150,7 @@ def road_dust_initialise_variables(
             constants.num_saltdata,
             constants.num_salt,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -161,7 +161,7 @@ def road_dust_initialise_variables(
             constants.num_size,
             constants.num_process,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -172,7 +172,7 @@ def road_dust_initialise_variables(
             constants.num_size,
             constants.num_process,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -183,7 +183,7 @@ def road_dust_initialise_variables(
             constants.num_size,
             constants.num_process,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -194,13 +194,13 @@ def road_dust_initialise_variables(
             constants.num_size,
             constants.num_process,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
 
     variables.road_meteo_data = np.zeros(
-        (constants.num_road_meteo, n_date, constants.num_track_max, n_roads)
+        (constants.num_road_meteo, n_date, model_parameters.num_track, n_roads)
     )
 
     variables.g_road_balance_data = np.zeros(
@@ -208,7 +208,7 @@ def road_dust_initialise_variables(
             constants.num_moisture,
             constants.num_moistbalance,
             n_date,
-            constants.num_track_max,
+            model_parameters.num_track,
             n_roads,
         )
     )
@@ -228,15 +228,15 @@ def road_dust_initialise_variables(
     variables.f_conc = np.full((n_date, n_roads), nodata)
 
     variables.g_road_data = np.zeros(
-        (constants.num_moisture, n_date, constants.num_track_max, n_roads)
+        (constants.num_moisture, n_date, model_parameters.num_track, n_roads)
     )
 
     # Initialize quality factor arrays
     variables.f_q = np.ones(
-        (constants.num_source_all, n_date, constants.num_track_max, n_roads)
+        (constants.num_source_all, n_date, model_parameters.num_track, n_roads)
     )
 
-    variables.f_q_obs = np.full((n_date, constants.num_track_max, n_roads), nodata)
+    variables.f_q_obs = np.full((n_date, model_parameters.num_track, n_roads), nodata)
 
     # Initialize specific mass balance data indices to zero (from min_time to max_time)
     time_slice = slice(min_time, max_time + 1)
@@ -265,7 +265,7 @@ def road_dust_initialise_variables(
             : constants.num_size,
             balance_idx,
             time_slice,
-            : constants.num_track_max,
+            : model_parameters.num_track,
             :n_roads,
         ] = 0
 
@@ -283,7 +283,7 @@ def road_dust_initialise_variables(
             : constants.num_size,
             emis_idx,
             time_slice,
-            : constants.num_track_max,
+            : model_parameters.num_track,
             :n_roads,
         ] = 0
         variables.E_road_bin_data[
@@ -291,7 +291,7 @@ def road_dust_initialise_variables(
             : constants.num_size,
             emis_idx,
             time_slice,
-            : constants.num_track_max,
+            : model_parameters.num_track,
             :n_roads,
         ] = 0
 
@@ -309,7 +309,7 @@ def road_dust_initialise_variables(
             : constants.num_size,
             conc_idx,
             time_slice,
-            : constants.num_track_max,
+            : model_parameters.num_track,
             :n_roads,
         ] = 0
 
@@ -325,7 +325,7 @@ def road_dust_initialise_variables(
             salt_idx,
             : constants.num_salt,
             time_slice,
-            : constants.num_track_max,
+            : model_parameters.num_track,
             :n_roads,
         ] = 0
 
@@ -360,7 +360,7 @@ def road_dust_initialise_variables(
 
     for meteo_idx in meteo_indices:
         variables.road_meteo_data[
-            meteo_idx, time_slice, : constants.num_track_max, :n_roads
+            meteo_idx, time_slice, : model_parameters.num_track, :n_roads
         ] = 0
 
     # Road moisture mass balance data initialization
@@ -385,13 +385,13 @@ def road_dust_initialise_variables(
             : constants.num_moisture,
             moisture_idx,
             time_slice,
-            : constants.num_track_max,
+            : model_parameters.num_track,
             :n_roads,
         ] = 0
 
     # Road moisture data initialization
     variables.g_road_data[
-        : constants.num_moisture, time_slice, : constants.num_track_max, :n_roads
+        : constants.num_moisture, time_slice, : model_parameters.num_track, :n_roads
     ] = 0
 
     # Set initial mass loading values

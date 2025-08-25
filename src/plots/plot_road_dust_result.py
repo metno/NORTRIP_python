@@ -14,6 +14,7 @@ from .plot_traffic import plot_traffic
 from .plot_meteorology import plot_meteorology
 from .plot_emissions_mass import plot_emissions_mass
 from .init_shared_data import init_shared_data
+from .plot_other_factors import plot_other_factors
 from .plot_wetness import plot_wetness
 import matplotlib.pyplot as plt
 import logging
@@ -63,8 +64,8 @@ def plot_road_dust_result(
         pass
 
     # Configure which figures to render (aligns with MATLAB order)
-    # Index 0: Traffic, 1: Meteorology, 2: Emissions & Mass, 3: Wetness, 12: Summary
-    plot_figure = [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # Index 0: Traffic, 1: Meteorology, 2: Emissions & Mass, 3: Wetness, 4: Other factors, 12: Summary
+    plot_figure = [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]
 
     # Prepare shared data that all plots will consume
     shared = init_shared_data(
@@ -99,6 +100,11 @@ def plot_road_dust_result(
     if plot_figure[3]:
         logger.info("Plotting road wetness figure")
         plot_wetness(shared, paths)
+
+    # Other factors figure (plot_figure index 4)
+    if plot_figure[4]:
+        logger.info("Plotting other factors figure")
+        plot_other_factors(shared, paths)
 
     # Summary figure
     if plot_figure[12]:
