@@ -317,6 +317,7 @@ def main():
             model_parameters=model_parameters,
             model_flags=model_flags,
             model_variables=model_variables,
+            meteo_input=meteorology_input,
             paths=paths,
             ro=0,
         )

@@ -5,6 +5,7 @@ from input_classes import (
     input_initial,
     input_metadata,
     input_airquality,
+    input_meteorology,
 )
 from initialise import time_config, model_variables
 from .plot_summary import plot_summary
@@ -13,10 +14,15 @@ from .plot_traffic import plot_traffic
 from .plot_meteorology import plot_meteorology
 from .plot_emissions_mass import plot_emissions_mass
 from .init_shared_data import init_shared_data
+from .plot_wetness import plot_wetness
 import matplotlib.pyplot as plt
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def plot_road_dust_result(
+    *,
     time_config: time_config,
     converted_data: converted_data,
     initial_data: input_initial,
@@ -26,6 +32,7 @@ def plot_road_dust_result(
     model_flags: model_flags,
     model_variables: model_variables,
     paths: model_file_paths,
+    meteo_input: input_meteorology,
     ro: int = 0,
     plot_size_fraction: int = constants.pm_10,
 ):
@@ -56,8 +63,8 @@ def plot_road_dust_result(
         pass
 
     # Configure which figures to render (aligns with MATLAB order)
-    # Index 0: Traffic, Index 1: Meteorology, Index 2: Emissions & Mass, Index 12: Summary
-    plot_figure = [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # Index 0: Traffic, 1: Meteorology, 2: Emissions & Mass, 3: Wetness, 12: Summary
+    plot_figure = [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # Prepare shared data that all plots will consume
     shared = init_shared_data(
@@ -65,6 +72,7 @@ def plot_road_dust_result(
         converted_data=converted_data,
         metadata=metadata,
         airquality_data=airquality_data,
+        meteo_input=meteo_input,
         model_parameters=model_parameters,
         model_flags=model_flags,
         model_variables=model_variables,
@@ -74,18 +82,27 @@ def plot_road_dust_result(
 
     # Traffic figure (plot_figure index 0)
     if plot_figure[0]:
+        logger.info("Plotting traffic figure")
         plot_traffic(shared, paths)
 
     # Meteorology figure (plot_figure index 1)
     if plot_figure[1]:
+        logger.info("Plotting meteorology figure")
         plot_meteorology(shared, paths)
 
     # Emissions and mass balance figure (plot_figure index 2)
     if plot_figure[2]:
+        logger.info("Plotting emissions and mass balance figure")
         plot_emissions_mass(shared, paths)
+
+    # Road wetness figure (plot_figure index 3)
+    if plot_figure[3]:
+        logger.info("Plotting road wetness figure")
+        plot_wetness(shared, paths)
 
     # Summary figure
     if plot_figure[12]:
+        logger.info("Plotting summary figure")
         plot_summary(shared, paths)
 
     plt.show()

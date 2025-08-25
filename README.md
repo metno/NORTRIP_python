@@ -122,12 +122,11 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    ruff format src tests
    ```
 
-## Project Structure
 
 
 ## Usage
 
-After installation, you can run NORTRIP using:
+After setup, you can run NORTRIP using:
 
 ```bash
 # If installed with uv

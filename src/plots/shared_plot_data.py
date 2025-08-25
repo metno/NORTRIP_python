@@ -41,6 +41,11 @@ class shared_plot_data:
     Salt_obs: np.ndarray
     Salt_obs_available: np.ndarray
 
+    # Availability flags derived for plotting convenience
+    road_wetness_obs_available: int
+    road_wetness_obs_in_mm: int
+    road_temperature_obs_available: int
+
     # Derived course-fraction (present only if requested)
     pm_course_derived: bool
     C_data_course: Optional[np.ndarray]

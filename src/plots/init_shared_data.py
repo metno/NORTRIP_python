@@ -2,6 +2,7 @@ from input_classes import (
     converted_data,
     input_metadata,
     input_airquality,
+    input_meteorology,
 )
 from config_classes import (
     model_parameters,
@@ -19,6 +20,7 @@ def init_shared_data(
     converted_data: converted_data,
     metadata: input_metadata,
     airquality_data: input_airquality,
+    meteo_input: input_meteorology,
     model_parameters: model_parameters,
     model_flags: model_flags,
     model_variables: model_variables,
@@ -144,6 +146,11 @@ def init_shared_data(
                 - PM_obs_bg[constants.pm_25, :n_date]
             )
 
+    # Availability flags from parsed meteorology input
+    road_wetness_obs_available = meteo_input.road_wetness_obs_available
+    road_temperature_obs_available = meteo_input.road_temperature_obs_available
+    road_wetness_obs_in_mm = meteo_input.road_wetness_obs_in_mm
+
     return shared_plot_data(
         av=av,
         i_min=time_config.min_time,
@@ -179,4 +186,7 @@ def init_shared_data(
         M_road_balance_data_course=M_road_balance_data_course,
         PM_obs_net_course=PM_obs_net_course,
         PM_obs_bg_course=PM_obs_bg_course,
+        road_wetness_obs_available=road_wetness_obs_available,
+        road_wetness_obs_in_mm=road_wetness_obs_in_mm,
+        road_temperature_obs_available=road_temperature_obs_available,
     )
