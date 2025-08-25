@@ -9,5 +9,5 @@ Fig 3:
     Non Suspendable sand (/10)
     Drainage
 
-Fig 13: Multiple
+Fig 13: Scatter plot values
 

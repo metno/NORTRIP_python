@@ -24,7 +24,6 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     xlabel_text = "Date"  # first panel always labels date
 
     # Build temporary masked copies aligned with MATLAB logic (mask nodata by NaN)
-    n_date = shared.date_num.shape[0]
     nodata = shared.nodata
 
     # Model concentrations by source: sum over sources for total
@@ -40,8 +39,8 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Identify bad indices for this panel and set to NaN in local copies
     bad = np.where(
         np.isnan(f_conc_temp)
-        | np.isnan(PM_obs_net_temp[x, :n_date])
-        | (PM_obs_net_temp[x, :n_date] == nodata)
+        | np.isnan(PM_obs_net_temp[x])
+        | (PM_obs_net_temp[x] == nodata)
     )[0]
     if bad.size:
         C_data_temp2[:, :, :, bad] = np.nan
@@ -56,40 +55,36 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     # Total modeled concentration for size x
     y_total = np.nansum(
-        C_data_temp2[constants.all_source_index, x, constants.C_total_index, :n_date],
+        C_data_temp2[constants.all_source_index, x, constants.C_total_index, :],
         axis=0,
     )
     y_total = np.maximum(y_total, 0)
-    x_str, xplot, yplot_total = average_data_func(date_num, y_total, 0, n_date - 1, av)
+    x_str, xplot, yplot_total = average_data_func(date_num, y_total, i_min, i_max, av)
 
     # Observed net
-    y_obs = PM_obs_net_temp[x, :n_date]
+    y_obs = PM_obs_net_temp[x]
     y_obs = np.maximum(y_obs, 0)
-    _, _, yplot_obs = average_data_func(date_num, y_obs, 0, n_date - 1, av)
+    _, _, yplot_obs = average_data_func(date_num, y_obs, i_min, i_max, av)
 
     # Salt na and second salt
-    y_salt_na = C_data_temp2[
-        constants.salt_index[0], x, constants.C_total_index, :n_date
-    ]
+    y_salt_na = C_data_temp2[constants.salt_index[0], x, constants.C_total_index, :]
     y_salt_na = np.maximum(y_salt_na, 0)
-    y_salt_2 = C_data_temp2[
-        constants.salt_index[1], x, constants.C_total_index, :n_date
-    ]
+    y_salt_2 = C_data_temp2[constants.salt_index[1], x, constants.C_total_index, :]
     y_salt_2 = np.maximum(y_salt_2, 0)
-    _, _, yplot_salt_na = average_data_func(date_num, y_salt_na, 0, n_date - 1, av)
-    _, _, yplot_salt_2 = average_data_func(date_num, y_salt_2, 0, n_date - 1, av)
+    _, _, yplot_salt_na = average_data_func(date_num, y_salt_na, i_min, i_max, av)
+    _, _, yplot_salt_2 = average_data_func(date_num, y_salt_2, i_min, i_max, av)
 
     # Wear (road + tyre + brake)
     y_wear = np.nansum(
-        C_data_temp2[constants.wear_index, x, constants.C_total_index, :n_date], axis=0
+        C_data_temp2[constants.wear_index, x, constants.C_total_index, :], axis=0
     )
     y_wear = np.maximum(y_wear, 0)
-    _, _, yplot_wear = average_data_func(date_num, y_wear, 0, n_date - 1, av)
+    _, _, yplot_wear = average_data_func(date_num, y_wear, i_min, i_max, av)
 
     # Sand
-    y_sand = C_data_temp2[constants.sand_index, x, constants.C_total_index, :n_date]
+    y_sand = C_data_temp2[constants.sand_index, x, constants.C_total_index, :]
     y_sand = np.maximum(y_sand, 0)
-    _, _, yplot_sand = average_data_func(date_num, y_sand, 0, n_date - 1, av)
+    _, _, yplot_sand = average_data_func(date_num, y_sand, i_min, i_max, av)
 
     # Convert MATLAB datenums to Python datetimes for axis formatting
     dt_x = matlab_datenum_to_datetime_array(xplot)
@@ -166,37 +161,37 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Panel 2: mass loading (g/m^2)
     x_load = constants.pm_200
     y_mass_dust = np.maximum(
-        shared.M_road_data_sum_tracks[constants.total_dust_index, x_load, :n_date]
+        shared.M_road_data_sum_tracks[constants.total_dust_index, x_load, :]
         * shared.b_factor,
         0,
     )
     y_mass_salt_na = np.maximum(
-        shared.M_road_data_sum_tracks[constants.salt_index[0], x_load, :n_date]
+        shared.M_road_data_sum_tracks[constants.salt_index[0], x_load, :]
         * shared.b_factor,
         0,
     )
     y_mass_salt_2 = np.maximum(
-        shared.M_road_data_sum_tracks[constants.salt_index[1], x_load, :n_date]
+        shared.M_road_data_sum_tracks[constants.salt_index[1], x_load, :]
         * shared.b_factor,
         0,
     )
     y_mass_sand = np.maximum(
-        shared.M_road_data_sum_tracks[constants.sand_index, x_load, :n_date]
+        shared.M_road_data_sum_tracks[constants.sand_index, x_load, :]
         * shared.b_factor,
         0,
     )
 
     _s, xplot2, y_mass_dust_av = average_data_func(
-        date_num, y_mass_dust, 0, n_date - 1, av
+        date_num, y_mass_dust, i_min, i_max, av
     )
     _s, _xp2, y_mass_salt_na_av = average_data_func(
-        date_num, y_mass_salt_na, 0, n_date - 1, av
+        date_num, y_mass_salt_na, i_min, i_max, av
     )
     _s, _xp3, y_mass_salt_2_av = average_data_func(
-        date_num, y_mass_salt_2, 0, n_date - 1, av
+        date_num, y_mass_salt_2, i_min, i_max, av
     )
     _s, _xp4, y_mass_sand_av = average_data_func(
-        date_num, y_mass_sand, 0, n_date - 1, av
+        date_num, y_mass_sand, i_min, i_max, av
     )
     dt_x2 = matlab_datenum_to_datetime_array(xplot2)
 
@@ -205,8 +200,8 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax2.set_ylabel("Mass loading (g/m²)")
 
     # Optional cleaning indicator as normalized step to max of main series
-    y_clean = shared.activity_data_ro[constants.t_cleaning_index, :n_date]
-    _s, _xp5, y_clean_av = average_data_func(date_num, y_clean, 0, n_date - 1, av)
+    y_clean = shared.activity_data_ro[constants.t_cleaning_index, :]
+    _s, _xp5, y_clean_av = average_data_func(date_num, y_clean, i_min, i_max, av)
     max_plot = np.nanmax(
         np.vstack(
             [
@@ -247,7 +242,10 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         date_num,
         np.nansum(
             C_data_temp2[
-                constants.all_source_index, x, constants.C_total_index, :n_date
+                constants.all_source_index,
+                x,
+                constants.C_total_index,
+                :,
             ],
             axis=0,
         ),
@@ -281,8 +279,26 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         except Exception:
             r_sq = np.nan
         rmse = float(np.sqrt(np.nanmean((y_mod_flat[mask] - y_obs_flat[mask]) ** 2)))
-        mean_obs = float(np.nanmean(y_obs_flat[mask]))
-        mean_mod = float(np.nanmean(y_mod_flat[mask]))
+        # For consistency with other panels and MATLAB-like masking, compute means
+        # over the original hourly window using the same validity mask
+        obs_series_sc = PM_obs_net_temp[x, :]
+        c_valid_sc = (
+            (~np.isnan(obs_series_sc))
+            & (obs_series_sc != nodata)
+            & (~np.isnan(f_conc_temp))
+        )
+        c_valid_sc_range = c_valid_sc[i_min : i_max + 1]
+        obs_series_sc_r = obs_series_sc[i_min : i_max + 1]
+        mean_obs = float(np.nanmean(obs_series_sc_r[c_valid_sc_range]))
+        total_series_sc = np.nansum(
+            np.maximum(
+                C_data_temp2[constants.all_source_index, x, constants.C_total_index, :],
+                0,
+            ),
+            axis=0,
+        )
+        total_series_sc_r = total_series_sc[i_min : i_max + 1]
+        mean_mod = float(np.nanmean(total_series_sc_r[c_valid_sc_range]))
         try:
             a1, a0 = np.polyfit(y_mod_flat[mask], y_obs_flat[mask], 1)
         except Exception:
@@ -320,10 +336,10 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Panel 4: Traffic and activity (text)
     ax4.axis("off")
     # Mean ADT for li/he
-    N_he = shared.traffic_data_ro[constants.N_v_index[constants.he], :n_date]
-    N_li = shared.traffic_data_ro[constants.N_v_index[constants.li], :n_date]
+    N_he = shared.traffic_data_ro[constants.N_v_index[constants.he], :]
+    N_li = shared.traffic_data_ro[constants.N_v_index[constants.li], :]
     # Estimate dt_h from date_num
-    if n_date > 1:
+    if len(shared.date_num) > 1:
         dt_h = float(np.nanmedian(np.diff(shared.date_num)) * 24.0)
         if not np.isfinite(dt_h) or dt_h <= 0:
             dt_h = 1.0
@@ -335,8 +351,8 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     mean_ADT_he = float(np.nanmean(N_he_win)) * 24.0 * dt_h
     mean_ADT_total = mean_ADT_li + mean_ADT_he
     # Mean speed weighted by flow
-    V_he = shared.traffic_data_ro[constants.V_veh_index[constants.he], :n_date]
-    V_li = shared.traffic_data_ro[constants.V_veh_index[constants.li], :n_date]
+    V_he = shared.traffic_data_ro[constants.V_veh_index[constants.he], :]
+    V_li = shared.traffic_data_ro[constants.V_veh_index[constants.li], :]
     V_he_win = V_he[i_min : i_max + 1]
     V_li_win = V_li[i_min : i_max + 1]
     mean_speed_he = (
@@ -350,11 +366,11 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         else float(np.nan)
     )
     # Events counts
-    salting_na = shared.activity_data_ro[constants.M_salting_index[0], :n_date]
-    salting_2 = shared.activity_data_ro[constants.M_salting_index[1], :n_date]
-    sanding = shared.activity_data_ro[constants.M_sanding_index, :n_date]
-    cleaning = shared.activity_data_ro[constants.t_cleaning_index, :n_date]
-    ploughing = shared.activity_data_ro[constants.t_ploughing_index, :n_date]
+    salting_na = shared.activity_data_ro[constants.M_salting_index[0], :]
+    salting_2 = shared.activity_data_ro[constants.M_salting_index[1], :]
+    sanding = shared.activity_data_ro[constants.M_sanding_index, :]
+    cleaning = shared.activity_data_ro[constants.t_cleaning_index, :]
+    ploughing = shared.activity_data_ro[constants.t_ploughing_index, :]
     num_salting_na = int(np.nansum(salting_na[i_min : i_max + 1] > 0))
     num_salting_2 = int(np.nansum(salting_2[i_min : i_max + 1] > 0))
     num_sanding = int(np.nansum(sanding[i_min : i_max + 1] > 0))
@@ -363,10 +379,10 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Studded tyre proportions (li/he) based on tyre-specific flows
     try:
         N_st_li = shared.traffic_data_ro[
-            constants.N_t_v_index[(constants.st, constants.li)], :n_date
+            constants.N_t_v_index[(constants.st, constants.li)], :
         ]
         N_st_he = shared.traffic_data_ro[
-            constants.N_t_v_index[(constants.st, constants.he)], :n_date
+            constants.N_t_v_index[(constants.st, constants.he)], :
         ]
         mean_ADT_st_li = float(np.nanmean(N_st_li[i_min : i_max + 1])) * 24.0 * dt_h
         mean_ADT_st_he = float(np.nanmean(N_st_he[i_min : i_max + 1])) * 24.0 * dt_h
@@ -412,28 +428,28 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     # Panel (row3 col2): Mean emission factor bars (mg/km/veh)
     # Compute mean hourly traffic (veh/hr)
-    N_total = shared.traffic_data_ro[constants.N_total_index, :n_date]
+    N_total = shared.traffic_data_ro[constants.N_total_index, :]
     N_total_win = N_total[i_min : i_max + 1]
-    mean_AHT = float(np.nanmean(N_total_win)) if np.nanmean(N_total_win) > 0 else 1.0
+    mean_AHT = float(np.nanmean(N_total_win))
 
     # Model emissions (g/km/hr) arrays over time
     E_total_dust = shared.E_road_data_sum_tracks[
-        constants.total_dust_index, x, constants.E_total_index, :n_date
+        constants.total_dust_index, x, constants.E_total_index, :
     ]
     E_direct_dust = np.nansum(
         shared.E_road_data_sum_tracks[
-            constants.dust_noexhaust_index, x, constants.E_direct_index, :n_date
+            constants.dust_noexhaust_index, x, constants.E_direct_index, :
         ],
         axis=0,
     )
     E_susp_dust = np.nansum(
         shared.E_road_data_sum_tracks[
-            constants.dust_noexhaust_index, x, constants.E_suspension_index, :n_date
+            constants.dust_noexhaust_index, x, constants.E_suspension_index, :
         ],
         axis=0,
     )
     E_exhaust = shared.E_road_data_sum_tracks[
-        constants.exhaust_index, x, constants.E_total_index, :n_date
+        constants.exhaust_index, x, constants.E_total_index, :
     ]
     E_total_dust_win = E_total_dust[i_min : i_max + 1]
     E_direct_dust_win = E_direct_dust[i_min : i_max + 1]
@@ -441,7 +457,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     E_exhaust_win = E_exhaust[i_min : i_max + 1]
 
     # Observed emissions from concentrations (match MATLAB: ratio of means)
-    pm_win = PM_obs_net_temp[x, :n_date][i_min : i_max + 1]
+    pm_win = PM_obs_net_temp[x][i_min : i_max + 1]
     f_win = f_conc_temp[i_min : i_max + 1]
     r_mask = (~np.isnan(pm_win)) & (~np.isnan(f_win))
     rf_mask = ~np.isnan(f_win)
@@ -472,27 +488,29 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Panel (row3 col3): Mean concentrations by source bars (µg/m³)
     # Build mask of valid times for concentrations (like MATLAB r), excluding nodata
     c_valid = (
-        (~np.isnan(PM_obs_net_temp[x, :n_date]))
-        & (PM_obs_net_temp[x, :n_date] != nodata)
+        (~np.isnan(PM_obs_net_temp[x]))
+        & (PM_obs_net_temp[x] != nodata)
         & (~np.isnan(f_conc_temp))
     )
     c_valid_range = c_valid[i_min : i_max + 1]
+    # Background-valid mask (require background availability too)
+    obs_bg_full = shared.PM_obs_bg[x, :]
+    c_valid_bg = c_valid & (~np.isnan(obs_bg_full)) & (obs_bg_full != nodata)
+    c_valid_bg_range = c_valid_bg[i_min : i_max + 1]
 
     # Source means
     def mean_source(idx: int) -> float:
-        vals = C_data_temp2[idx, x, constants.C_total_index, :n_date]
+        vals = C_data_temp2[idx, x, constants.C_total_index, :]
         vals = np.maximum(vals, 0)
         vals_r = vals[i_min : i_max + 1]
         return float(np.nanmean(vals_r[c_valid_range]))
 
-    obs_series = PM_obs_net_temp[x, :n_date]
+    obs_series = PM_obs_net_temp[x]
     obs_series_r = obs_series[i_min : i_max + 1]
     observed_conc = float(np.nanmean(obs_series_r[c_valid_range]))
     total_series = np.nansum(
         np.maximum(
-            C_data_temp2[
-                constants.all_source_index, x, constants.C_total_index, :n_date
-            ],
+            C_data_temp2[constants.all_source_index, x, constants.C_total_index, :],
             0,
         ),
         axis=0,
@@ -537,22 +555,30 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     # Compute meteorology stats with nodata handling
     Ta_arr = mask_nd(
-        shared.meteo_data_ro[constants.T_a_index, shared.i_min : shared.i_max]
+        shared.meteo_data_ro[constants.T_a_index, shared.i_min : shared.i_max + 1]
     )
     RH_arr = mask_nd(
-        shared.meteo_data_ro[constants.RH_index, shared.i_min : shared.i_max]
+        shared.meteo_data_ro[constants.RH_index, shared.i_min : shared.i_max + 1]
     )
     short_rad_arr = mask_nd(
-        shared.meteo_data_ro[constants.short_rad_in_index, shared.i_min : shared.i_max]
+        shared.meteo_data_ro[
+            constants.short_rad_in_index, shared.i_min : shared.i_max + 1
+        ]
     )
     cloud_arr = mask_nd(
-        shared.meteo_data_ro[constants.cloud_cover_index, shared.i_min : shared.i_max]
+        shared.meteo_data_ro[
+            constants.cloud_cover_index, shared.i_min : shared.i_max + 1
+        ]
     )
     rain_arr = mask_nd(
-        shared.meteo_data_ro[constants.Rain_precip_index, shared.i_min : shared.i_max]
+        shared.meteo_data_ro[
+            constants.Rain_precip_index, shared.i_min : shared.i_max + 1
+        ]
     )
     snow_arr = mask_nd(
-        shared.meteo_data_ro[constants.Snow_precip_index, shared.i_min : shared.i_max]
+        shared.meteo_data_ro[
+            constants.Snow_precip_index, shared.i_min : shared.i_max + 1
+        ]
     )
 
     mean_Ta = float(np.nanmean(Ta_arr))
@@ -561,7 +587,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Also compute mean net short-wave radiation from road state
     short_rad_net_arr = mask_nd(
         shared.road_meteo_weighted[
-            constants.short_rad_net_index, shared.i_min : shared.i_max
+            constants.short_rad_net_index, shared.i_min : shared.i_max + 1
         ]
     )
     mean_short_rad_net = float(np.nanmean(short_rad_net_arr))
@@ -577,16 +603,14 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     else:
         mean_cloud = float("nan")
 
-    total_precip = float(np.nansum(np.nan_to_num(rain_arr) + np.nan_to_num(snow_arr)))
-    freq_precip = float(
-        np.nanmean((np.nan_to_num(rain_arr) + np.nan_to_num(snow_arr)) > 0) * 100.0
-    )
+    total_precip = float(np.sum(rain_arr + snow_arr))
+    freq_precip = float(np.mean((rain_arr + snow_arr) > 0) * 100.0)
     # Wet frequency and mean dispersion
-    fq_road = mask_nd(shared.f_q_weighted[constants.road_index, :n_date])
+    fq_road = mask_nd(shared.f_q_weighted[constants.road_index, :])
     fq_road_win = fq_road[i_min : i_max + 1]
     prop_wet = float(np.nanmean(fq_road_win < 0.5) * 100.0)
     # Wet/dry agreement metrics between obs and model
-    fq_obs = mask_nd(shared.f_q_obs_weighted[:n_date])
+    fq_obs = mask_nd(shared.f_q_obs_weighted[:])
     fq_obs_win = fq_obs[i_min : i_max + 1]
     wet_mod = fq_road_win < 0.5
     wet_obs = fq_obs_win < 0.5
@@ -620,7 +644,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Panel (row4 col3): Concentrations info text (net and with background)
     # Build averaged series for background too
     _s, _xpb, y_obs_bg_av = average_data_func(
-        date_num, shared.PM_obs_bg[x, :n_date], i_min, i_max, av
+        date_num, shared.PM_obs_bg[x, :], i_min, i_max, av
     )
 
     # Compute percentiles from averaged series
@@ -636,9 +660,14 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     y_obs_av_r = y_obs_av.squeeze()
     y_mod_av_r = y_mod_av.squeeze()
     y_obs_bg_av_r = y_obs_bg_av.squeeze()
-    obs_mean = float(np.nanmean(y_obs_av_r))
-    mod_mean = float(np.nanmean(y_mod_av_r))
-    obs_bg_mean = float(np.nanmean(y_obs_bg_av_r))
+    # Match MATLAB: use hour-level means over the c_valid mask for means in text
+    # Observed and model (net)
+    obs_mean = observed_conc
+    mod_mean = total_conc
+    # Observed background mean with background-valid mask
+    obs_bg_series = shared.PM_obs_bg[x, :]
+    obs_bg_series_r = obs_bg_series[i_min : i_max + 1]
+    obs_bg_mean = float(np.nanmean(obs_bg_series_r[c_valid_bg_range]))
     obs_per90 = percentile(y_obs_av_r, 90)
     mod_per90 = percentile(y_mod_av_r, 90)
     obs_bg_per90 = percentile(y_obs_av_r + y_obs_bg_av_r, 90)
