@@ -58,19 +58,19 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         C_data_temp2[constants.all_source_index, x, constants.C_total_index, :],
         axis=0,
     )
-    y_total = np.maximum(y_total, 0)
+
     x_str, xplot, yplot_total = average_data_func(date_num, y_total, i_min, i_max, av)
 
     # Observed net
     y_obs = PM_obs_net_temp[x]
-    y_obs = np.maximum(y_obs, 0)
+
     _, _, yplot_obs = average_data_func(date_num, y_obs, i_min, i_max, av)
 
     # Salt na and second salt
     y_salt_na = C_data_temp2[constants.salt_index[0], x, constants.C_total_index, :]
-    y_salt_na = np.maximum(y_salt_na, 0)
+    # y_salt_na = np.maximum(y_salt_na, 0)
     y_salt_2 = C_data_temp2[constants.salt_index[1], x, constants.C_total_index, :]
-    y_salt_2 = np.maximum(y_salt_2, 0)
+    # y_salt_2 = np.maximum(y_salt_2, 0)
     _, _, yplot_salt_na = average_data_func(date_num, y_salt_na, i_min, i_max, av)
     _, _, yplot_salt_2 = average_data_func(date_num, y_salt_2, i_min, i_max, av)
 
@@ -78,12 +78,12 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     y_wear = np.nansum(
         C_data_temp2[constants.wear_index, x, constants.C_total_index, :], axis=0
     )
-    y_wear = np.maximum(y_wear, 0)
+    # y_wear = np.maximum(y_wear, 0)
     _, _, yplot_wear = average_data_func(date_num, y_wear, i_min, i_max, av)
 
     # Sand
     y_sand = C_data_temp2[constants.sand_index, x, constants.C_total_index, :]
-    y_sand = np.maximum(y_sand, 0)
+    # y_sand = np.maximum(y_sand, 0)
     _, _, yplot_sand = average_data_func(date_num, y_sand, i_min, i_max, av)
 
     # Convert MATLAB datenums to Python datetimes for axis formatting
@@ -501,7 +501,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Source means
     def mean_source(idx: int) -> float:
         vals = C_data_temp2[idx, x, constants.C_total_index, :]
-        vals = np.maximum(vals, 0)
+        # vals = np.maximum(vals, 0)
         vals_r = vals[i_min : i_max + 1]
         return float(np.nanmean(vals_r[c_valid_range]))
 
@@ -509,10 +509,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     obs_series_r = obs_series[i_min : i_max + 1]
     observed_conc = float(np.nanmean(obs_series_r[c_valid_range]))
     total_series = np.nansum(
-        np.maximum(
-            C_data_temp2[constants.all_source_index, x, constants.C_total_index, :],
-            0,
-        ),
+        C_data_temp2[constants.all_source_index, x, constants.C_total_index, :],
         axis=0,
     )
     total_series_r = total_series[i_min : i_max + 1]
