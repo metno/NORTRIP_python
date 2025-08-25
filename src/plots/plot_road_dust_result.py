@@ -65,7 +65,7 @@ def plot_road_dust_result(
 
     # Configure which figures to render (aligns with MATLAB order)
     # Index 0: Traffic, 1: Meteorology, 2: Emissions & Mass, 3: Wetness, 4: Other factors, 12: Summary
-    plot_figure = [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+    plot_figure = [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
 
     # Prepare shared data that all plots will consume
     shared = init_shared_data(

@@ -266,6 +266,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax3.scatter(
         y_mod_flat[mask], y_obs_flat[mask], s=12, edgecolors="b", facecolors="none"
     )
+    ax3.set_title("Scatter daily mean")
     ax3.set_xlabel(f"{pm_text} modelled (µg/m³)")
     ax3.set_ylabel(f"{pm_text} observed (µg/m³)")
     if np.any(mask):
@@ -361,6 +362,29 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     num_sanding = int(np.nansum(sanding[i_min : i_max + 1] > 0))
     num_cleaning = int(np.nansum(cleaning[i_min : i_max + 1] > 0))
     num_ploughing = int(np.nansum(ploughing[i_min : i_max + 1] > 0))
+    # Studded tyre proportions (li/he) based on tyre-specific flows
+    try:
+        N_st_li = shared.traffic_data_ro[
+            constants.N_t_v_index[(constants.st, constants.li)], :n_date
+        ]
+        N_st_he = shared.traffic_data_ro[
+            constants.N_t_v_index[(constants.st, constants.he)], :n_date
+        ]
+        mean_ADT_st_li = float(np.nanmean(N_st_li[i_min : i_max + 1])) * 24.0 * dt_h
+        mean_ADT_st_he = float(np.nanmean(N_st_he[i_min : i_max + 1])) * 24.0 * dt_h
+        studded_li_pct = (
+            mean_ADT_st_li / max(mean_ADT_li, 1e-9) * 100.0
+            if mean_ADT_li > 0
+            else float("nan")
+        )
+        studded_he_pct = (
+            mean_ADT_st_he / max(mean_ADT_he, 1e-9) * 100.0
+            if mean_ADT_he > 0
+            else float("nan")
+        )
+    except Exception:
+        studded_li_pct = float("nan")
+        studded_he_pct = float("nan")
     # Number of days based on time steps and dt (match MATLAB: length * dt / 24)
     num_steps = int(shared.i_max - shared.i_min + 1)
     num_days = float(num_steps * dt_h / 24.0)
@@ -370,52 +394,23 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax4.text(
         0.0, y0, "Traffic and activity", fontweight="bold", transform=ax4.transAxes
     )
-    ax4.text(
-        0.0, y0 - dy, f"Mean ADT = {mean_ADT_total:4.0f} (veh)", transform=ax4.transAxes
-    )
-    # Percent split li/he
+    # Build and render lines with consistent spacing
     total_ADT = mean_ADT_total if mean_ADT_total > 0 else 1.0
     pct_li = mean_ADT_li / total_ADT * 100.0
     pct_he = mean_ADT_he / total_ADT * 100.0
-    ax4.text(
-        0.0,
-        y0 - 2 * dy,
+    lines_ax4 = [
+        f"Mean ADT = {mean_ADT_total:4.0f} (veh)",
         f"Mean ADT (li / he) = {pct_li:4.1f} / {pct_he:4.1f} (%)",
-        transform=ax4.transAxes,
-    )
-    ax4.text(
-        0.0,
-        y0 - 3 * dy,
         f"Mean speed (li / he) = {mean_speed_li:4.1f} / {mean_speed_he:4.1f} (km/hr)",
-        transform=ax4.transAxes,
-    )
-    ax4.text(
-        0.0, y0 - 4 * dy, f"Number of days = {num_days:4.1f}", transform=ax4.transAxes
-    )
-    ax4.text(
-        0.0,
-        y0 - 5 * dy,
+        f"Studded (li / he) = {studded_li_pct:4.1f} / {studded_he_pct:4.1f} (%)",
+        f"Number of days = {num_days:4.1f}",
         f"Number salting events (na/mg) = {num_salting_na:3d}/{num_salting_2:3d}",
-        transform=ax4.transAxes,
-    )
-    ax4.text(
-        0.0,
-        y0 - 6 * dy,
         f"Number sanding events = {num_sanding:4d}",
-        transform=ax4.transAxes,
-    )
-    ax4.text(
-        0.0,
-        y0 - 7 * dy,
         f"Number cleaning events = {num_cleaning:4d}",
-        transform=ax4.transAxes,
-    )
-    ax4.text(
-        0.0,
-        y0 - 8 * dy,
         f"Number ploughing events = {num_ploughing:4d}",
-        transform=ax4.transAxes,
-    )
+    ]
+    for i, text in enumerate(lines_ax4):
+        ax4.text(0.0, y0 - (i + 1) * dy, text, transform=ax4.transAxes)
 
     # Panel (row3 col2): Mean emission factor bars (mg/km/veh)
     # Compute mean hourly traffic (veh/hr)
@@ -564,6 +559,13 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     mean_Ta = float(np.nanmean(Ta_arr))
     mean_RH = float(np.nanmean(RH_arr))
     mean_short_rad_glob = float(np.nanmean(short_rad_arr))
+    # Also compute mean net short-wave radiation from road state
+    short_rad_net_arr = mask_nd(
+        shared.road_meteo_weighted[
+            constants.short_rad_net_index, shared.i_min : shared.i_max
+        ]
+    )
+    mean_short_rad_net = float(np.nanmean(short_rad_net_arr))
 
     # Cloud cover: if values are fractions (<=1.2), convert to %; else assume already %
     valid_cloud = cloud_arr[~np.isnan(cloud_arr)]
@@ -584,56 +586,37 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     fq_road = mask_nd(shared.f_q_weighted[constants.road_index, :n_date])
     fq_road_win = fq_road[i_min : i_max + 1]
     prop_wet = float(np.nanmean(fq_road_win < 0.5) * 100.0)
+    # Wet/dry agreement metrics between obs and model
+    fq_obs = mask_nd(shared.f_q_obs_weighted[:n_date])
+    fq_obs_win = fq_obs[i_min : i_max + 1]
+    wet_mod = fq_road_win < 0.5
+    wet_obs = fq_obs_win < 0.5
+    hits = (wet_mod & wet_obs) | (~wet_mod & ~wet_obs)
+    f_q_hits = float(np.nanmean(hits.astype(float)) * 100.0)
+    rel_prop_wet = float(
+        (np.nansum(wet_mod) / max(np.nansum(wet_obs), 1e-9))
+        if np.isfinite(np.nansum(wet_obs))
+        else float("nan")
+    )
     mean_f_conc = float(np.nanmean(f_conc_temp[i_min : i_max + 1]))
 
     y0m = 1.0
     dym = 0.12
     ax7.text(0.0, y0m, "Meteorology", fontweight="bold", transform=ax7.transAxes)
-    ax7.text(
-        0.0,
-        y0m - dym,
+    lines_ax7 = [
         f"Mean Temperature = {mean_Ta:4.2f} (°C)",
-        transform=ax7.transAxes,
-    )
-    ax7.text(
-        0.0, y0m - 2 * dym, f"Mean RH = {mean_RH:4.1f} (%)", transform=ax7.transAxes
-    )
-    ax7.text(
-        0.0,
-        y0m - 3 * dym,
-        f"Mean short radiation = {mean_short_rad_glob:4.1f} (W/m²)",
-        transform=ax7.transAxes,
-    )
-    ax7.text(
-        0.0,
-        y0m - 4 * dym,
+        f"Mean RH = {mean_RH:4.1f} (%)",
+        f"Mean short radiation (glob/net) = {mean_short_rad_glob:4.1f}/{mean_short_rad_net:4.1f} (W/m²)",
         f"Mean cloud cover = {mean_cloud:4.1f} (%)",
-        transform=ax7.transAxes,
-    )
-    ax7.text(
-        0.0,
-        y0m - 5 * dym,
         f"Total precipitation = {total_precip:4.1f} (mm)",
-        transform=ax7.transAxes,
-    )
-    ax7.text(
-        0.0,
-        y0m - 6 * dym,
         f"Frequency precipitation = {freq_precip:4.1f} (%)",
-        transform=ax7.transAxes,
-    )
-    ax7.text(
-        0.0,
-        y0m - 7 * dym,
         f"Frequency wet road = {prop_wet:4.1f} (%)",
-        transform=ax7.transAxes,
-    )
-    ax7.text(
-        0.0,
-        y0m - 8 * dym,
+        f"Relative freq wet road = {rel_prop_wet:4.2f}",
+        f"Surface moisture hits = {f_q_hits:4.1f} (%)",
         f"Mean dispersion = {mean_f_conc:4.3f} (µg/m³·(g/km/hr)⁻¹)",
-        transform=ax7.transAxes,
-    )
+    ]
+    for i, text in enumerate(lines_ax7):
+        ax7.text(0.0, y0m - (i + 1) * dym, text, transform=ax7.transAxes)
 
     # Panel (row4 col3): Concentrations info text (net and with background)
     # Build averaged series for background too
@@ -690,59 +673,26 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         fontweight="bold",
         transform=ax8.transAxes,
     )
-    ax8.text(
-        0.0,
-        0.90,
+    # Render lines with extra vertical spacing
+    y0c = 1.0
+    dyc = 0.12
+    lines_ax8 = [
         f"Mean obs (net,total) = {obs_mean:4.1f}, {obs_mean + obs_bg_mean:4.1f} (µg/m³)",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.82,
         f"Mean model (net,total) = {mod_mean:4.1f}, {mod_mean + obs_bg_mean:4.1f} (µg/m³)",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.74,
         f"Mean background obs = {obs_bg_mean:4.1f} (µg/m³)",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.66,
         f"90th per obs (net,total) = {obs_per90:4.1f}, {obs_bg_per90:4.1f} (µg/m³)",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.58,
         f"90th per model (net,total) = {mod_per90:4.1f}, {mod_bg_per90:4.1f} (µg/m³)",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.50,
         f"36th highest obs (net,total) = {high36_obs:4.1f}, {high36_obs_bg:4.1f} (µg/m³)",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.42,
         f"36th highest model (net,total) = {high36_mod:4.1f}, {high36_mod_bg:4.1f} (µg/m³)",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.34,
         f"Days > 50 µg/m³ obs (net,total) = {obs_ex_50:4d}, {obs_bg_ex_50:4d}",
-        transform=ax8.transAxes,
-    )
-    ax8.text(
-        0.0,
-        0.26,
         f"Days > 50 µg/m³ model (net,total) = {mod_ex_50:4d}, {mod_bg_ex_50:4d}",
-        transform=ax8.transAxes,
+    ]
+    # Comparable hours within selected window
+    comparable_hours = (
+        float(np.nanmean(c_valid_range) * 100.0) if c_valid_range.size else float("nan")
     )
+    lines_ax8.append(f"Comparable hours = {comparable_hours:4.1f} (%)")
+    for i, text in enumerate(lines_ax8):
+        ax8.text(0.0, y0c - (i + 1) * dyc, text, transform=ax8.transAxes)
 
     plt.tight_layout()
