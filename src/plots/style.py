@@ -66,27 +66,3 @@ def apply_plot_style() -> None:
     except Exception:
         # cycler is a matplotlib dependency; just ignore if unavailable
         pass
-
-
-def shrink_y_labels(axes, points: int = 2) -> None:
-    """Reduce y-axis label font size by a given number of points.
-
-    Accepts a single Axes or an iterable of Axes.
-    """
-    try:
-        from collections.abc import Iterable
-
-        axes_iter = axes if isinstance(axes, Iterable) else [axes]
-    except Exception:
-        axes_iter = [axes]
-
-    for ax in axes_iter:
-        if ax is None:
-            continue
-        label = ax.yaxis.get_label()
-        try:
-            current = float(label.get_size())
-        except Exception:
-            current = mpl.rcParams.get("axes.labelsize", 8)
-        new_size = max(1.0, current - float(points))
-        label.set_size(new_size)
