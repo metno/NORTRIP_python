@@ -52,8 +52,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     date_num = shared.date_num
     i_min = int(shared.i_min)
     i_max = int(shared.i_max)
-    t_min = date_num[i_min]
-    t_max = date_num[i_max]
+    # Selected window
 
     # Total modeled concentration for size x
     y_total = np.nansum(
@@ -252,17 +251,16 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             ],
             axis=0,
         ),
-        0,
-        n_date - 1,
+        i_min,
+        i_max,
         av,
     )
-    _s, _xps, y_obs_av = average_data_func(date_num, y_obs, 0, n_date - 1, av)
+    _s, _xps, y_obs_av = average_data_func(date_num, y_obs, i_min, i_max, av)
     # Mask valid pairs
     y_mod_flat = y_mod_av.squeeze()
     y_obs_flat = y_obs_av.squeeze()
-    # Restrict stats to selected time window
-    range_mask = (np.array(xplot_sc) >= t_min) & (np.array(xplot_sc) <= t_max)
-    mask = range_mask & ~np.isnan(y_mod_flat) & ~np.isnan(y_obs_flat)
+    # Valid pairs only (averaged within selected window already)
+    mask = ~np.isnan(y_mod_flat) & ~np.isnan(y_obs_flat)
     ax3.scatter(
         y_mod_flat[mask], y_obs_flat[mask], s=12, edgecolors="b", facecolors="none"
     )
@@ -442,19 +440,20 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     E_susp_dust_win = E_susp_dust[i_min : i_max + 1]
     E_exhaust_win = E_exhaust[i_min : i_max + 1]
 
-    # Observed emissions from concentrations
-    # E_obs = PM_obs_net / f_conc (mask invalid incl. nodata)
-    f_valid = (
-        ~np.isnan(f_conc_temp)
-        & (~np.isnan(PM_obs_net_temp[x, :n_date]))
-        & (PM_obs_net_temp[x, :n_date] != nodata)
-    )
-    E_obs_series = np.full(n_date, np.nan)
-    E_obs_series[f_valid] = PM_obs_net_temp[x, f_valid] / f_conc_temp[f_valid]
-    E_obs_series_win = E_obs_series[i_min : i_max + 1]
+    # Observed emissions from concentrations (match MATLAB: ratio of means)
+    pm_win = PM_obs_net_temp[x, :n_date][i_min : i_max + 1]
+    f_win = f_conc_temp[i_min : i_max + 1]
+    r_mask = (~np.isnan(pm_win)) & (~np.isnan(f_win))
+    rf_mask = ~np.isnan(f_win)
+    if np.any(r_mask) and np.any(rf_mask):
+        observed_conc_win = float(np.nanmean(pm_win[r_mask]))
+        mean_f_conc_win = float(np.nanmean(f_win[rf_mask]))
+        obs_emission = observed_conc_win / max(mean_f_conc_win, 1e-9)
+    else:
+        obs_emission = float("nan")
 
     # Convert to mg/km/veh using mean hourly traffic
-    obs_ef_mg = float(np.nanmean(E_obs_series_win)) / max(mean_AHT, 1e-9) * 1000.0
+    obs_ef_mg = obs_emission / max(mean_AHT, 1e-9) * 1000.0
     mod_ef_mg = float(np.nanmean(E_total_dust_win)) / max(mean_AHT, 1e-9) * 1000.0
     dir_ef_mg = float(np.nanmean(E_direct_dust_win)) / max(mean_AHT, 1e-9) * 1000.0
     sus_ef_mg = float(np.nanmean(E_susp_dust_win)) / max(mean_AHT, 1e-9) * 1000.0
@@ -464,7 +463,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     labels_ef = ["Obs.", "Mod.", "Dir.", "Sus.", "Exh."]
     ax5.bar(range(1, 6), bars_ef, color=["k", "g", "g", "g", "g"], alpha=0.8)
     ax5.set_xticks(range(1, 6), labels_ef)
-    ax5.set_ylabel(f"Emission factor {pm_text} (mg/km/veh)")
+    ax5.set_ylabel(f"Emission factor {pm_text} (mg/km/veh)", fontsize=6)
     ax5.set_title("Mean emission factor")
     for i, val in enumerate(bars_ef, start=1):
         if np.isfinite(val) and val > 0:
@@ -621,7 +620,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Panel (row4 col3): Concentrations info text (net and with background)
     # Build averaged series for background too
     _s, _xpb, y_obs_bg_av = average_data_func(
-        date_num, shared.PM_obs_bg[x, :n_date], 0, n_date - 1, av
+        date_num, shared.PM_obs_bg[x, :n_date], i_min, i_max, av
     )
 
     # Compute percentiles from averaged series
@@ -633,11 +632,10 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         k = max(0, min(len(vals) - 1, int(round(len(vals) * p / 100.0)) - 1))
         return float(np.sort(vals)[k])
 
-    # Restrict averaged stats to selected time window
-    range_mask2 = (np.array(xplot_sc) >= t_min) & (np.array(xplot_sc) <= t_max)
-    y_obs_av_r = y_obs_av.squeeze()[range_mask2]
-    y_mod_av_r = y_mod_av.squeeze()[range_mask2]
-    y_obs_bg_av_r = y_obs_bg_av.squeeze()[range_mask2]
+    # Use averaged stats within the selected window
+    y_obs_av_r = y_obs_av.squeeze()
+    y_mod_av_r = y_mod_av.squeeze()
+    y_obs_bg_av_r = y_obs_bg_av.squeeze()
     obs_mean = float(np.nanmean(y_obs_av_r))
     mod_mean = float(np.nanmean(y_mod_av_r))
     obs_bg_mean = float(np.nanmean(y_obs_bg_av_r))
