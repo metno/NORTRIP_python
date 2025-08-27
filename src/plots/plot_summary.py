@@ -116,7 +116,13 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Plot series in the MATLAB order/styles
     ax1.plot(dt_x, y_obs.squeeze(), "k--", linewidth=1, label="Observed")
     ax1.plot(dt_x, y_salt_na.squeeze(), "g-", linewidth=1, label="Modelled salt(na)")
-    ax1.plot(dt_x, y_salt_mg.squeeze(), "g--", linewidth=1, label="Modelled salt(mg)")
+    ax1.plot(
+        dt_x,
+        y_salt_mg.squeeze(),
+        "g--",
+        linewidth=1,
+        label=f"Modelled salt({shared.salt2_str})",
+    )
     ax1.plot(dt_x, y_wear.squeeze(), "r:", linewidth=1, label="Modelled wear")
     ax1.plot(dt_x, y_sand.squeeze(), "m--", linewidth=1, label="Modelled sand")
     ax1.plot(dt_x, y_total_model.squeeze(), "b-", linewidth=1, label="Modelled total")
@@ -195,7 +201,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     legend_entries = [
         "Suspendable dust",
         "Salt(na)",
-        "Salt(mg)",
+        f"Salt({shared.salt2_str})",
         "Suspendable sand",
     ]
     if (
@@ -217,14 +223,20 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             "Cleaning",
             "Suspendable dust",
             "Salt(na)",
-            "Salt(mg)",
+            f"Salt({shared.salt2_str})",
             "Suspendable sand",
         ]
 
     # Plot series
     ax2.plot(dt_x2, y_dust.squeeze(), "k-", linewidth=1, label="Suspendable dust")
     ax2.plot(dt_x2, y_salt_na.squeeze(), "g-", linewidth=1, label="Salt(na)")
-    ax2.plot(dt_x2, y_salt_mg.squeeze(), "g--", linewidth=1, label="Salt(mg)")
+    ax2.plot(
+        dt_x2,
+        y_salt_mg.squeeze(),
+        "g--",
+        linewidth=1,
+        label=f"Salt({shared.salt2_str})",
+    )
     ax2.plot(dt_x2, y_sand.squeeze(), "r--", linewidth=1, label="Suspendable sand")
     # ax2.set_xlabel(shared.xlabel_text)
     format_time_axis(ax2, dt_x2, shared.av[0], day_tick_limit=150)
@@ -499,7 +511,17 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax5.bar(x_positions_c, ploty2_c, color="k")
     ax5.set_xticks(x_positions_c)
     ax5.set_xticklabels(
-        ["obs", "mod", "road", "tyre", "brake", "sand", "na", "mg", "exh"]
+        [
+            "obs",
+            "mod",
+            "road",
+            "tyre",
+            "brake",
+            "sand",
+            "na",
+            f"{shared.salt2_str}",
+            "exh",
+        ]
     )
     ax5.set_title("Mean concentrations")
     ax5.set_ylabel(f"Concentration {pm_text} (µg/m³)")
