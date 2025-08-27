@@ -91,7 +91,9 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     # Figure using a 4x3 grid: rows 0-1 span all 3 cols; row 2 has 3 small panels
     fig = plt.figure(figsize=(10, 8))
-    gs = fig.add_gridspec(4, 3, hspace=0.5, wspace=0.35)
+    gs = fig.add_gridspec(
+        4, 3, hspace=0.3, wspace=0.25, left=0.06, right=0.99, top=0.95, bottom=0.06
+    )
     try:
         fig.canvas.manager.set_window_title("Figure 13: Summary")
     except Exception:
@@ -120,7 +122,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax1.plot(dt_x, y_total_model.squeeze(), "b-", linewidth=1, label="Modelled total")
 
     # Labels
-    ax1.set_ylabel(f"{pm_text} concentration (µg/m³)")
+    ax1.set_ylabel(f"{pm_text} concentration (µg/m³)", fontsize=6)
     ax1.set_xlabel(shared.xlabel_text)
 
     # Axis formatting similar to MATLAB date tick handling
@@ -149,7 +151,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # ---------------- Panel 2: Mass loading (g/m²) ----------------
     ax2 = fig.add_subplot(gs[1, :])
     ax2.set_title("")
-    ax2.set_ylabel("Mass loading (g/m²)")
+    ax2.set_ylabel("Mass loading (g/m²)", fontsize=6)
 
     # Local masked copies
     M_sum = shared.M_road_data_sum_tracks.copy()
@@ -248,8 +250,8 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax3 = fig.add_subplot(gs[2, 0])
     # Title depending on exhaust availability is not in shared; default to generic
     ax3.set_title("Scatter daily mean")
-    ax3.set_ylabel(f"{pm_text} observed concentration (µg/m³)")
-    ax3.set_xlabel(f"{pm_text} modelled concentration (µg/m³)")
+    ax3.set_ylabel(f"{pm_text} observed concentration (µg/m³)", fontsize=6)
+    ax3.set_xlabel(f"{pm_text} modelled concentration (µg/m³)", fontsize=7)
 
     x_vals = np.asarray(y_total_model).squeeze()
     y_vals = np.asarray(y_obs).squeeze()
@@ -323,5 +325,3 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
                     "-",
                     color=(0.5, 0.5, 0.5),
                 )
-
-    plt.tight_layout()
