@@ -123,7 +123,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     # Labels
     ax1.set_ylabel(f"{pm_text} concentration (µg/m³)", fontsize=6)
-    ax1.set_xlabel(shared.xlabel_text)
+    # ax1.set_xlabel(shared.xlabel_text)
 
     # Axis formatting similar to MATLAB date tick handling
     format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
@@ -226,7 +226,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax2.plot(dt_x2, y_salt_na.squeeze(), "g-", linewidth=1, label="Salt(na)")
     ax2.plot(dt_x2, y_salt_mg.squeeze(), "g--", linewidth=1, label="Salt(mg)")
     ax2.plot(dt_x2, y_sand.squeeze(), "r--", linewidth=1, label="Suspendable sand")
-    ax2.set_xlabel(shared.xlabel_text)
+    # ax2.set_xlabel(shared.xlabel_text)
     format_time_axis(ax2, dt_x2, shared.av[0], day_tick_limit=150)
     ax2.legend(legend_entries, loc="upper left")
 
@@ -325,3 +325,101 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
                     "-",
                     color=(0.5, 0.5, 0.5),
                 )
+
+    # ---------------- Panel 4: Mean emission factor bar chart ----------------
+    ax4 = fig.add_subplot(gs[2, 1])
+    # Emission arrays and traffic within selected window
+    mask_range = slice(i_min, i_max + 1)
+    E = shared.E_road_data_sum_tracks.astype(float).copy()
+    E[E == nodata] = np.nan
+    traffic = shared.traffic_data_ro.astype(float).copy()
+    traffic[traffic == nodata] = np.nan
+
+    # Series across time window
+    E_total_series = E[
+        constants.total_dust_index, x_size, constants.E_total_index, mask_range
+    ]
+    E_exhaust_series = E[
+        constants.exhaust_index, x_size, constants.E_total_index, mask_range
+    ]
+    E_direct_series = np.sum(
+        E[constants.dust_noexhaust_index, x_size, constants.E_direct_index, mask_range],
+        axis=0,
+    )
+    E_susp_series = np.sum(
+        E[
+            constants.dust_noexhaust_index,
+            x_size,
+            constants.E_suspension_index,
+            mask_range,
+        ],
+        axis=0,
+    )
+    N_total_series = traffic[constants.N_total_index, mask_range]
+
+    # Means across window
+    total_emissions = float(np.nanmean(E_total_series))
+    direct_emissions = float(np.nanmean(E_direct_series))
+    suspension_emissions = float(np.nanmean(E_susp_series))
+    exhaust_emissions = float(np.nanmean(E_exhaust_series))
+    mean_AHT = float(np.nanmean(N_total_series))  # average hourly traffic (veh/hr)
+
+    # Observed emission from concentrations and f_conc (window masks follow MATLAB)
+    PM_obs = shared.PM_obs_net.astype(float).copy()
+    PM_obs[PM_obs == nodata] = np.nan
+    obs_series_win = PM_obs[x_size, mask_range]
+    f_conc = shared.f_conc.astype(float).copy()
+    f_conc[f_conc == nodata] = np.nan
+    f_conc_win = f_conc[mask_range]
+    valid_obs = np.isfinite(obs_series_win) & np.isfinite(f_conc_win)
+    observed_concentrations = (
+        float(np.nanmean(obs_series_win[valid_obs])) if np.any(valid_obs) else np.nan
+    )
+    valid_fconc = np.isfinite(f_conc_win)
+    mean_f_conc = (
+        float(np.nanmean(f_conc_win[valid_fconc])) if np.any(valid_fconc) else np.nan
+    )
+    observed_emission = (
+        observed_concentrations / mean_f_conc
+        if np.isfinite(observed_concentrations)
+        and np.isfinite(mean_f_conc)
+        and mean_f_conc != 0
+        else np.nan
+    )
+
+    # Convert to mg/km/veh via divide by mean_AHT (veh/hr) then *1000
+    def to_mg_per_km_per_veh(val: float) -> float:
+        if not np.isfinite(val) or not np.isfinite(mean_AHT) or mean_AHT == 0:
+            return np.nan
+        return float(val / mean_AHT * 1000.0)
+
+    ploty1 = [
+        to_mg_per_km_per_veh(observed_emission),
+        to_mg_per_km_per_veh(total_emissions),
+        to_mg_per_km_per_veh(direct_emissions),
+        to_mg_per_km_per_veh(suspension_emissions),
+        to_mg_per_km_per_veh(exhaust_emissions),
+    ]
+    ploty2 = [ploty1[0], 0, 0, 0, 0]
+
+    # Bars
+    x_positions = np.arange(1, 6)
+    ax4.bar(x_positions, ploty1, color="#30ff30", edgecolor="k", linewidth=0.5)
+    ax4.bar(x_positions, ploty2, color="k")
+    ax4.set_xticks(x_positions)
+    ax4.set_xticklabels(["Obs.", "Mod.", "Dir.", "Sus.", "Exh."])
+    ax4.set_title("Mean emission factor")
+    ax4.set_ylabel(f"Emission factor {pm_text} (mg/km/veh)", fontsize=6)
+
+    # Value labels above bars
+    for xpos, val in zip(x_positions, ploty1, strict=False):
+        if np.isfinite(val) and val > 0:
+            ax4.text(
+                xpos,
+                val,
+                f"{val:5.0f}",
+                ha="center",
+                va="bottom",
+            )
+    ax4.set_xlim(0, 6)
+    ax4.set_ylim(bottom=0)
