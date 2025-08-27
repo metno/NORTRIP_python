@@ -90,7 +90,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     dt_x = matlab_datenum_to_datetime_array(xplot)
 
     # Figure with 4 stacked panels (we'll fill panel 1 and 2 now)
-    fig: plt.Figure, axes: list[plt.Axes] = plt.subplots(4, 1, figsize=(10, 8), sharex=False)
+    fig, axes = plt.subplots(4, 1, figsize=(10, 8), sharex=False)
     fig.subplots_adjust(hspace=0.5)
     try:
         fig.canvas.manager.set_window_title("Figure 13: Summary")
