@@ -10,8 +10,8 @@
             "cwd": "${workspaceFolder}",
             "python": "${workspaceFolder}/.venv/bin/python",
             "args": [
+                "model_paths/model_paths_and_files.xlsx",
                 "-t",
-                "1"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
@@ -25,6 +25,9 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "python": "${workspaceFolder}/.venv/bin/python",
+            "args": [
+                "model_paths/model_paths_and_files.xlsx",
+            ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
