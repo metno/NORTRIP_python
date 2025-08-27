@@ -9,6 +9,20 @@ def create_arg_parser() -> argparse.ArgumentParser:
         argparse.ArgumentParser: Configured argument parser.
     """
     parser = argparse.ArgumentParser(description="NORTRIP Road Dust Model")
+
+    def validate_xlsx_path(path_value: str) -> str:
+        """Ensure provided path points to a .xlsx file (relative or absolute)."""
+        if not isinstance(path_value, str) or not path_value.lower().endswith(".xlsx"):
+            raise argparse.ArgumentTypeError(
+                "Path must be a relative or absolute path to a .xlsx file"
+            )
+        return path_value
+
+    parser.add_argument(
+        "paths",
+        type=validate_xlsx_path,
+        help="Relative or absolute path to a .xlsx file. (Eg. model_paths/model_paths.xlsx)",
+    )
     parser.add_argument(
         "-t",
         "--text",

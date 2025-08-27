@@ -6,7 +6,6 @@ from importlib.metadata import version
 from ospm import OSPM_Main
 import constants
 import numpy as np
-from constants.road_dust_constant import T_s_index
 from functions import running_mean_temperature_func
 from read_files import (
     read_road_dust_parameters,
@@ -55,7 +54,8 @@ def main():
     logger.info(f"Print results to terminal: {print_results}")
     logger.info(f"Run fortran model: {use_fortran}")
 
-    paths = read_road_dust_paths(read_as_text=read_as_text)
+    # args.paths is now positional and points to the model paths Excel file
+    paths = read_road_dust_paths(read_as_text=read_as_text, paths_xlsx=args.paths)
 
     model_parameters, model_flags, model_activities = read_road_dust_parameters(
         paths.path_filename_inputparam, read_as_text=read_as_text
@@ -268,7 +268,7 @@ def main():
         # Put forecast surface temperature into the normal road temperature
         if model_flags.forecast_hour > 0:
             model_variables.road_meteo_data[
-                T_s_index, time_config.min_time : time_config.max_time, tr, ro
+                constants.T_s_index, time_config.min_time : time_config.max_time, tr, ro
             ] = model_variables.forecast_T_s[
                 time_config.min_time : time_config.max_time
             ]

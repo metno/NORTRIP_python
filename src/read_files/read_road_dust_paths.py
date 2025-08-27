@@ -6,14 +6,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def read_road_dust_paths(read_as_text=0) -> model_file_paths:
+def read_road_dust_paths(
+    read_as_text=0, paths_xlsx: str | None = None
+) -> model_file_paths:
+    """
+    Load model paths and filenames from the configured paths file.
+
+    Args:
+        read_as_text (int): 0 to read Excel, 1 to read text file equivalent.
+        paths_xlsx (str | None): Optional override for the Excel file that defines
+            model paths (relative or absolute path to a .xlsx file).
+
+    Returns:
+        model_file_paths: Dataclass with populated path settings.
+    """
     paths = model_file_paths()
 
     try:
         if read_as_text == 0:
-            logger.info("Setting paths from Excel file")
+            use_file = paths_xlsx or "model_paths/model_paths_and_files.xlsx"
+            logger.info(f"Setting paths from Excel file: {use_file}")
             paths_df = pd.read_excel(
-                "model_paths/model_paths_and_files.xlsx",
+                use_file,
                 sheet_name="Filenames",
                 header=None,
             )
