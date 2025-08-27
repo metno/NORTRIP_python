@@ -87,8 +87,9 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Convert MATLAB datenums to datetimes for plotting
     dt_x = matlab_datenum_to_datetime_array(xplot)
 
-    # Figure and axis
-    fig, ax = plt.subplots(1, 1, figsize=(10, 3))
+    # Figure with 4 stacked panels (we'll fill panel 1 and 2 now)
+    fig, axes = plt.subplots(4, 1, figsize=(10, 8), sharex=False)
+    fig.subplots_adjust(hspace=0.5)
     try:
         fig.canvas.manager.set_window_title("Figure 13: Summary")
     except Exception:
@@ -103,47 +104,147 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         pm_text = "PM"
 
     title_str = getattr(paths, "title_str", "") or "Summary"
-    ax.set_title(f"{title_str}: {pm_text}")
+    ax1 = axes[0]
+    ax1.set_title(f"{title_str}: {pm_text}")
 
     # Hide values below zero (set to NaN) to mirror MATLAB not displaying negatives
-    def _hide_negative(a: np.ndarray) -> np.ndarray:
-        arr = np.asarray(a).copy()
-        # arr[arr < 0] = np.nan
-        return arr
-
-    y_obs_plot = _hide_negative(y_obs).squeeze()
-    y_salt_na_plot = _hide_negative(y_salt_na).squeeze()
-    y_salt_mg_plot = _hide_negative(y_salt_mg).squeeze()
-    y_wear_plot = _hide_negative(y_wear).squeeze()
-    y_sand_plot = _hide_negative(y_sand).squeeze()
-    y_total_model_plot = _hide_negative(y_total_model).squeeze()
 
     # Plot series in the MATLAB order/styles
-    ax.plot(dt_x, y_obs_plot, "k--", linewidth=1, label="Observed")
-    ax.plot(dt_x, y_salt_na_plot, "g-", linewidth=1, label="Modelled salt(na)")
-    ax.plot(dt_x, y_salt_mg_plot, "g--", linewidth=1, label="Modelled salt(mg)")
-    ax.plot(dt_x, y_wear_plot, "r:", linewidth=1, label="Modelled wear")
-    ax.plot(dt_x, y_sand_plot, "m--", linewidth=1, label="Modelled sand")
-    ax.plot(dt_x, y_total_model_plot, "b-", linewidth=1, label="Modelled total")
+    ax1.plot(dt_x, y_obs.squeeze(), "k--", linewidth=1, label="Observed")
+    ax1.plot(dt_x, y_salt_na.squeeze(), "g-", linewidth=1, label="Modelled salt(na)")
+    ax1.plot(dt_x, y_salt_mg.squeeze(), "g--", linewidth=1, label="Modelled salt(mg)")
+    ax1.plot(dt_x, y_wear.squeeze(), "r:", linewidth=1, label="Modelled wear")
+    ax1.plot(dt_x, y_sand.squeeze(), "m--", linewidth=1, label="Modelled sand")
+    ax1.plot(dt_x, y_total_model.squeeze(), "b-", linewidth=1, label="Modelled total")
 
     # Labels
-    ax.set_ylabel(f"{pm_text} concentration (µg/m³)")
-    ax.set_xlabel(shared.xlabel_text)
+    ax1.set_ylabel(f"{pm_text} concentration (µg/m³)")
+    ax1.set_xlabel(shared.xlabel_text)
 
     # Axis formatting similar to MATLAB date tick handling
-    format_time_axis(ax, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
 
     # Legend
-    ax.legend(loc="upper left")
+    ax1.legend(loc="upper left")
 
     # y-limit (kept optional to match MATLAB tight behavior; user disabled setting)
     try:
         y_stack = np.vstack(
-            [y_total_model_plot, y_obs_plot, y_salt_na_plot, y_wear_plot, y_sand_plot]
+            [
+                y_total_model.squeeze(),
+                y_obs.squeeze(),
+                y_salt_na.squeeze(),
+                y_wear.squeeze(),
+                y_sand.squeeze(),
+            ]
         )
         y_max = float(np.nanmax(y_stack)) * 1.1
         if np.isfinite(y_max):
-            ax.set_ylim(0, y_max)
+            ax1.set_ylim(0, y_max)
+    except Exception:
+        pass
+
+    # ---------------- Panel 2: Mass loading (g/m²) ----------------
+    ax2 = axes[1]
+    ax2.set_title("")
+    ax2.set_ylabel("Mass loading (g/m²)")
+
+    # Local masked copies
+    M_sum = shared.M_road_data_sum_tracks.copy()
+    M_sum[M_sum == nodata] = np.nan
+    activity = shared.activity_data_ro.copy()
+    activity[activity == nodata] = np.nan
+
+    b_factor = shared.b_factor
+    x_load = getattr(constants, "pm_200", 0)
+
+    # Build mass series at suspendable size, convert to g/m²
+    y_mass_dust = (
+        np.asarray(M_sum[constants.total_dust_index, x_load, :n_date]) * b_factor
+    )
+    y_mass_salt_na = (
+        np.asarray(M_sum[constants.salt_index[0], x_load, :n_date]) * b_factor
+    )
+    y_mass_sand = np.asarray(M_sum[constants.sand_index, x_load, :n_date]) * b_factor
+    y_mass_salt_mg = (
+        np.asarray(M_sum[constants.salt_index[1], x_load, :n_date]) * b_factor
+    )
+
+    # Enforce non-negative for plotting
+    y_mass_dust = np.maximum(y_mass_dust, 0)
+    y_mass_salt_na = np.maximum(y_mass_salt_na, 0)
+    y_mass_sand = np.maximum(y_mass_sand, 0)
+    y_mass_salt_mg = np.maximum(y_mass_salt_mg, 0)
+
+    # Average
+    x_str2, xplot2, y_dust = average_data_func(date_num, y_mass_dust, i_min, i_max, av)
+    _, _, y_salt_na = average_data_func(date_num, y_mass_salt_na, i_min, i_max, av)
+    _, _, y_sand = average_data_func(date_num, y_mass_sand, i_min, i_max, av)
+    _, _, y_salt_mg = average_data_func(date_num, y_mass_salt_mg, i_min, i_max, av)
+
+    dt_x2 = matlab_datenum_to_datetime_array(xplot2)
+
+    # Cleaning stairs normalization
+    _, _, y_clean = average_data_func(
+        date_num, activity[constants.t_cleaning_index, :n_date], i_min, i_max, av
+    )
+    max_plot = float(
+        np.nanmax(np.vstack([y_dust.squeeze(), y_salt_na.squeeze(), y_sand.squeeze()]))
+    )
+    has_clean_raw = np.any(
+        np.nan_to_num(activity[constants.t_cleaning_index, :n_date], nan=0.0) != 0
+    )
+    legend_entries = [
+        "Suspendable dust",
+        "Salt(na)",
+        "Salt(mg)",
+        "Suspendable sand",
+    ]
+    if (
+        has_clean_raw
+        and np.nanmax(y_clean) > 0
+        and np.isfinite(max_plot)
+        and max_plot > 0
+    ):
+        y_clean_norm = y_clean.squeeze() / np.nanmax(y_clean) * max_plot
+        ax2.step(
+            dt_x2,
+            y_clean_norm,
+            where="post",
+            color="b",
+            linewidth=0.5,
+            label="Cleaning",
+        )
+        legend_entries = [
+            "Cleaning",
+            "Suspendable dust",
+            "Salt(na)",
+            "Salt(mg)",
+            "Suspendable sand",
+        ]
+
+    # Plot series
+    ax2.plot(dt_x2, y_dust.squeeze(), "k-", linewidth=1, label="Suspendable dust")
+    ax2.plot(dt_x2, y_salt_na.squeeze(), "g-", linewidth=1, label="Salt(na)")
+    ax2.plot(dt_x2, y_salt_mg.squeeze(), "g--", linewidth=1, label="Salt(mg)")
+    ax2.plot(dt_x2, y_sand.squeeze(), "r--", linewidth=1, label="Suspendable sand")
+    ax2.set_xlabel(shared.xlabel_text)
+    format_time_axis(ax2, dt_x2, shared.av[0], day_tick_limit=150)
+    ax2.legend(legend_entries, loc="upper left")
+
+    # y-limit: 0..1.1 * max of plotted series (excluding NaNs)
+    try:
+        y_stack2 = np.vstack(
+            [
+                y_dust.squeeze(),
+                y_salt_na.squeeze(),
+                y_salt_mg.squeeze(),
+                y_sand.squeeze(),
+            ]
+        )
+        y_max2 = float(np.nanmax(y_stack2)) * 1.1
+        if np.isfinite(y_max2):
+            ax2.set_ylim(-0.05, y_max2)
     except Exception:
         pass
 
