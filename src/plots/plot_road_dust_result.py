@@ -2,6 +2,7 @@ import constants
 from config_classes import model_parameters, model_flags, model_file_paths
 from input_classes import (
     converted_data,
+    input_activity,
     input_initial,
     input_metadata,
     input_airquality,
@@ -32,6 +33,7 @@ def plot_road_dust_result(
     model_parameters: model_parameters,
     model_flags: model_flags,
     model_variables: model_variables,
+    input_activity: input_activity,
     paths: model_file_paths,
     meteo_input: input_meteorology,
     ro: int = 0,
@@ -52,6 +54,7 @@ def plot_road_dust_result(
         model_parameters: Model parameters (tracks, size distributions, etc.).
         model_flags: Model flags (plot_type_flag controls averaging).
         model_variables: Full model outputs (E, C, M arrays, meteo on road, etc.).
+        input_activity: Input activity data.
         paths: File/figure naming and title information.
         ro: Road index to plot.
         plot_size_fraction: Size fraction index to plot (defaults to PM10).
@@ -77,6 +80,7 @@ def plot_road_dust_result(
         model_parameters=model_parameters,
         model_flags=model_flags,
         model_variables=model_variables,
+        input_activity=input_activity,
         ro=ro,
         plot_size_fraction=plot_size_fraction,
     )

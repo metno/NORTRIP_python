@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -48,9 +48,11 @@ class shared_plot_data:
 
     # Derived course-fraction (present only if requested)
     pm_course_derived: bool
-    C_data_course: Optional[np.ndarray]
-    E_road_data_course: Optional[np.ndarray]
-    M_road_data_course: Optional[np.ndarray]
-    M_road_balance_data_course: Optional[np.ndarray]
-    PM_obs_net_course: Optional[np.ndarray]
-    PM_obs_bg_course: Optional[np.ndarray]
+    C_data_course: np.ndarray
+    E_road_data_course: np.ndarray
+    M_road_data_course: np.ndarray
+    M_road_balance_data_course: np.ndarray
+    PM_obs_net_course: np.ndarray
+    PM_obs_bg_course: np.ndarray
+
+    salt2_str: str

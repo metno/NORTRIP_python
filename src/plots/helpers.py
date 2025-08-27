@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Tuple, Any
 
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.axes import Axes
 
 from functions import average_data_func
 
@@ -33,7 +33,7 @@ def prepare_series(
 
 
 def format_time_axis(
-    ax: plt.Axes, dt_x: list, av_index: int, day_tick_limit: int = 150
+    ax: Axes, dt_x: list, av_index: int, day_tick_limit: int = 150
 ) -> None:
     if av_index in (3, 5):
         return  # handled separately using string ticks
@@ -51,7 +51,7 @@ def format_time_axis(
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
     for label in ax.get_xticklabels():
         label.set_rotation(0)
-        label.set_ha("center")
+        label.set_horizontalalignment("center")
 
 
 def mask_nodata(arr: np.ndarray, nodata: float) -> np.ndarray:

@@ -3,6 +3,7 @@ from input_classes import (
     input_metadata,
     input_airquality,
     input_meteorology,
+    input_activity,
 )
 from config_classes import (
     model_parameters,
@@ -24,6 +25,7 @@ def init_shared_data(
     model_parameters: model_parameters,
     model_flags: model_flags,
     model_variables: model_variables,
+    input_activity: input_activity,
     ro: int,
     plot_size_fraction: int,
 ) -> shared_plot_data:
@@ -104,13 +106,13 @@ def init_shared_data(
     Salt_obs_available = np.array(airquality_data.Salt_obs_available, copy=True)
 
     # Derived course fraction handling (virtual size: PM_course = PM10 - PM2.5)
-    pm_course_derived = plot_size_fraction == getattr(constants, "pm_course", -1)
-    C_data_course = None
-    E_road_data_course = None
-    M_road_data_course = None
-    M_road_balance_data_course = None
-    PM_obs_net_course = None
-    PM_obs_bg_course = None
+    pm_course_derived = plot_size_fraction == constants.pm_course
+    C_data_course = np.zeros((0, 0, 0, 0))
+    E_road_data_course = np.zeros((0, 0, 0, 0))
+    M_road_data_course = np.zeros((0, 0, 0))
+    M_road_balance_data_course = np.zeros((0, 0, 0, 0))
+    PM_obs_net_course = np.zeros((0, 0))
+    PM_obs_bg_course = np.zeros((0, 0))
 
     if pm_course_derived:
         # Create derived arrays without changing original shapes
@@ -189,4 +191,5 @@ def init_shared_data(
         road_wetness_obs_available=road_wetness_obs_available,
         road_wetness_obs_in_mm=road_wetness_obs_in_mm,
         road_temperature_obs_available=road_temperature_obs_available,
+        salt2_str=input_activity.salt2_str,
     )

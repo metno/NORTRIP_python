@@ -52,7 +52,7 @@ def plot_wetness(shared: shared_plot_data, paths: model_file_paths) -> None:
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 6), sharex=False)
     fig.subplots_adjust(hspace=0.35)
     try:
-        fig.canvas.manager.set_window_title("Figure 4: Road wetness")
+        fig.canvas.manager.set_window_title("Figure 4: Road wetness")  # type: ignore
     except Exception:
         pass
 

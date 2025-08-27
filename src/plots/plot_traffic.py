@@ -1,5 +1,5 @@
-from __future__ import annotations
 import matplotlib.pyplot as plt
+import numpy as np
 
 import constants
 from config_classes import model_file_paths
@@ -98,7 +98,7 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     # Set window title for the figure window
     try:
-        fig.canvas.manager.set_window_title("Figure 1: Traffic")
+        fig.canvas.manager.set_window_title("Figure 1: Traffic")  # type: ignore
     except Exception:
         pass
 
@@ -115,8 +115,8 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax1.legend(loc="upper left")
     format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
     if len(dt_x) > 0:
-        dt_min = matlab_datenum_to_datetime_array([date_num[i_min]])[0]
-        dt_max = matlab_datenum_to_datetime_array([date_num[i_max]])[0]
+        dt_min = matlab_datenum_to_datetime_array(np.array([date_num[i_min]]))[0]
+        dt_max = matlab_datenum_to_datetime_array(np.array([date_num[i_max]]))[0]
         ax1.set_xlim(dt_min, dt_max)
 
     # Panel 2: traffic speed

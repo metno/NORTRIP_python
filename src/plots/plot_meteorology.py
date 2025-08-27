@@ -65,15 +65,13 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
     fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(10, 6), sharex=False)
     fig.subplots_adjust(hspace=0.35)
     try:
-        fig.canvas.manager.set_window_title("Figure 2: Meteorology")
+        fig.canvas.manager.set_window_title("Figure 2: Meteorology")  # type: ignore
     except Exception:
         pass
 
     # Title on first panel
-    if hasattr(paths, "title_str") and paths.title_str:
-        ax1.set_title(f"{paths.title_str}: Meteorology")
-    else:
-        ax1.set_title("Meteorology")
+
+    ax1.set_title(f"{paths.title_str}: Meteorology")
 
     # Split air temperature into <0C and >=0C segments
     Ta_flat = Ta.squeeze()

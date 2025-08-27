@@ -74,7 +74,7 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 6), sharex=False)
     fig.subplots_adjust(hspace=0.4)
     try:
-        fig.canvas.manager.set_window_title("Figure 3: Emissions and mass")
+        fig.canvas.manager.set_window_title("Figure 3: Emissions and mass")  # type: ignore
     except Exception:
         pass
 

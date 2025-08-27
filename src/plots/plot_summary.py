@@ -95,7 +95,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         4, 3, hspace=0.3, wspace=0.25, left=0.06, right=0.99, top=0.95, bottom=0.06
     )
     try:
-        fig.canvas.manager.set_window_title("Figure 13: Summary")
+        fig.canvas.manager.set_window_title("Figure 13: Summary")  # type: ignore
     except Exception:
         pass
 
@@ -415,7 +415,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     for xpos, val in zip(x_positions, ploty1, strict=False):
         if np.isfinite(val) and val > 0:
             ax4.text(
-                xpos,
+                float(xpos),
                 val,
                 f"{val:5.0f}",
                 ha="center",
@@ -506,6 +506,6 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
     for xpos, val in zip(x_positions_c, ploty1_c, strict=False):
         if np.isfinite(val) and val > 0:
-            ax5.text(xpos, val, f"{val:5.1f}", ha="center", va="bottom")
+            ax5.text(float(xpos), val, f"{val:5.1f}", ha="center", va="bottom")
     ax5.set_xlim(0, 10)
     ax5.set_ylim(bottom=0)

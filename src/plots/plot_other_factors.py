@@ -10,7 +10,7 @@ from .shared_plot_data import shared_plot_data
 from .helpers import matlab_datenum_to_datetime_array, format_time_axis, mask_nodata
 
 
-def _safe_divide(num: np.ndarray, den: np.ndarray) -> np.ndarray:
+def _safe_divide(num: np.ndarray | float, den: np.ndarray | float) -> np.ndarray:
     with np.errstate(divide="ignore", invalid="ignore"):
         out = np.true_divide(num, den)
         out[~np.isfinite(out)] = np.nan
@@ -75,7 +75,7 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
     )
     fig.subplots_adjust(hspace=0.5)
     try:
-        fig.canvas.manager.set_window_title("Figure 5: Other factors")
+        fig.canvas.manager.set_window_title("Figure 5: Other factors")  # type: ignore
     except Exception:
         pass
 

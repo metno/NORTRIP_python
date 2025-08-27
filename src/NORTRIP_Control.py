@@ -266,11 +266,15 @@ def main():
 
         # Put forecast surface temperature into the normal road temperature
         if model_flags.forecast_hour > 0:
-            model_variables.road_meteo_data[
-                constants.T_s_index, time_config.min_time : time_config.max_time, tr, ro
-            ] = model_variables.forecast_T_s[
-                time_config.min_time : time_config.max_time
-            ]
+            for tr_idx in range(model_parameters.num_track):
+                model_variables.road_meteo_data[
+                    constants.T_s_index,
+                    time_config.min_time : time_config.max_time,
+                    tr_idx,
+                    ro,
+                ] = model_variables.forecast_T_s[
+                    time_config.min_time : time_config.max_time
+                ]
 
         # Calculate dispersion factors using ospm or NOx
         if model_flags.use_ospm_flag:
@@ -305,22 +309,21 @@ def main():
     time_config.max_time = time_config.max_time_save
 
     # Generate plots
-    try:
-        plot_road_dust_result(
-            time_config=time_config,
-            converted_data=converted_data,
-            initial_data=initial_input,
-            metadata=metadata_input,
-            airquality_data=airquality_input,
-            model_parameters=model_parameters,
-            model_flags=model_flags,
-            model_variables=model_variables,
-            meteo_input=meteorology_input,
-            paths=paths,
-            ro=0,
-        )
-    except Exception as e:
-        logger.exception(f"Plotting failed: {e}")
+
+    plot_road_dust_result(
+        time_config=time_config,
+        converted_data=converted_data,
+        initial_data=initial_input,
+        metadata=metadata_input,
+        airquality_data=airquality_input,
+        model_parameters=model_parameters,
+        model_flags=model_flags,
+        model_variables=model_variables,
+        meteo_input=meteorology_input,
+        input_activity=activity_input,
+        paths=paths,
+        ro=0,
+    )
 
     logger.info("End of NORTRIP_Control")
 
