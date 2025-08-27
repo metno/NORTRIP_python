@@ -99,7 +99,6 @@ def main():
     )
 
     if use_fortran:
-        # Does nothing for now
         NORTRIP_fortran_control()
 
     # Initialize activity state for tracking maintenance activities
@@ -302,11 +301,10 @@ def main():
             ro=ro,
         )
 
-    # End road loop
-
-    # Generate plots (summary for now)
     time_config.min_time = time_config.min_time_save
     time_config.max_time = time_config.max_time_save
+
+    # Generate plots
     try:
         plot_road_dust_result(
             time_config=time_config,

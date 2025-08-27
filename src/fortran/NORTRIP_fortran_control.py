@@ -4,4 +4,4 @@ def NORTRIP_fortran_control():
 
     TODO: Add parameters and run fortran model.
     """
-    pass
+    print("NORTRIP_fortran_control: Not implemented yet")

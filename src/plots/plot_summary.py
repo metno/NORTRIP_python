@@ -26,6 +26,8 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     av = list(shared.av)
     x_size = shared.plot_size_fraction
 
+    # ---------------- Panel 1: Concentrations (µg/m³) ----------------
+
     # Prepare local float copies and apply MATLAB-equivalent masking
     # Invalid times r: when f_conc == nodata OR PM_obs_net(x, :) == nodata
     f_conc = shared.f_conc[:n_date].copy()
@@ -88,7 +90,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     dt_x = matlab_datenum_to_datetime_array(xplot)
 
     # Figure with 4 stacked panels (we'll fill panel 1 and 2 now)
-    fig, axes = plt.subplots(4, 1, figsize=(10, 8), sharex=False)
+    fig: plt.Figure, axes: list[plt.Axes] = plt.subplots(4, 1, figsize=(10, 8), sharex=False)
     fig.subplots_adjust(hspace=0.5)
     try:
         fig.canvas.manager.set_window_title("Figure 13: Summary")
@@ -140,7 +142,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         )
         y_max = float(np.nanmax(y_stack)) * 1.1
         if np.isfinite(y_max):
-            ax1.set_ylim(0, y_max)
+            ax1.set_ylim(-10.0, y_max)
     except Exception:
         pass
 
@@ -169,12 +171,6 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     y_mass_salt_mg = (
         np.asarray(M_sum[constants.salt_index[1], x_load, :n_date]) * b_factor
     )
-
-    # Enforce non-negative for plotting
-    y_mass_dust = np.maximum(y_mass_dust, 0)
-    y_mass_salt_na = np.maximum(y_mass_salt_na, 0)
-    y_mass_sand = np.maximum(y_mass_sand, 0)
-    y_mass_salt_mg = np.maximum(y_mass_salt_mg, 0)
 
     # Average
     x_str2, xplot2, y_dust = average_data_func(date_num, y_mass_dust, i_min, i_max, av)
@@ -244,7 +240,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         )
         y_max2 = float(np.nanmax(y_stack2)) * 1.1
         if np.isfinite(y_max2):
-            ax2.set_ylim(-0.05, y_max2)
+            ax2.set_ylim(-10.0, y_max2)
     except Exception:
         pass
 
