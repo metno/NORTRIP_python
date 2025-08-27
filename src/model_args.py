@@ -26,26 +26,20 @@ def create_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-t",
         "--text",
-        type=int,
-        choices=[0, 1],
-        default=0,
-        help="Read as text mode (0=False, 1=True). Default is 0.",
+        action="store_true",
+        help="Read paths as text file instead of Excel.",
     )
     parser.add_argument(
         "-p",
         "--print",
-        type=int,
-        choices=[0, 1],
-        default=0,
-        help="Print model results to terminal (0=False, 1=True). Default is 0.",
+        action="store_true",
+        help="Print model results to terminal.",
     )
     parser.add_argument(
         "-f",
         "--fortran",
-        type=int,
-        choices=[0, 1],
-        default=0,
-        help="Run fortran model (0=False, 1=True). Default is 0.",
+        action="store_true",
+        help="Run fortran model. (WIP)",
     )
 
     return parser
