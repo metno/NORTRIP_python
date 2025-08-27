@@ -89,9 +89,9 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # Convert MATLAB datenums to datetimes for plotting
     dt_x = matlab_datenum_to_datetime_array(xplot)
 
-    # Figure with 4 stacked panels (we'll fill panel 1 and 2 now)
-    fig, axes = plt.subplots(4, 1, figsize=(10, 8), sharex=False)
-    fig.subplots_adjust(hspace=0.5)
+    # Figure using a 4x3 grid: rows 0-1 span all 3 cols; row 2 has 3 small panels
+    fig = plt.figure(figsize=(10, 8))
+    gs = fig.add_gridspec(4, 3, hspace=0.5, wspace=0.35)
     try:
         fig.canvas.manager.set_window_title("Figure 13: Summary")
     except Exception:
@@ -106,7 +106,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         pm_text = "PM"
 
     title_str = getattr(paths, "title_str", "") or "Summary"
-    ax1 = axes[0]
+    ax1 = fig.add_subplot(gs[0, :])
     ax1.set_title(f"{title_str}: {pm_text}")
 
     # Hide values below zero (set to NaN) to mirror MATLAB not displaying negatives
@@ -147,7 +147,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         pass
 
     # ---------------- Panel 2: Mass loading (g/m²) ----------------
-    ax2 = axes[1]
+    ax2 = fig.add_subplot(gs[1, :])
     ax2.set_title("")
     ax2.set_ylabel("Mass loading (g/m²)")
 
@@ -243,5 +243,85 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             ax2.set_ylim(-10.0, y_max2)
     except Exception:
         pass
+
+    # ---------------- Panel 3: Scatter daily mean (modeled vs observed) ----------------
+    ax3 = fig.add_subplot(gs[2, 0])
+    # Title depending on exhaust availability is not in shared; default to generic
+    ax3.set_title("Scatter daily mean")
+    ax3.set_ylabel(f"{pm_text} observed concentration (µg/m³)")
+    ax3.set_xlabel(f"{pm_text} modelled concentration (µg/m³)")
+
+    x_vals = np.asarray(y_total_model).squeeze()
+    y_vals = np.asarray(y_obs).squeeze()
+    valid = np.isfinite(x_vals) & np.isfinite(y_vals)
+
+    if np.any(valid):
+        xm = x_vals[valid]
+        ym = y_vals[valid]
+        ax3.scatter(xm, ym, facecolor="none", edgecolor="blue", s=10)
+
+        max_plot = float(np.nanmax([np.nanmax(xm), np.nanmax(ym)]))
+        if np.isfinite(max_plot):
+            ax3.set_xlim(0, max_plot)
+            ax3.set_ylim(0, max_plot)
+
+        # Statistics
+        if xm.size >= 2:
+            try:
+                R = np.corrcoef(xm, ym)
+                r_sq = float(R[0, 1] ** 2)
+            except Exception:
+                r_sq = np.nan
+            rmse = float(np.sqrt(np.nanmean((xm - ym) ** 2)))
+            mean_obs = float(np.nanmean(ym))
+            mean_mod = float(np.nanmean(xm))
+            with np.errstate(invalid="ignore", divide="ignore"):
+                _fbias = float((mean_mod - mean_obs) / (mean_mod + mean_obs) * 2.0)
+            try:
+                a1, a0 = np.polyfit(xm, ym, 1)
+            except Exception:
+                a1, a0 = np.nan, np.nan
+
+            # Text annotations (normalized coordinates)
+            ax3.text(
+                0.05, 0.95, f"r²  = {r_sq:4.2f}", transform=ax3.transAxes, va="top"
+            )
+            ax3.text(
+                0.05,
+                0.85,
+                f"RMSE = {rmse:4.1f} (µg/m³)",
+                transform=ax3.transAxes,
+                va="top",
+            )
+            ax3.text(
+                0.05,
+                0.75,
+                f"OBS  = {mean_obs:4.1f} (µg/m³)",
+                transform=ax3.transAxes,
+                va="top",
+            )
+            ax3.text(
+                0.05,
+                0.65,
+                f"MOD  = {mean_mod:4.1f} (µg/m³)",
+                transform=ax3.transAxes,
+                va="top",
+            )
+
+            # Regression line across observed x-range
+            xmin = float(np.nanmin(xm))
+            xmax = float(np.nanmax(xm))
+            if (
+                np.isfinite(a0)
+                and np.isfinite(a1)
+                and np.isfinite(xmin)
+                and np.isfinite(xmax)
+            ):
+                ax3.plot(
+                    [xmin, xmax],
+                    [a0 + a1 * xmin, a0 + a1 * xmax],
+                    "-",
+                    color=(0.5, 0.5, 0.5),
+                )
 
     plt.tight_layout()
