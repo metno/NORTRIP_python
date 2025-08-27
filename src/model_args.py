@@ -21,7 +21,7 @@ def create_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "paths",
         type=validate_xlsx_path,
-        help="Relative or absolute path to a .xlsx file. (Eg. model_paths/model_paths.xlsx)",
+        help="Relative or absolute path to an .xlsx file containing the model file paths. (Eg. model_paths/model_paths.xlsx)",
     )
     parser.add_argument(
         "-t",
