@@ -531,3 +531,306 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             ax5.text(float(xpos), val, f"{val:5.1f}", ha="center", va="bottom")
     ax5.set_xlim(0, 10)
     ax5.set_ylim(bottom=0)
+
+    # ---------------- Panel 6: Traffic and activity text block ----------------
+    ax6 = fig.add_subplot(gs[3, 0])
+    ax6.axis("off")
+
+    # Compute metrics over selected window
+    li = constants.li
+    he = constants.he
+    st = constants.st
+    tmask = mask_range
+    traffic = shared.traffic_data_ro.astype(float).copy()
+    traffic[traffic == nodata] = np.nan
+
+    # Mean hourly flows
+    N_li = traffic[constants.N_v_index[li], tmask]
+    N_he = traffic[constants.N_v_index[he], tmask]
+    mean_hour_li = float(np.nanmean(N_li)) if np.any(np.isfinite(N_li)) else np.nan
+    mean_hour_he = float(np.nanmean(N_he)) if np.any(np.isfinite(N_he)) else np.nan
+    mean_ADT_li = mean_hour_li * 24.0 if np.isfinite(mean_hour_li) else np.nan
+    mean_ADT_he = mean_hour_he * 24.0 if np.isfinite(mean_hour_he) else np.nan
+    mean_ADT_total = (
+        mean_ADT_li + mean_ADT_he
+        if np.isfinite(mean_ADT_li) and np.isfinite(mean_ADT_he)
+        else np.nan
+    )
+
+    # Mean speeds (traffic-weighted)
+    V_li = traffic[constants.V_veh_index[li], tmask]
+    V_he = traffic[constants.V_veh_index[he], tmask]
+
+    def weighted_mean(val: np.ndarray, w: np.ndarray) -> float:
+        val = np.asarray(val, dtype=float)
+        w = np.asarray(w, dtype=float)
+        with np.errstate(invalid="ignore"):
+            num = np.nansum(val * w)
+            den = np.nansum(w)
+        return float(num / den) if den > 0 else np.nan
+
+    mean_speed_li = weighted_mean(V_li, N_li)
+    mean_speed_he = weighted_mean(V_he, N_he)
+
+    # Studded proportions by vehicle type
+    N_st_li = traffic[constants.N_t_v_index[(st, li)], tmask]
+    N_st_he = traffic[constants.N_t_v_index[(st, he)], tmask]
+    mean_ADT_st_li = (
+        float(np.nanmean(N_st_li)) * 24.0 if np.any(np.isfinite(N_st_li)) else np.nan
+    )
+    mean_ADT_st_he = (
+        float(np.nanmean(N_st_he)) * 24.0 if np.any(np.isfinite(N_st_he)) else np.nan
+    )
+    prop_st_li = (
+        float(mean_ADT_st_li / mean_ADT_li)
+        if np.isfinite(mean_ADT_st_li) and np.isfinite(mean_ADT_li) and mean_ADT_li > 0
+        else np.nan
+    )
+    prop_st_he = (
+        float(mean_ADT_st_he / mean_ADT_he)
+        if np.isfinite(mean_ADT_st_he) and np.isfinite(mean_ADT_he) and mean_ADT_he > 0
+        else np.nan
+    )
+
+    # Event counts
+    activity = shared.activity_data_ro.astype(float).copy()
+    activity[activity == nodata] = np.nan
+    num_salting_na = int(
+        np.nansum((activity[constants.M_salting_index[0], tmask] > 0).astype(int))
+    )
+    num_salting_2 = int(
+        np.nansum((activity[constants.M_salting_index[1], tmask] > 0).astype(int))
+    )
+    num_sanding = int(
+        np.nansum((activity[constants.M_sanding_index, tmask] > 0).astype(int))
+    )
+    num_cleaning = int(
+        np.nansum((activity[constants.t_cleaning_index, tmask] > 0).astype(int))
+    )
+    num_ploughing = int(
+        np.nansum((activity[constants.t_ploughing_index, tmask] > 0).astype(int))
+    )
+
+    # Number of days in window from datetimes
+    dt_slice = matlab_datenum_to_datetime_array(shared.date_num[i_min : i_max + 1])
+    if len(dt_slice) >= 2:
+        num_days = (dt_slice[-1] - dt_slice[0]).total_seconds() / 86400.0
+    else:
+        num_days = 0.0
+
+    # Render as stacked text with offsets
+    title = "Traffic and activity"
+    lines = [
+        f"Mean ADT  = {mean_ADT_total:4.0f} (veh)",
+        f"Mean ADT (li / he) = {mean_ADT_li / (mean_ADT_total) * 100:4.1f} / {mean_ADT_he / (mean_ADT_total) * 100:4.1f} (%)"
+        if np.isfinite(mean_ADT_total) and mean_ADT_total > 0
+        else "Mean ADT (li / he) = n/a / n/a (%)",
+        f"Mean speed (li / he) = {mean_speed_li:4.1f} / {mean_speed_he:4.1f} (km/hr)",
+        f"Studded (li / he) = {prop_st_li * 100:4.1f} / {prop_st_he * 100:4.1f} (%)"
+        if np.isfinite(prop_st_li) and np.isfinite(prop_st_he)
+        else "Studded (li / he) = n/a / n/a (%)",
+        f"Number of days = {num_days:4.1f}",
+        f"Number salting events (na/{shared.salt2_str}) = {num_salting_na:3.0f}/{num_salting_2:3.0f}",
+        f"Number sanding events = {num_sanding:4.0f}",
+        f"Number cleaning events = {num_cleaning:4.0f}",
+        f"Number ploughing events = {num_ploughing:4.0f}",
+    ]
+
+    y = 1.0
+    dy = 0.1
+    ax6.text(0.0, y, title, transform=ax6.transAxes, fontweight="bold")
+    for text in lines:
+        y -= dy
+        ax6.text(0.0, y, text, transform=ax6.transAxes)
+
+    # ---------------- Panel 7: Meteorology text block ----------------
+    ax7 = fig.add_subplot(gs[3, 1])
+    ax7.axis("off")
+
+    meteo = shared.meteo_data_ro.astype(float).copy()
+    meteo[meteo == nodata] = np.nan
+    roadm = shared.road_meteo_weighted.astype(float).copy()
+    roadm[roadm == nodata] = np.nan
+
+    # Means over window
+    mean_Ta = float(np.nanmean(meteo[constants.T_a_index, mask_range]))
+    mean_RH = float(np.nanmean(meteo[constants.RH_index, mask_range]))
+    # Short-wave radiation: global from meteo, net from road meteo
+    mean_short_rad = float(np.nanmean(meteo[constants.short_rad_in_index, mask_range]))
+    mean_short_rad_net = float(
+        np.nanmean(roadm[constants.short_rad_net_index, mask_range])
+    )
+    mean_cloud = float(np.nanmean(meteo[constants.cloud_cover_index, mask_range]))
+
+    # Precip totals and frequency
+    rain = meteo[constants.Rain_precip_index, mask_range]
+    snow = meteo[constants.Snow_precip_index, mask_range]
+    total_precip = float(np.nansum(rain + snow))
+    # Frequency based on any precip per timestep
+    # Count any precip in a timestep only once
+    precip_any = (np.nan_to_num(rain, nan=0.0) > 0) | (np.nan_to_num(snow, nan=0.0) > 0)
+    freq_precip = float(np.mean(precip_any)) if precip_any.size > 0 else 0.0
+
+    # Wet/dry proportions using f_q
+    fq = shared.f_q_weighted.astype(float).copy()
+    fq[fq == nodata] = np.nan
+    fq_obs = shared.f_q_obs_weighted.astype(float).copy()
+    fq_obs[fq_obs == nodata] = np.nan
+    fq_road_win = fq[constants.road_index, mask_range]
+    fq_obs_win = fq_obs[mask_range]
+
+    is_wet_mod = fq_road_win < 0.5
+    is_wet_obs = fq_obs_win < 0.5
+    prop_wet = (
+        float(np.nanmean(is_wet_mod.astype(float))) if is_wet_mod.size > 0 else 0.0
+    )
+    # relative freq = model wet count / observed wet count
+    wet_mod_count = int(np.nansum(is_wet_mod.astype(float)))
+    wet_obs_count = int(np.nansum(is_wet_obs.astype(float)))
+    rel_prop_wet = float(wet_mod_count / wet_obs_count) if wet_obs_count > 0 else np.nan
+
+    # Moisture hits (matching sign of wet/dry classification)
+    # Map to -1 (wet) and +1 (dry)
+    fq_obs_sign = np.where(is_wet_obs, -1, 1)
+    fq_mod_sign = np.where(is_wet_mod, -1, 1)
+    valid_hits = np.isfinite(fq_obs_win) & np.isfinite(fq_road_win)
+    hits = np.sum((fq_obs_sign[valid_hits] * fq_mod_sign[valid_hits]) > 0)
+    total_classified = int(np.sum(valid_hits))
+    f_q_hits = (
+        float(hits / total_classified * 100.0) if total_classified > 0 else np.nan
+    )
+
+    # Mean dispersion from earlier computed mean_f_conc (fallback to window mean)
+    if np.isfinite(mean_f_conc):
+        f_conc_win = shared.f_conc[mask_range].astype(float)
+        f_conc_win[f_conc_win == nodata] = np.nan
+        mean_f_conc = float(np.nanmean(f_conc_win))
+
+    title2 = "Meteorology"
+    lines2 = [
+        f"Mean Temperature = {mean_Ta:4.2f} (°C)",
+        f"Mean RH = {mean_RH:4.1f} (%)",
+        f"Mean short radiation global/net = {mean_short_rad:4.1f}/{mean_short_rad_net:4.1f} (W/m²)",
+        f"Mean cloud cover = {mean_cloud * 100:4.1f} (%)",
+        f"Total precipitation = {total_precip:4.1f} (mm)",
+        f"Frequency precipitation = {freq_precip * 100:4.1f} (%)",
+        f"Frequency wet road = {prop_wet * 100:4.1f} (%)",
+        f"Relative freq wet road = {rel_prop_wet:4.2f}",
+        f"Surface moisture hits = {f_q_hits:4.1f} (%)",
+        f"Mean dispersion = {mean_f_conc:4.3f} (µg/m³·(g/km/hr)⁻¹)",
+    ]
+
+    y = 1.0
+    dy = 0.1
+    ax7.text(0.0, y, title2, transform=ax7.transAxes, fontweight="bold")
+    for text in lines2:
+        y -= dy
+        ax7.text(0.0, y, text, transform=ax7.transAxes)
+
+    # ---------------- Panel 8: Concentrations text block ----------------
+    ax8 = fig.add_subplot(gs[3, 2])
+    ax8.axis("off")
+
+    # Build averaged series for percentiles/exceedances (net and with background)
+    PM_obs_bg_all = shared.PM_obs_bg.astype(float).copy()
+    PM_obs_bg_all[PM_obs_bg_all == nodata] = np.nan
+    obs_bg_series_win = PM_obs_bg_all[x_size, mask_range]
+
+    # Daily/selected averaging using same av as charts
+    _xstr_bg, _xplot_bg, y_obs_bg = average_data_func(
+        date_num, PM_obs_bg_all[x_size, :n_date], i_min, i_max, av
+    )
+
+    # Mask for availability across all three averaged series
+    y_obs_net_av = np.asarray(y_obs).squeeze()
+    y_mod_net_av = np.asarray(y_total_model).squeeze()
+    y_obs_bg_av = np.asarray(y_obs_bg).squeeze()
+    r_av = (
+        np.isfinite(y_obs_net_av) & np.isfinite(y_mod_net_av) & np.isfinite(y_obs_bg_av)
+    )
+
+    # Percentiles (match MATLAB index rounding approach)
+    def percentile_from_sorted(arr: np.ndarray, p: float) -> float:
+        arr_valid = np.asarray(arr, dtype=float)
+        arr_valid = arr_valid[np.isfinite(arr_valid)]
+        if arr_valid.size == 0:
+            return float("nan")
+        arr_sorted = np.sort(arr_valid)
+        idx = int(np.round(arr_sorted.size * p / 100.0)) - 1
+        idx = max(0, min(arr_sorted.size - 1, idx))
+        return float(arr_sorted[idx])
+
+    per = 90.0
+    obs_c_per = percentile_from_sorted(y_obs_net_av[r_av], per)
+    mod_c_per = percentile_from_sorted(y_mod_net_av[r_av], per)
+    obs_c_bg_per = percentile_from_sorted((y_obs_net_av + y_obs_bg_av)[r_av], per)
+    mod_c_bg_per = percentile_from_sorted((y_mod_net_av + y_obs_bg_av)[r_av], per)
+
+    # 36th highest values
+    days_lim = 36
+
+    def _nth_highest(arr: np.ndarray, n: int) -> float:
+        arr_valid = np.asarray(arr, dtype=float)
+        arr_valid = arr_valid[np.isfinite(arr_valid)]
+        if arr_valid.size < n or arr_valid.size == 0:
+            return 0.0
+        arr_sorted = np.sort(arr_valid)  # ascending
+        return float(arr_sorted[-n])
+
+    high36_obs = _nth_highest(y_obs_net_av[r_av], days_lim)
+    high36_mod = _nth_highest(y_mod_net_av[r_av], days_lim)
+    high36_obs_bg = _nth_highest((y_obs_net_av + y_obs_bg_av)[r_av], days_lim)
+    high36_mod_bg = _nth_highest((y_mod_net_av + y_obs_bg_av)[r_av], days_lim)
+
+    # Exceedances over limit for averaged series
+    limit = 50.0
+    obs_c_ex = int(np.nansum(y_obs_net_av[r_av] > limit))
+    mod_c_ex = int(np.nansum(y_mod_net_av[r_av] > limit))
+    obs_c_bg_ex = int(np.nansum((y_obs_net_av + y_obs_bg_av)[r_av] > limit))
+    mod_c_bg_ex = int(np.nansum((y_mod_net_av + y_obs_bg_av)[r_av] > limit))
+
+    # Comparable hours: fraction of timesteps with both obs and f_conc available
+    f_conc_win_ch = shared.f_conc[mask_range].astype(float)
+    f_conc_win_ch[f_conc_win_ch == nodata] = np.nan
+    pm_obs_win_ch = shared.PM_obs_net[x_size, mask_range].astype(float)
+    pm_obs_win_ch[pm_obs_win_ch == nodata] = np.nan
+    valid_hours = np.isfinite(f_conc_win_ch) & np.isfinite(pm_obs_win_ch)
+    comparable_hours = (
+        float(np.nansum(valid_hours) / valid_hours.size)
+        if valid_hours.size > 0
+        else float("nan")
+    )
+
+    # Means for text (net and total)
+    # observed_concentrations was computed earlier; compute background mean (with mask including bg)
+    valid_bg = (
+        np.isfinite(obs_bg_series_win)
+        & np.isfinite(f_conc_win_ch)
+        & np.isfinite(pm_obs_win_ch)
+    )
+    observed_concentrations_bg = (
+        float(np.nanmean(obs_bg_series_win[valid_bg]))
+        if np.any(valid_bg)
+        else float("nan")
+    )
+
+    title3 = f"Concentrations {pm_text}"
+    lines3 = [
+        f"Mean obs (net,total) = {observed_concentrations:4.1f}, {observed_concentrations + observed_concentrations_bg:4.1f} (µg/m³)",
+        f"Mean model (net,total) = {total_concentrations:4.1f}, {total_concentrations + observed_concentrations_bg:4.1f} (µg/m³)",
+        f"Mean background obs = {observed_concentrations_bg:4.1f} (µg/m³)",
+        f"90th per obs (net,total)  = {obs_c_per:4.1f}, {obs_c_bg_per:4.1f} (µg/m³)",
+        f"90th per model (net,total) = {mod_c_per:4.1f}, {mod_c_bg_per:4.1f} (µg/m³)",
+        f"36th highest obs (net,total)  = {high36_obs:4.1f}, {high36_obs_bg:4.1f} (µg/m³)",
+        f"36th highest model (net,total) = {high36_mod:4.1f}, {high36_mod_bg:4.1f} (µg/m³)",
+        f"Days>50 µg/m³ obs (net,total) = {obs_c_ex:4.0f}, {obs_c_bg_ex:4.0f} (days)",
+        f"Days>50 µg/m³ model (net,total) = {mod_c_ex:4.0f}, {mod_c_bg_ex:4.0f} (days)",
+        f"Comparable hours = {comparable_hours * 100:4.1f} %",
+    ]
+
+    y = 1.0
+    dy = 0.1
+    ax8.text(0.0, y, title3, transform=ax8.transAxes, fontweight="bold")
+    for text in lines3:
+        y -= dy
+        ax8.text(0.0, y, text, transform=ax8.transAxes)
