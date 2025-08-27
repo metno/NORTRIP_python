@@ -423,3 +423,89 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             )
     ax4.set_xlim(0, 6)
     ax4.set_ylim(bottom=0)
+
+    # ---------------- Panel 5: Mean concentrations bar chart ----------------
+    ax5 = fig.add_subplot(gs[2, 2])
+    # Concentration arrays within selected window
+    C = shared.C_data_sum_tracks.astype(float).copy()
+    C[C == nodata] = np.nan
+    # Use same window and validity mask as for observed emissions
+    # (valid when both PM_obs and f_conc are finite)
+    # Build series
+    total_c_series = np.sum(
+        C[
+            constants.all_source_index,
+            x_size,
+            constants.C_total_index,
+            mask_range,
+        ],
+        axis=0,
+    )
+    roadwear_c_series = C[
+        constants.road_index, x_size, constants.C_total_index, mask_range
+    ]
+    tyrewear_c_series = C[
+        constants.tyre_index, x_size, constants.C_total_index, mask_range
+    ]
+    brakewear_c_series = C[
+        constants.brake_index, x_size, constants.C_total_index, mask_range
+    ]
+    sand_c_series = C[constants.sand_index, x_size, constants.C_total_index, mask_range]
+    salt_na_c_series = C[
+        constants.salt_index[0], x_size, constants.C_total_index, mask_range
+    ]
+    salt_mg_c_series = C[
+        constants.salt_index[1], x_size, constants.C_total_index, mask_range
+    ]
+    exhaust_c_series = C[
+        constants.exhaust_index, x_size, constants.C_total_index, mask_range
+    ]
+
+    # Means using valid_obs mask from earlier computation
+    if np.any(valid_obs):
+        total_concentrations = float(np.nanmean(total_c_series[valid_obs]))
+        roadwear_concentrations = float(np.nanmean(roadwear_c_series[valid_obs]))
+        tyrewear_concentrations = float(np.nanmean(tyrewear_c_series[valid_obs]))
+        brakewear_concentrations = float(np.nanmean(brakewear_c_series[valid_obs]))
+        sand_concentrations = float(np.nanmean(sand_c_series[valid_obs]))
+        salt_na_concentrations = float(np.nanmean(salt_na_c_series[valid_obs]))
+        salt_mg_concentrations = float(np.nanmean(salt_mg_c_series[valid_obs]))
+        exhaust_concentrations = float(np.nanmean(exhaust_c_series[valid_obs]))
+    else:
+        total_concentrations = np.nan
+        roadwear_concentrations = np.nan
+        tyrewear_concentrations = np.nan
+        brakewear_concentrations = np.nan
+        sand_concentrations = np.nan
+        salt_na_concentrations = np.nan
+        salt_mg_concentrations = np.nan
+        exhaust_concentrations = np.nan
+
+    ploty1_c = [
+        observed_concentrations,
+        total_concentrations,
+        roadwear_concentrations,
+        tyrewear_concentrations,
+        brakewear_concentrations,
+        sand_concentrations,
+        salt_na_concentrations,
+        salt_mg_concentrations,
+        exhaust_concentrations,
+    ]
+    ploty2_c = [ploty1_c[0]] + [0] * 8
+
+    x_positions_c = np.arange(1, 10)
+    ax5.bar(x_positions_c, ploty1_c, color="#d62728", edgecolor="k", linewidth=0.5)
+    ax5.bar(x_positions_c, ploty2_c, color="k")
+    ax5.set_xticks(x_positions_c)
+    ax5.set_xticklabels(
+        ["obs", "mod", "road", "tyre", "brake", "sand", "na", "mg", "exh"]
+    )
+    ax5.set_title("Mean concentrations")
+    ax5.set_ylabel(f"Concentration {pm_text} (µg/m³)")
+
+    for xpos, val in zip(x_positions_c, ploty1_c, strict=False):
+        if np.isfinite(val) and val > 0:
+            ax5.text(xpos, val, f"{val:5.1f}", ha="center", va="bottom")
+    ax5.set_xlim(0, 10)
+    ax5.set_ylim(bottom=0)
