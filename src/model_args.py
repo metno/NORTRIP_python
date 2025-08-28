@@ -16,11 +16,11 @@ def create_arg_parser() -> argparse.ArgumentParser:
         Supported forms:
         - "all" -> enable all 14 plots
         - "none" -> disable all plots
+        - "normal" -> enable all plots except temperature and moisture
+        - "temperature" -> enable temperature and moisture plots
         - 14-character bitstring like "11110000000010"
         - Comma-separated 0/1 list like "1,1,1,1,1,0,0,0,0,0,0,0,1,0"
         """
-        if not isinstance(value, str):
-            raise argparse.ArgumentTypeError("--plot-figure must be a string")
 
         text = value.strip().lower()
         num_flags = 14
@@ -29,34 +29,20 @@ def create_arg_parser() -> argparse.ArgumentParser:
             return [1] * num_flags
         if text == "none":
             return [0] * num_flags
+        if text == "normal":
+            return [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0]
+        if text == "temperature":
+            return [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1]
 
-        # Comma-separated list
-        if "," in text:
-            try:
-                flags = [int(x.strip()) for x in text.split(",")]
-            except ValueError as exc:
-                raise argparse.ArgumentTypeError(
-                    "--plot-figure must contain only 0 or 1"
-                ) from exc
-            if any(x not in (0, 1) for x in flags):
-                raise argparse.ArgumentTypeError("--plot-figure values must be 0 or 1")
-            if len(flags) != num_flags:
-                raise argparse.ArgumentTypeError(
-                    f"--plot-figure must have exactly {num_flags} values"
-                )
-            return flags
-
-        # Bitstring of 0/1 characters
         if set(text).issubset({"0", "1"}):
             if len(text) != num_flags:
                 raise argparse.ArgumentTypeError(
-                    f"--plot-figure bitstring must be length {num_flags}"
+                    f"--plot bitstring must be length {num_flags}"
                 )
             return [int(ch) for ch in text]
 
         raise argparse.ArgumentTypeError(
-            "Invalid --plot-figure format. Use 'all', 'none', a 14-digit 0/1 bitstring, "
-            "or a comma-separated list of 14 zeros/ones."
+            "Invalid --plot format. Use 'all', 'none', 'normal', 'temperature', or a 14-digit 0/1 bitstring."
         )
 
     def validate_xlsx_path(path_value: str) -> str:
@@ -93,14 +79,13 @@ def create_arg_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "-pl",
-        "--plot-figure",
-        dest="plot_figure",
+        "--plot",
+        dest="plot",
         type=parse_plot_figure_arg,
-        default=parse_plot_figure_arg("all"),
+        default=parse_plot_figure_arg("normal"),
         metavar="SPEC",
         help=(
-            "Which plots to generate. One of: 'all' (default), 'none', a 14-digit 0/1 bitstring, "
-            "or a comma-separated list of 14 zeros/ones (e.g. 1,1,1,1,1,0,0,0,0,0,0,0,1,0)."
+            "Which plots to generate. One of: 'all', 'none', 'normal' (default), 'temperature', a 14-digit 0/1 bitstring. (eg. '11110000000010')"
         ),
     )
 
