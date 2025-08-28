@@ -45,6 +45,7 @@ def main():
     read_as_text = bool(args.text)
     print_results = bool(args.print)
     use_fortran = bool(args.fortran)
+    plot_figure = args.plot_figure
 
     print("-" * 33)
     print(f"Starting NORTRIP_python_v{version('nortrip-python')}...")
@@ -323,6 +324,7 @@ def main():
         input_activity=activity_input,
         paths=paths,
         ro=0,
+        plot_figure=plot_figure,
     )
 
     logger.info("End of NORTRIP_Control")

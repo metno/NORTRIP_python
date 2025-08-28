@@ -38,6 +38,7 @@ def plot_road_dust_result(
     meteo_input: input_meteorology,
     ro: int = 0,
     plot_size_fraction: int = constants.pm_10,
+    plot_figure: list[int] | None = None,
 ):
     """
     Entry point for generating NORTRIP plots.
@@ -60,15 +61,14 @@ def plot_road_dust_result(
         plot_size_fraction: Size fraction index to plot (defaults to PM10).
     """
 
+    if plot_figure is None:
+        plot_figure = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+
     # Apply global plot style once per session
     try:
         apply_plot_style()
     except Exception:
         pass
-
-    # Configure which figures to render (aligns with MATLAB order)
-    # Index 0: Traffic, 1: Meteorology, 2: Emissions & Mass, 3: Wetness, 4: Other factors, 12: Summary
-    plot_figure = [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
 
     # Prepare shared data that all plots will consume
     shared = init_shared_data(

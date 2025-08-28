@@ -13,10 +13,23 @@ from .helpers import (
 
 def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     """
-    Render the first panel of the summary chart (concentrations over time).
+    Render the full summary figure (MATLAB figure 13) using a 4x3 layout.
 
-    This implements the MATLAB section under plot_figure(13) → first subplot,
-    computing averaged series and plotting observed vs source contributions.
+    Panels:
+    - Row 1 (spans 3 cols):
+      1) Time series of concentrations: observed vs modelled source contributions
+    - Row 2 (spans 3 cols):
+      2) Mass loading (g/m²): suspendable dust, salt(na), salt(salt2_str), sand, optional cleaning stairs
+    - Row 3 (3 cols):
+      3) Scatter (daily mean): modelled vs observed, with stats and regression line
+      4) Mean emission factor (mg/km/veh): observed, model total, direct, suspension, exhaust
+      5) Mean concentrations (µg/m³): observed, total, road/tyre/brake/sand/salt(na)/salt(salt2_str)/exhaust
+    - Row 4 (3 cols):
+      6) Traffic and activity summary (text block)
+      7) Meteorology summary (text block)
+      8) Concentration statistics (text block): percentiles, 36th-highest, exceedances, comparable hours
+
+    Inputs are provided via `shared_plot_data` and `model_file_paths`.
     """
     # Shorthands
     date_num = shared.date_num
