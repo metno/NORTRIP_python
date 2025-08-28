@@ -21,6 +21,7 @@ from .plot_energy_moisture_balance import plot_energy_moisture_balance
 from .plot_concentrations import plot_concentrations
 from .plot_scatter_qq import plot_scatter_qq
 from .plot_ae import plot_ae
+from .plot_scatter_temp_moisture import plot_scatter_temp_moisture
 import matplotlib.pyplot as plt
 import logging
 
@@ -138,5 +139,10 @@ def plot_road_dust_result(
     if plot_figure[12]:
         logger.info("Plotting summary figure")
         plot_summary(shared, paths)
+
+    # Scatter temperature and moisture figure (plot_figure index 13)
+    if plot_figure[13]:
+        logger.info("Plotting scatter temperature and moisture figure")
+        plot_scatter_temp_moisture(shared, paths)
 
     plt.show()
