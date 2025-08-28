@@ -3,7 +3,6 @@ from config_classes import model_parameters, model_flags, model_file_paths
 from input_classes import (
     converted_data,
     input_activity,
-    input_initial,
     input_metadata,
     input_airquality,
     input_meteorology,
@@ -32,7 +31,6 @@ def plot_road_dust_result(
     *,
     time_config: time_config,
     converted_data: converted_data,
-    initial_data: input_initial,
     metadata: input_metadata,
     airquality_data: input_airquality,
     model_parameters: model_parameters,
@@ -54,7 +52,6 @@ def plot_road_dust_result(
     Args:
         time_config: Time setup used for averaging ranges etc.
         converted_data: Converted input data (traffic, meteo, activities, dates).
-        initial_data: Initial state inputs.
         metadata: Metadata, including nodata and geometry.
         airquality_data: Air quality observations (PM, NOx, etc.).
         model_parameters: Model parameters (tracks, size distributions, etc.).

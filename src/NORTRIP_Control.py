@@ -314,7 +314,6 @@ def main():
     plot_road_dust_result(
         time_config=time_config,
         converted_data=converted_data,
-        initial_data=initial_input,
         metadata=metadata_input,
         airquality_data=airquality_input,
         model_parameters=model_parameters,
