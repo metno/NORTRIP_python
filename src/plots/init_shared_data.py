@@ -104,6 +104,9 @@ def init_shared_data(
     PM_obs_bg = np.array(airquality_data.PM_obs_bg, copy=True)
     Salt_obs = np.array(airquality_data.Salt_obs, copy=True)
     Salt_obs_available = np.array(airquality_data.Salt_obs_available, copy=True)
+    NOX_obs = np.array(airquality_data.NOX_obs, copy=True)
+    NOX_background = np.array(airquality_data.NOX_background, copy=True)
+    NOX_obs_net = np.array(airquality_data.NOX_obs_net, copy=True)
 
     # Derived course fraction handling (virtual size: PM_course = PM10 - PM2.5)
     pm_course_derived = plot_size_fraction == constants.pm_course
@@ -182,6 +185,9 @@ def init_shared_data(
         PM_obs_bg=PM_obs_bg,
         Salt_obs=Salt_obs,
         Salt_obs_available=Salt_obs_available,
+        NOX_obs=NOX_obs,
+        NOX_background=NOX_background,
+        NOX_obs_net=NOX_obs_net,
         pm_course_derived=pm_course_derived,
         C_data_course=C_data_course,
         E_road_data_course=E_road_data_course,

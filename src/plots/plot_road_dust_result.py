@@ -18,6 +18,7 @@ from .init_shared_data import init_shared_data
 from .plot_other_factors import plot_other_factors
 from .plot_wetness import plot_wetness
 from .plot_energy_moisture_balance import plot_energy_moisture_balance
+from .plot_concentrations import plot_concentrations
 import matplotlib.pyplot as plt
 import logging
 
@@ -120,5 +121,10 @@ def plot_road_dust_result(
     if plot_figure[12]:
         logger.info("Plotting summary figure")
         plot_summary(shared, paths)
+
+    # Concentrations figure (plot_figure index 6)
+    if plot_figure[6]:
+        logger.info("Plotting concentrations figure")
+        plot_concentrations(shared, paths)
 
     plt.show()

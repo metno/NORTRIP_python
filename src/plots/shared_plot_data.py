@@ -41,6 +41,9 @@ class shared_plot_data:
     PM_obs_bg: np.ndarray
     Salt_obs: np.ndarray
     Salt_obs_available: np.ndarray
+    NOX_obs: np.ndarray
+    NOX_background: np.ndarray
+    NOX_obs_net: np.ndarray
 
     # Availability flags derived for plotting convenience
     road_wetness_obs_available: int
