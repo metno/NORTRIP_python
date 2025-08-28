@@ -17,6 +17,7 @@ from .plot_emissions_mass import plot_emissions_mass
 from .init_shared_data import init_shared_data
 from .plot_other_factors import plot_other_factors
 from .plot_wetness import plot_wetness
+from .plot_energy_moisture_balance import plot_energy_moisture_balance
 import matplotlib.pyplot as plt
 import logging
 
@@ -62,7 +63,7 @@ def plot_road_dust_result(
     """
 
     if plot_figure is None:
-        plot_figure = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+        plot_figure = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     # Apply global plot style once per session
     try:
@@ -109,6 +110,11 @@ def plot_road_dust_result(
     if plot_figure[4]:
         logger.info("Plotting other factors figure")
         plot_other_factors(shared, paths)
+
+    # Energy and moisture balance figure (plot_figure index 5)
+    if plot_figure[5]:
+        logger.info("Plotting energy and moisture balance figure")
+        plot_energy_moisture_balance(shared, paths)
 
     # Summary figure
     if plot_figure[12]:

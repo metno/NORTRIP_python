@@ -157,6 +157,7 @@ def init_shared_data(
         av=av,
         i_min=time_config.min_time,
         i_max=time_config.max_time,
+        dt=float(time_config.dt),
         xlabel_text=xlabel_text,
         date_num=date_num,
         b_factor=b_factor,
@@ -191,5 +192,7 @@ def init_shared_data(
         road_wetness_obs_available=road_wetness_obs_available,
         road_wetness_obs_in_mm=road_wetness_obs_in_mm,
         road_temperature_obs_available=road_temperature_obs_available,
+        use_energy_correction_flag=model_flags.use_energy_correction_flag,
+        use_wetting_data_flag=model_flags.use_wetting_data_flag,
         salt2_str=input_activity.salt2_str,
     )

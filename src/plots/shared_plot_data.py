@@ -10,6 +10,7 @@ class shared_plot_data:
     av: Tuple[int, ...]
     i_min: int
     i_max: int
+    dt: float
     xlabel_text: str
     date_num: np.ndarray
     b_factor: float
@@ -45,6 +46,8 @@ class shared_plot_data:
     road_wetness_obs_available: int
     road_wetness_obs_in_mm: int
     road_temperature_obs_available: int
+    use_energy_correction_flag: int
+    use_wetting_data_flag: int
 
     # Derived course-fraction (present only if requested)
     pm_course_derived: bool
