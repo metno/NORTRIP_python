@@ -89,57 +89,57 @@ def plot_road_dust_result(
 
     # Traffic figure (plot_figure index 0)
     if plot_figure[0]:
-        logger.info("Plotting traffic figure")
+        logger.info("Plotting figure 1: traffic")
         plot_traffic(shared, paths)
 
     # Meteorology figure (plot_figure index 1)
     if plot_figure[1]:
-        logger.info("Plotting meteorology figure")
+        logger.info("Plotting figure 2: meteorology")
         plot_meteorology(shared, paths)
 
     # Emissions and mass balance figure (plot_figure index 2)
     if plot_figure[2]:
-        logger.info("Plotting emissions and mass balance figure")
+        logger.info("Plotting figure 3: emissions and mass balance")
         plot_emissions_mass(shared, paths)
 
     # Road wetness figure (plot_figure index 3)
     if plot_figure[3]:
-        logger.info("Plotting road wetness figure")
+        logger.info("Plotting figure 4: road wetness")
         plot_wetness(shared, paths)
 
     # Other factors figure (plot_figure index 4)
     if plot_figure[4]:
-        logger.info("Plotting other factors figure")
+        logger.info("Plotting figure 5: other factors")
         plot_other_factors(shared, paths)
 
     # Energy and moisture balance figure (plot_figure index 5)
     if plot_figure[5]:
-        logger.info("Plotting energy and moisture balance figure")
+        logger.info("Plotting figure 6: energy and moisture balance")
         plot_energy_moisture_balance(shared, paths)
 
     # Concentrations figure (plot_figure index 6)
     if plot_figure[6]:
-        logger.info("Plotting concentrations figure")
+        logger.info("Plotting figure 7: concentrations")
         plot_concentrations(shared, paths)
 
     # AE plot (plot_figure index 7)
     if plot_figure[7]:
-        logger.info("Plotting AE figure")
+        logger.info("Plotting figure 8: AE")
         plot_ae(shared, paths)
 
     # Scatter/QQ plots (plot_figure index 10)
     if plot_figure[10]:
-        logger.info("Plotting scatter/QQ figure")
+        logger.info("Plotting figure 11: scatter/QQ")
         plot_scatter_qq(shared, paths)
 
     # Summary figure
     if plot_figure[12]:
-        logger.info("Plotting summary figure")
+        logger.info("Plotting figure 13: summary")
         plot_summary(shared, paths)
 
     # Scatter temperature and moisture figure (plot_figure index 13)
     if plot_figure[13]:
-        logger.info("Plotting scatter temperature and moisture figure")
+        logger.info("Plotting figure 14: scatter temperature and moisture")
         plot_scatter_temp_moisture(shared, paths)
 
     plt.show()
