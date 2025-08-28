@@ -171,7 +171,6 @@ def plot_energy_moisture_balance(
             label=f"Energy correction = {mean_E_corr:4.2f} W/m²",
         )
     ax1.set_ylabel("Energy (W/m²)")
-    ax1.set_xlabel(shared.xlabel_text)
     ax1.legend(loc="upper left")
     format_time_axis(ax1, dt_x_e, shared.av[0], day_tick_limit=day_tick_limit)
     if len(dt_x_e) > 0:
@@ -241,8 +240,8 @@ def plot_energy_moisture_balance(
     mean_spray = _mean_on_rw(y_spray)
     mean_wetting = _mean_on_rw(y_wetting)
     mean_melt = _mean_on_rw(y_melt)
-    mean_rain = _mean_on_rw(y_rain)
-    mean_drain = _mean_on_rw(y_drain)
+    # mean_rain = _mean_on_rw(y_rain)
+    # mean_drain = _mean_on_rw(y_drain)
 
     dt_x_w = matlab_datenum_to_datetime_array(xplot_w)
     ax2.set_title(f"{title_str}: Surface water balance")
@@ -269,7 +268,6 @@ def plot_energy_moisture_balance(
         dt_x_w, np.asarray(y_wetting).squeeze(), "y-", linewidth=1, label="Wetting"
     )
     ax2.set_ylabel("Rates (mm/hr)")
-    ax2.set_xlabel(shared.xlabel_text)
     format_time_axis(ax2, dt_x_w, shared.av[0], day_tick_limit=day_tick_limit)
     legend_text2 = [
         f"Evap/condens = {mean_evap * 1000:4.2f} (µm/hr)",
