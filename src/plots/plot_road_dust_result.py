@@ -20,6 +20,7 @@ from .plot_wetness import plot_wetness
 from .plot_energy_moisture_balance import plot_energy_moisture_balance
 from .plot_concentrations import plot_concentrations
 from .plot_scatter_qq import plot_scatter_qq
+from .plot_ae import plot_ae
 import matplotlib.pyplot as plt
 import logging
 
@@ -122,6 +123,11 @@ def plot_road_dust_result(
     if plot_figure[6]:
         logger.info("Plotting concentrations figure")
         plot_concentrations(shared, paths)
+
+    # AE plot (plot_figure index 7)
+    if plot_figure[7]:
+        logger.info("Plotting AE figure")
+        plot_ae(shared, paths)
 
     # Scatter/QQ plots (plot_figure index 10)
     if plot_figure[10]:

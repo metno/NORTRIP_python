@@ -202,6 +202,10 @@ def init_shared_data(
         road_temperature_obs_available=road_temperature_obs_available,
         use_energy_correction_flag=model_flags.use_energy_correction_flag,
         use_wetting_data_flag=model_flags.use_wetting_data_flag,
+        use_salting_data_1_flag=model_flags.use_salting_data_1_flag,
+        use_salting_data_2_flag=model_flags.use_salting_data_2_flag,
+        use_sanding_data_flag=model_flags.use_sanding_data_flag,
+        use_cleaning_data_flag=model_flags.use_cleaning_data_flag,
         EP_emis_available=EP_emis_available,
         salt2_str=input_activity.salt2_str,
     )

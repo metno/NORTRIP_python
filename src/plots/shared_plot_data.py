@@ -53,6 +53,12 @@ class shared_plot_data:
     use_energy_correction_flag: int
     use_wetting_data_flag: int
 
+    # Plot gating flags (from model flags)
+    use_salting_data_1_flag: int
+    use_salting_data_2_flag: int
+    use_sanding_data_flag: int
+    use_cleaning_data_flag: int
+
     # Derived course-fraction (present only if requested)
     pm_course_derived: bool
     C_data_course: np.ndarray
