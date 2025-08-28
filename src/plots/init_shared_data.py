@@ -156,6 +156,8 @@ def init_shared_data(
     road_temperature_obs_available = meteo_input.road_temperature_obs_available
     road_wetness_obs_in_mm = meteo_input.road_wetness_obs_in_mm
 
+    EP_emis_available = int(airquality_data.EP_emis_available)
+
     return shared_plot_data(
         av=av,
         i_min=time_config.min_time,
@@ -200,5 +202,6 @@ def init_shared_data(
         road_temperature_obs_available=road_temperature_obs_available,
         use_energy_correction_flag=model_flags.use_energy_correction_flag,
         use_wetting_data_flag=model_flags.use_wetting_data_flag,
+        EP_emis_available=EP_emis_available,
         salt2_str=input_activity.salt2_str,
     )

@@ -44,6 +44,7 @@ class shared_plot_data:
     NOX_obs: np.ndarray
     NOX_background: np.ndarray
     NOX_obs_net: np.ndarray
+    EP_emis_available: int
 
     # Availability flags derived for plotting convenience
     road_wetness_obs_available: int

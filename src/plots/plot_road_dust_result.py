@@ -19,6 +19,7 @@ from .plot_other_factors import plot_other_factors
 from .plot_wetness import plot_wetness
 from .plot_energy_moisture_balance import plot_energy_moisture_balance
 from .plot_concentrations import plot_concentrations
+from .plot_scatter_qq import plot_scatter_qq
 import matplotlib.pyplot as plt
 import logging
 
@@ -117,14 +118,19 @@ def plot_road_dust_result(
         logger.info("Plotting energy and moisture balance figure")
         plot_energy_moisture_balance(shared, paths)
 
-    # Summary figure
-    if plot_figure[12]:
-        logger.info("Plotting summary figure")
-        plot_summary(shared, paths)
-
     # Concentrations figure (plot_figure index 6)
     if plot_figure[6]:
         logger.info("Plotting concentrations figure")
         plot_concentrations(shared, paths)
+
+    # Scatter/QQ plots (plot_figure index 10)
+    if plot_figure[10]:
+        logger.info("Plotting scatter/QQ figure")
+        plot_scatter_qq(shared, paths)
+
+    # Summary figure
+    if plot_figure[12]:
+        logger.info("Plotting summary figure")
+        plot_summary(shared, paths)
 
     plt.show()
