@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -104,7 +102,7 @@ def plot_scatter_temp_moisture(
             except Exception:
                 r_sq = np.nan
             rmse = float(np.sqrt(np.nanmean((xm - ym) ** 2)))
-            # mae = float(np.nanmean(np.abs(xm - ym)))
+            mae = float(np.nanmean(np.abs(xm - ym)))
             mean_obs = float(np.nanmean(ym))
             mean_mod = float(np.nanmean(xm))
             try:
@@ -156,6 +154,14 @@ def plot_scatter_temp_moisture(
                     [a0 + a1 * xmin, a0 + a1 * xmax],
                     "-",
                     color=(0.5, 0.5, 0.5),
+                )
+            # Console table (left-aligned) mirroring MATLAB fid_print
+            if shared.print_result:
+                print(
+                    f"{'Mean observed':<20}\t{'Mean modelled':<20}\t{'RMSE':<20}\t{'MAE':<20}\t{'Corr (r^2)':<20}\t{'Intercept':<20}\t{'Slope':<20}\t{'Bias':<20}"
+                )
+                print(
+                    f"{mean_obs:<20.3f}\t{mean_mod:<20.3f}\t{rmse:<20.3f}\t{mae:<20.3f}\t{r_sq:<20.3f}\t{a0:<20.3f}\t{a1:<20.3f}\t{(mean_mod - mean_obs):<20.3f}"
                 )
     ax1.set_ylabel(r"$\Delta T_s$ observed (°C)")
     ax1.set_xlabel(r"$\Delta T_s$ modelled (°C)")
