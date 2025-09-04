@@ -324,6 +324,7 @@ def main():
         paths=paths,
         ro=0,
         plot_figure=plot_figure,
+        print_result=print_results,
     )
 
     logger.info("End of NORTRIP_Control")

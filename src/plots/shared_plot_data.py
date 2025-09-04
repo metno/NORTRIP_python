@@ -69,3 +69,4 @@ class shared_plot_data:
     PM_obs_bg_course: np.ndarray
 
     salt2_str: str
+    print_result: bool

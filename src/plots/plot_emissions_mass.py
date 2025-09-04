@@ -278,4 +278,176 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     ]
     ax3.legend(handles, legend_text, loc="upper left")
 
+    
     plt.tight_layout()
+
+    # ---------------- Optional textual summaries (post-plot prints) ----------------
+    if shared.print_result:
+        pm_text_print = (
+            "PM10" if x_size == constants.pm_10 else ("PM2.5" if x_size == constants.pm_25 else "PM")
+        )
+        title_str = paths.title_str
+        
+        av_label = constants.av_str[shared.av[0] - 1]
+        print(f"{title_str} ({pm_text_print}) {av_label}")
+        print("-----------------------------------------------------")
+
+        # Total surface mass budget (g/m^2) over selected period
+        # y_* arrays are in g/m^2/hr; integrate by multiplying with dt
+        dt = float(shared.dt)
+        sum_P_road_wearsource_print = float(np.nansum(y_wear_retention[mask_range])) * dt
+        sum_P_road_allother_print = float(np.nansum(y_other_prod[mask_range])) * dt
+        sum_S_suspension_print = float(np.nansum(y_susp_sink[mask_range])) * dt
+        sum_S_drainage_print = float(np.nansum(y_drain_sink[mask_range])) * dt
+        sum_S_spray_print = float(np.nansum(y_spray_sink[mask_range])) * dt
+        sum_S_cleaning_print = float(np.nansum(y_clean_sink[mask_range])) * dt
+        sum_S_ploughing_print = float(np.nansum(y_plough_sink[mask_range])) * dt
+        sum_S_windblown_print = float(np.nansum(y_wind_sink[mask_range])) * dt
+
+        print("Total surface mass budget (g/m^2)")
+        print(
+            "\t".join(
+                [
+                    f"{'Wear retention':<18}",
+                    f"{'Other production':<18}",
+                    f"{'Suspension':<18}",
+                    f"{'Drainage':<18}",
+                    f"{'Spray':<18}",
+                    f"{'Cleaning':<18}",
+                    f"{'Ploughing':<18}",
+                    f"{'Windblown':<18}",
+                ]
+            )
+        )
+        print(
+            "\t".join(
+                [
+                    f"{sum_P_road_wearsource_print:18.2f}",
+                    f"{sum_P_road_allother_print:18.2f}",
+                    f"{sum_S_suspension_print:18.2f}",
+                    f"{sum_S_drainage_print:18.2f}",
+                    f"{sum_S_spray_print:18.2f}",
+                    f"{sum_S_cleaning_print:18.2f}",
+                    f"{sum_S_ploughing_print:18.2f}",
+                    f"{sum_S_windblown_print:18.2f}",
+                ]
+            )
+        )
+
+        # Total surface salt (NaCl) budget (g/m^2)
+        # Work directly on masked raw arrays and scale using dt and b_factor as in MATLAB
+        salt_species_index = constants.salt_index[0]
+        b_factor_local = float(b_factor)
+
+        sum_salt_application = float(
+            np.nansum(
+                MB_sum[
+                    salt_species_index, constants.pm_all, constants.P_depo_index, mask_range
+                ]
+            )
+        ) * dt * b_factor_local
+
+        sum_S_suspension_salt = float(
+            np.nansum(
+                -MB_sum[
+                    salt_species_index,
+                    constants.pm_all,
+                    constants.S_suspension_index,
+                    mask_range,
+                ]
+            )
+        ) * dt * b_factor_local
+
+        sum_S_emission_salt = float(
+            np.nansum(
+                -E_sum[
+                    salt_species_index, constants.pm_all, constants.E_suspension_index, mask_range
+                ]
+            )
+        ) * dt * b_factor_local
+
+        sum_S_drainage_salt = float(
+            np.nansum(
+                -MB_sum[
+                    salt_species_index,
+                    constants.pm_all,
+                    constants.S_dustdrainage_index,
+                    mask_range,
+                ]
+            )
+        ) * dt * b_factor_local
+
+        sum_S_spray_salt = float(
+            np.nansum(
+                -MB_sum[
+                    salt_species_index,
+                    constants.pm_all,
+                    constants.S_dustspray_index,
+                    mask_range,
+                ]
+            )
+        ) * dt * b_factor_local
+
+        sum_S_cleaning_salt = float(
+            np.nansum(
+                -MB_sum[
+                    salt_species_index,
+                    constants.pm_all,
+                    constants.S_cleaning_index,
+                    mask_range,
+                ]
+            )
+        ) * dt * b_factor_local
+
+        sum_S_ploughing_salt = float(
+            np.nansum(
+                -MB_sum[
+                    salt_species_index,
+                    constants.pm_all,
+                    constants.S_dustploughing_index,
+                    mask_range,
+                ]
+            )
+        ) * dt * b_factor_local
+
+        sum_S_windblown_salt = float(
+            np.nansum(
+                -MB_sum[
+                    salt_species_index,
+                    constants.pm_all,
+                    constants.S_windblown_index,
+                    mask_range,
+                ]
+            )
+        ) * dt * b_factor_local
+
+        print("Total surface salt (NaCl) budget (g/m^2)")
+        print(
+            "\t".join(
+                [
+                    f"{'Salt application':<18}",
+                    f"{'Suspension':<18}",
+                    f"{'Total emission':<18}",
+                    f"{'Drainage':<18}",
+                    f"{'Spray':<18}",
+                    f"{'Cleaning':<18}",
+                    f"{'Ploughing':<18}",
+                    f"{'Windblown':<18}",
+                ]
+            )
+        )
+        print(
+            "\t".join(
+                [
+                    f"{sum_salt_application:18.2f}",
+                    f"{sum_S_suspension_salt:18.2f}",
+                    f"{sum_S_emission_salt:18.2f}",
+                    f"{sum_S_drainage_salt:18.2f}",
+                    f"{sum_S_spray_salt:18.2f}",
+                    f"{sum_S_cleaning_salt:18.2f}",
+                    f"{sum_S_ploughing_salt:18.2f}",
+                    f"{sum_S_windblown_salt:18.2f}",
+                ]
+            )
+        )
+

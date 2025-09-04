@@ -42,6 +42,7 @@ def plot_road_dust_result(
     ro: int = 0,
     plot_size_fraction: int = constants.pm_10,
     plot_figure: list[int] | None = None,
+    print_result: bool,
 ):
     """
     Entry point for generating NORTRIP plots.
@@ -85,6 +86,7 @@ def plot_road_dust_result(
         input_activity=input_activity,
         ro=ro,
         plot_size_fraction=plot_size_fraction,
+        print_result=print_result,
     )
 
     # Traffic figure (plot_figure index 0)
