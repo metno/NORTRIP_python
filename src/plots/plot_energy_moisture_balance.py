@@ -287,6 +287,7 @@ def plot_energy_moisture_balance(
     # ---------------- Optional textual summaries (post-plot prints) ----------------
     if shared.print_result:
         # Energy budget (W/m^2)
+        print()
         print("Energy budget (W/m^2)")
         print(
             "\t".join(
@@ -305,14 +306,14 @@ def plot_energy_moisture_balance(
         print(
             "\t".join(
                 [
-                    f"{mean_short_net:18.2f}",
-                    f"{mean_long_net:18.2f}",
-                    f"{(mean_short_net + mean_long_net):18.2f}",
-                    f"{mean_H:18.2f}",
-                    f"{mean_L:18.2f}",
-                    f"{mean_H_traffic:18.2f}",
-                    f"{mean_G:18.2f}",
-                    f"{mean_G_sub:18.2f}",
+                    f"{mean_short_net:<18.2f}",
+                    f"{mean_long_net:<18.2f}",
+                    f"{(mean_short_net + mean_long_net):<18.2f}",
+                    f"{mean_H:<18.2f}",
+                    f"{mean_L:<18.2f}",
+                    f"{mean_H_traffic:<18.2f}",
+                    f"{mean_G:<18.2f}",
+                    f"{mean_G_sub:<18.2f}",
                 ]
             )
         )
@@ -336,14 +337,15 @@ def plot_energy_moisture_balance(
         print(
             "\t".join(
                 [
-                    f"{mean_rain * 24:18.4f}",
-                    f"{mean_drain * 24:18.4f}",
-                    f"{mean_rain_drain * 24:18.4f}",
-                    f"{mean_evap * 24:18.4f}",
-                    f"{mean_melt * 24:18.4f}",
-                    f"{mean_freeze * 24:18.4f}",
-                    f"{mean_spray * 24:18.4f}",
-                    f"{mean_wetting * 24:18.4f}",
+                    f"{mean_rain * 24:<18.4f}",
+                    f"{mean_drain * 24:<18.4f}",
+                    f"{mean_rain_drain * 24:<18.4f}",
+                    f"{mean_evap * 24:<18.4f}",
+                    f"{mean_melt * 24:<18.4f}",
+                    f"{mean_freeze * 24:<18.4f}",
+                    f"{mean_spray * 24:<18.4f}",
+                    f"{mean_wetting * 24:<18.4f}",
                 ]
             )
         )
+        print()

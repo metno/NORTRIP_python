@@ -289,6 +289,8 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
         title_str = paths.title_str
         
         av_label = constants.av_str[shared.av[0] - 1]
+
+        print()
         print(f"{title_str} ({pm_text_print}) {av_label}")
         print("-----------------------------------------------------")
 
@@ -322,14 +324,14 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
         print(
             "\t".join(
                 [
-                    f"{sum_P_road_wearsource_print:18.2f}",
-                    f"{sum_P_road_allother_print:18.2f}",
-                    f"{sum_S_suspension_print:18.2f}",
-                    f"{sum_S_drainage_print:18.2f}",
-                    f"{sum_S_spray_print:18.2f}",
-                    f"{sum_S_cleaning_print:18.2f}",
-                    f"{sum_S_ploughing_print:18.2f}",
-                    f"{sum_S_windblown_print:18.2f}",
+                    f"{sum_P_road_wearsource_print:<18.2f}",
+                    f"{sum_P_road_allother_print:<18.2f}",
+                    f"{sum_S_suspension_print:<18.2f}",
+                    f"{sum_S_drainage_print:<18.2f}",
+                    f"{sum_S_spray_print:<18.2f}",
+                    f"{sum_S_cleaning_print:<18.2f}",
+                    f"{sum_S_ploughing_print:<18.2f}",
+                    f"{sum_S_windblown_print:<18.2f}",
                 ]
             )
         )
@@ -439,15 +441,16 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
         print(
             "\t".join(
                 [
-                    f"{sum_salt_application:18.2f}",
-                    f"{sum_S_suspension_salt:18.2f}",
-                    f"{sum_S_emission_salt:18.2f}",
-                    f"{sum_S_drainage_salt:18.2f}",
-                    f"{sum_S_spray_salt:18.2f}",
-                    f"{sum_S_cleaning_salt:18.2f}",
-                    f"{sum_S_ploughing_salt:18.2f}",
-                    f"{sum_S_windblown_salt:18.2f}",
+                    f"{sum_salt_application:<18.2f}",
+                    f"{sum_S_suspension_salt:<18.2f}",
+                    f"{sum_S_emission_salt:<18.2f}",
+                    f"{sum_S_drainage_salt:<18.2f}",
+                    f"{sum_S_spray_salt:<18.2f}",
+                    f"{sum_S_cleaning_salt:<18.2f}",
+                    f"{sum_S_ploughing_salt:<18.2f}",
+                    f"{sum_S_windblown_salt:<18.2f}",
                 ]
             )
         )
+        print()
 
