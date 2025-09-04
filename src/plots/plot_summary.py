@@ -120,7 +120,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     else:
         pm_text = "PM"
 
-    title_str = getattr(paths, "title_str", "") or "Summary"
+    title_str = paths.title_str or "Summary"
     ax1 = fig.add_subplot(gs[0, :])
     ax1.set_title(f"{title_str}: {pm_text}")
 
@@ -302,8 +302,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             rmse = float(np.sqrt(np.nanmean((xm - ym) ** 2)))
             mean_obs = float(np.nanmean(ym))
             mean_mod = float(np.nanmean(xm))
-            with np.errstate(invalid="ignore", divide="ignore"):
-                _fbias = float((mean_mod - mean_obs) / (mean_mod + mean_obs) * 2.0)
+            # Fractional bias not displayed in scatter panel; compute later for tables
             try:
                 a1, a0 = np.polyfit(xm, ym, 1)
             except Exception:
@@ -847,3 +846,167 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     for text in lines3:
         y -= dy
         ax8.text(0.0, y, text, transform=ax8.transAxes)
+
+    # ---------------- Optional textual summaries (post-plot prints) ----------------
+    if shared.print_result:
+        # 1) Traffic and activity data
+        # Mean ADT totals and HDV share
+        mean_ADT_li_safe = mean_ADT_li if np.isfinite(mean_ADT_li) else 0.0
+        mean_ADT_he_safe = mean_ADT_he if np.isfinite(mean_ADT_he) else 0.0
+        mean_ADT_total_safe = mean_ADT_total if np.isfinite(mean_ADT_total) else (
+            mean_ADT_li_safe + mean_ADT_he_safe
+        )
+        hdv_pct = (
+            mean_ADT_he_safe / mean_ADT_total_safe * 100.0
+            if mean_ADT_total_safe > 0
+            else float("nan")
+        )
+
+        # Mean speed as simple average of light/heavy
+        speeds = [v for v in [mean_speed_li, mean_speed_he] if np.isfinite(v)]
+        mean_speed_avg = float(np.mean(speeds)) if len(speeds) > 0 else float("nan")
+
+        # Studded proportions
+        mean_studded_ldv_pct = prop_st_li * 100.0 if np.isfinite(prop_st_li) else float("nan")
+
+        # Max studded share for LDV across window
+        N_li_series = traffic[constants.N_v_index[li], mask_range]
+        N_st_li_series = traffic[constants.N_t_v_index[(st, li)], mask_range]
+        with np.errstate(invalid="ignore", divide="ignore"):
+            frac_st_li_series = N_st_li_series / N_li_series
+        max_prop_studded_li_pct = (
+            float(np.nanmax(frac_st_li_series) * 100.0)
+            if np.any(np.isfinite(frac_st_li_series))
+            else float("nan")
+        )
+
+        # Total salt activity over window (ton/km)
+        # Algebra from MATLAB: salting_total = sum(M_salting) * b_road_lanes * 1000
+        # With b_factor = 1/1000/ b_road_lanes, so salting_total = sum(M_salting) / b_factor
+        activity_win = shared.activity_data_ro.astype(float).copy()
+        activity_win[activity_win == nodata] = np.nan
+        salting_sum = float(
+            np.nansum(
+                activity_win[constants.M_salting_index[0], mask_range]
+            )
+            + np.nansum(activity_win[constants.M_salting_index[1], mask_range])
+        )
+        salting_total_g_per_km = (
+            salting_sum / shared.b_factor if shared.b_factor not in (0.0, np.nan) else float("nan")
+        )
+        salting_total_ton_per_km = salting_total_g_per_km * 1e-6 if np.isfinite(salting_total_g_per_km) else float("nan")
+
+        print("Traffic and activity data")
+        print(
+            f"{'Number of days':<18}\t{'Mean ADT':<18}\t{'HDV (%)':<18}\t{'Mean speed (km/hr)':<18}\t"
+            f"{'Mean studded (%LDV)':<18}\t{'Max studded (%LDV)':<18}\t{'Total salt (ton/km)':<18}\t"
+            f"{'Salting(1) events':<18}\t{'Salting(2) events':<18}\t{'Sanding events':<18}\t{'Cleaning events':<18}\t{'Ploughing events':<18}"
+        )
+        print(
+            f"{num_days:<18.2f}\t{(mean_ADT_li_safe + mean_ADT_he_safe):<18.0f}\t{hdv_pct:<18.2f}\t{mean_speed_avg:<18.2f}\t"
+            f"{mean_studded_ldv_pct:<18.2f}\t{max_prop_studded_li_pct:<18.2f}\t{salting_total_ton_per_km:<18.2f}\t"
+            f"{num_salting_na:<18.2f}\t{num_salting_2:<18.2f}\t{num_sanding:<18.2f}\t{num_cleaning:<18.2f}\t{num_ploughing:<18.2f}"
+        )
+
+        # 2) Meteorological data
+        print("Meteorological data")
+        print(
+            f"{'Mean Temp(C)':<18}\t{'Mean RH(%)':<18}\t{'Mean global(W/m^2)':<18}\t{'Mean cloud cover(%)':<18}\t"
+            f"{'Total precip(mm)':<18}\t{'Frequency precip(%)':<18}\t{'Frequency wet(%)':<18}\t{'Mean dispersion':<18}"
+        )
+        print(
+            f"{mean_Ta:<18.2f}\t{mean_RH:<18.2f}\t{mean_short_rad:<18.2f}\t{(mean_cloud*100.0):<18.2f}\t"
+            f"{total_precip:<18.2f}\t{(freq_precip*100.0):<18.2f}\t{(prop_wet*100.0):<18.2f}\t{mean_f_conc:<18.3f}"
+        )
+
+        # 3) Source contribution (ug/m^3)
+        print("Source contribution (ug/m^3)")
+        print(
+            f"{'Observed total':<18}\t{'Model total':<18}\t{'Model road':<18}\t{'Model tyre':<18}\t{'Model brake':<18}\t"
+            f"{'Model sand':<18}\t{'Model salt(na)':<18}\t{'Model salt('+shared.salt2_str+')':<18}\t{'Model exhaust':<18}"
+        )
+        print(
+            f"{observed_concentrations:<18.2f}\t{total_concentrations:<18.2f}\t{roadwear_concentrations:<18.2f}\t{tyrewear_concentrations:<18.2f}\t{brakewear_concentrations:<18.2f}\t"
+            f"{sand_concentrations:<18.2f}\t{salt_na_concentrations:<18.2f}\t{salt_mg_concentrations:<18.2f}\t{exhaust_concentrations:<18.2f}"
+        )
+
+        # 4) Net concentration results and with background
+        # Build averaged series for stats (already computed above as y_obs_net_av, y_mod_net_av, y_obs_bg_av, r_av)
+        def _safe_corrcoef(a: np.ndarray, b: np.ndarray) -> float:
+            try:
+                R = np.corrcoef(a, b)
+                return float(R[0, 1] ** 2)
+            except Exception:
+                return float("nan")
+
+        # RMSE and fractional bias helper
+        def _rmse(a: np.ndarray, b: np.ndarray) -> float:
+            return float(np.sqrt(np.nanmean((a - b) ** 2)))
+
+        def _fbias(mod: np.ndarray, obs: np.ndarray) -> float:
+            m_mod = float(np.nanmean(mod))
+            m_obs = float(np.nanmean(obs))
+            with np.errstate(invalid="ignore", divide="ignore"):
+                fb = (m_mod - m_obs) / (m_mod + m_obs) * 2.0 * 100.0
+            return float(fb)
+
+        # r^2 values
+        r_sq_net_pm10 = _safe_corrcoef(y_obs_net_av[r_av], y_mod_net_av[r_av])
+        r_sq_bg_pm10 = _safe_corrcoef(
+            (y_obs_net_av + y_obs_bg_av)[r_av], (y_mod_net_av + y_obs_bg_av)[r_av]
+        )
+
+        # RMSE and NRMSE
+        rmse_net = _rmse(y_obs_net_av[r_av], y_mod_net_av[r_av])
+        rmse_bg = _rmse(
+            (y_obs_net_av + y_obs_bg_av)[r_av], (y_mod_net_av + y_obs_bg_av)[r_av]
+        )
+        nrmse_net = (
+            rmse_net / float(np.nanmean(y_obs_net_av[r_av])) * 100.0 if np.any(r_av) else float("nan")
+        )
+        nrmse_bg = (
+            rmse_bg
+            / float(np.nanmean((y_obs_net_av + y_obs_bg_av)[r_av]))
+            * 100.0
+            if np.any(r_av)
+            else float("nan")
+        )
+        fb_net = _fbias(y_mod_net_av[r_av], y_obs_net_av[r_av])
+        fb_bg = _fbias(
+            (y_mod_net_av + y_obs_bg_av)[r_av], (y_obs_net_av + y_obs_bg_av)[r_av]
+        )
+
+        # Background-only exceedances to mirror MATLAB difference logic
+        bg_exceed_only = int(np.nansum(y_obs_bg_av[r_av] > limit))
+        obs_c_dif_ex = int(obs_c_bg_ex - bg_exceed_only)
+        mod_c_dif_ex = int(mod_c_bg_ex - bg_exceed_only)
+
+        print("Net concentration results (ug/m^3)")
+        print(
+            f"{'Obs_mean':<12}\t{'Mod_mean':<12}\t{'Obs_90_per':<12}\t{'Mod_90_per':<12}\t{'Obs_36_high':<12}\t{'Mod_36_high':<12}\t"
+            f"{'Obs_ex_50':<12}\t{'Mod_ex_50':<12}\t{'R_sq':<12}\t{'RMSE':<12}\t{'NRMSE(%)':<12}\t{'FB(%)':<12}"
+        )
+        print(
+            f"{observed_concentrations:<12.2f}\t{total_concentrations:<12.2f}\t{obs_c_per:<12.2f}\t{mod_c_per:<12.2f}\t{high36_obs:<12.2f}\t{high36_mod:<12.2f}\t"
+            f"{obs_c_dif_ex:<12.2f}\t{mod_c_dif_ex:<12.2f}\t{r_sq_net_pm10:<12.2f}\t{rmse_net:<12.2f}\t{nrmse_net:<12.2f}\t{fb_net:<12.2f}"
+        )
+
+        print("With background concentration results (ug/m^3)")
+        print(
+            f"{'Obs_mean':<12}\t{'Mod_mean':<12}\t{'Obs_90_per':<12}\t{'Mod_90_per':<12}\t{'Obs_36_high':<12}\t{'Mod_36_high':<12}\t"
+            f"{'Obs_ex_50':<12}\t{'Mod_ex_50':<12}\t{'R_sq':<12}\t{'RMSE':<12}\t{'NRMSE(%)':<12}\t{'FB(%)':<12}"
+        )
+        print(
+            f"{(observed_concentrations + observed_concentrations_bg):<12.2f}\t{(total_concentrations + observed_concentrations_bg):<12.2f}\t"
+            f"{obs_c_bg_per:<12.2f}\t{mod_c_bg_per:<12.2f}\t{high36_obs_bg:<12.2f}\t{high36_mod_bg:<12.2f}\t{obs_c_bg_ex:<12.2f}\t{mod_c_bg_ex:<12.2f}\t"
+            f"{r_sq_bg_pm10:<12.2f}\t{rmse_bg:<12.2f}\t{nrmse_bg:<12.2f}\t{fb_bg:<12.2f}"
+        )
+
+        # 5) Sensitivity outputs (always printed when print_result is True)
+        print("Sensitivity outputs (ug/m^3)")
+        print(
+            f"{'Obs_mean':<12}\t{'Mod_mean':<12}\t{'Obs_per':<12}\t{'Mod_per':<12}\t{'R_sq':<12}\t{'FB(%)':<12}\t{'rel_WET_freq':<12}\t{'f_q_HITS':<12}"
+        )
+        print(
+            f"{observed_concentrations:<12.2f}\t{total_concentrations:<12.2f}\t{obs_c_per:<12.2f}\t{mod_c_per:<12.2f}\t{r_sq_net_pm10:<12.2f}\t{fb_net:<12.2f}\t{rel_prop_wet:<12.2f}\t{f_q_hits:<12.2f}"
+        )
