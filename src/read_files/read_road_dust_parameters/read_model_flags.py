@@ -10,6 +10,9 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
     """
     Load model flags from DataFrame and return an instance of model_flags.
 
+    This function works by using the fields in the model_flags dataclass,
+    meaning if new flags are to be added they only need to be added to the dataclass.
+
     Args:
         flags_df (DataFrame): DataFrame containing model flags.
 

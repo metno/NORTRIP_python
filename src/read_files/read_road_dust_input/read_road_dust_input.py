@@ -26,6 +26,7 @@ def read_road_dust_input(
 
     Args:
         input_file_path (str): Path to the input file.
+        model_parameters (model_parameters): Model parameters needed for initial data reading
         read_as_text (bool, optional): If True, read the file as text. Will reformat input_file_path to text format.
         print_results (bool, optional): If True, print the results to the console
     Returns:
@@ -97,7 +98,6 @@ def read_road_dust_input(
             logger.error(f"Sheet not found in file: {input_file_path}")
             exit(1)
 
-    # Check if all required sheets are present (for the linter)
     if (
         metadata_df is None
         or initial_df is None

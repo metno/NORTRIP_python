@@ -19,7 +19,7 @@ def read_input_airquality(
     traffic_date_num: np.ndarray,
     traffic_hour: np.ndarray,
     N_total_nodata: list,
-    N_good_data: np.ndarray,
+    N_good_data: np.ndarray | None,
     print_results: bool = False,
 ) -> input_airquality:
     """
@@ -160,9 +160,8 @@ def read_input_airquality(
     # Replace emission data when there is no traffic data (as this is usually coupled)
     if (
         len(N_total_nodata) > 0
-        and len(N_good_data) > 0
-        and traffic_hour is not None
         and N_good_data is not None
+        and traffic_hour is not None
     ):
         # Fill NOX emissions using daily averages
         if NOX_emis_available:

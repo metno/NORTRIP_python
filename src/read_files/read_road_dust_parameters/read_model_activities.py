@@ -12,6 +12,10 @@ def read_model_activities(
     """
     Load model activities from DataFrame and return an instance of model_activities.
 
+    This function works by using the fields in the model_activities dataclass,
+    meaning if new fields are to be added they only need to be added to the dataclass.
+    Special cases are handled manually.
+
     Args:
         activities_df (DataFrame): DataFrame containing model activities.
         model_parameters (model_parameters): to potentially overwrite ploughing_threshold.
@@ -22,7 +26,7 @@ def read_model_activities(
     loaded_activities = model_activities()
 
     # Extract header and data columns
-    header_col = activities_df.iloc[:, 0]  # First column contains headers
+    header_col = activities_df.iloc[:, 0] 
     data_col = activities_df.iloc[:, 1]
 
     loaded_count = 0

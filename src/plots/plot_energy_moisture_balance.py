@@ -114,7 +114,7 @@ def plot_energy_moisture_balance(
     except Exception:
         pass
 
-    title_str = getattr(paths, "title_str", "") or "Energy and moisture balance"
+    title_str = paths.title_str or "Energy and moisture balance"
     ax1.set_title(f"{title_str}: Energy balance")
     # Plot order/styles per MATLAB
     # ax1.plot(dt_x_e, np.asarray(y_rad_net).squeeze(), "k-", linewidth=0.5)
@@ -240,8 +240,8 @@ def plot_energy_moisture_balance(
     mean_spray = _mean_on_rw(y_spray)
     mean_wetting = _mean_on_rw(y_wetting)
     mean_melt = _mean_on_rw(y_melt)
-    # mean_rain = _mean_on_rw(y_rain)
-    # mean_drain = _mean_on_rw(y_drain)
+    mean_rain = _mean_on_rw(y_rain)
+    mean_drain = _mean_on_rw(y_drain)
 
     dt_x_w = matlab_datenum_to_datetime_array(xplot_w)
     ax2.set_title(f"{title_str}: Surface water balance")
@@ -283,3 +283,67 @@ def plot_energy_moisture_balance(
     ax2.autoscale(enable=True, axis="y", tight=True)
 
     plt.tight_layout()
+
+    # ---------------- Optional textual summaries (post-plot prints) ----------------
+    if shared.print_result:
+        # Energy budget (W/m^2)
+        print("Energy budget (W/m^2)")
+        print(
+            "\t".join(
+                [
+                    f"{'Net shortwave':<18}",
+                    f"{'Net longwave':<18}",
+                    f"{'Net radiation':<18}",
+                    f"{'Sensible heat':<18}",
+                    f"{'Latent heat':<18}",
+                    f"{'Traffic heat':<18}",
+                    f"{'Surface heat':<18}",
+                    f"{'Sub-surface heat':<18}",
+                ]
+            )
+        )
+        print(
+            "\t".join(
+                [
+                    f"{mean_short_net:18.2f}",
+                    f"{mean_long_net:18.2f}",
+                    f"{(mean_short_net + mean_long_net):18.2f}",
+                    f"{mean_H:18.2f}",
+                    f"{mean_L:18.2f}",
+                    f"{mean_H_traffic:18.2f}",
+                    f"{mean_G:18.2f}",
+                    f"{mean_G_sub:18.2f}",
+                ]
+            )
+        )
+
+        # Moisture budget (mm/day)
+        print("Moisture budget (mm/day)")
+        print(
+            "\t".join(
+                [
+                    f"{'Rain':<18}",
+                    f"{'Drainage':<18}",
+                    f"{'Rain-drainage':<18}",
+                    f"{'Evaporation':<18}",
+                    f"{'Melt':<18}",
+                    f"{'Freezing':<18}",
+                    f"{'Spray':<18}",
+                    f"{'Wetting':<18}",
+                ]
+            )
+        )
+        print(
+            "\t".join(
+                [
+                    f"{mean_rain * 24:18.4f}",
+                    f"{mean_drain * 24:18.4f}",
+                    f"{mean_rain_drain * 24:18.4f}",
+                    f"{mean_evap * 24:18.4f}",
+                    f"{mean_melt * 24:18.4f}",
+                    f"{mean_freeze * 24:18.4f}",
+                    f"{mean_spray * 24:18.4f}",
+                    f"{mean_wetting * 24:18.4f}",
+                ]
+            )
+        )

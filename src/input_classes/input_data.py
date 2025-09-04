@@ -13,8 +13,7 @@ class input_data:
     Dataclass containing all input data classes for NORTRIP model.
 
     This class consolidates all the individual input dataclasses that are
-    read from the input files into a single container for better organization
-    and type safety.
+    read from the input files into a single container.
     """
 
     activity: input_activity
