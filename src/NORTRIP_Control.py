@@ -45,15 +45,20 @@ def main():
     read_as_text = bool(args.text)
     print_results = bool(args.print)
     use_fortran = bool(args.fortran)
+    use_logging = bool(args.log)
     plot_figure = args.plot
 
+    if not use_logging:
+        logging.disable()
+        
     print("-" * 33)
     print(f"Starting NORTRIP_python_v{version('nortrip-python')}...")
     print("-" * 33)
 
-    logger.info(f"Read as inputs as text: {read_as_text}")
-    logger.info(f"Print results to terminal: {print_results}")
-    logger.info(f"Run fortran model: {use_fortran}")
+    print(f"Read as inputs as text: {read_as_text}")
+    print(f"Print results to terminal: {print_results}")
+    print(f"Run fortran model: {use_fortran}")
+
 
     # args.paths is now positional and points to the model paths Excel file
     paths = read_road_dust_paths(read_as_text=read_as_text, paths_xlsx=args.paths)

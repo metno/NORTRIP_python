@@ -76,6 +76,12 @@ def create_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run fortran model. (WIP)",
     )
+    parser.add_argument(
+        "-l",
+        "--log",
+        action="store_false",
+        help="Disables logging.",
+    )
 
     parser.add_argument(
         "-pl",

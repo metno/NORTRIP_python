@@ -287,7 +287,6 @@ def plot_energy_moisture_balance(
     # ---------------- Optional textual summaries (post-plot prints) ----------------
     if shared.print_result:
         # Energy budget (W/m^2)
-        print()
         print("Energy budget (W/m^2)")
         print(
             "\t".join(
@@ -348,4 +347,3 @@ def plot_energy_moisture_balance(
                 ]
             )
         )
-        print()

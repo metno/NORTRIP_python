@@ -290,7 +290,6 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
         
         av_label = constants.av_str[shared.av[0] - 1]
 
-        print()
         print(f"{title_str} ({pm_text_print}) {av_label}")
         print("-----------------------------------------------------")
 
@@ -452,5 +451,3 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
                 ]
             )
         )
-        print()
-
