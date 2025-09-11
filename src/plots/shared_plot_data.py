@@ -70,3 +70,4 @@ class shared_plot_data:
 
     salt2_str: str
     print_result: bool
+    save_plots: bool

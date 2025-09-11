@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 import constants
 from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
-
+from .helpers import generate_matlab_style_filename
 
 def plot_scatter_temp_moisture(
     shared: shared_plot_data, paths: model_file_paths
@@ -81,8 +82,7 @@ def plot_scatter_temp_moisture(
     except Exception:
         pass
 
-    title_str = getattr(paths, "title_str", "") or "Scatter temperature and moisture"
-
+    title_str = paths.title_str or "Scatter temperature and moisture"
     # Panel 1: ΔT scatter
     ax1.set_title(f"{title_str}: temperature difference")
     if np.any(valid):
@@ -249,3 +249,15 @@ def plot_scatter_temp_moisture(
     ax2.set_xlabel(r"$T_s$ observed (°C)")
 
     plt.tight_layout()
+
+    if shared.save_plots:
+        plot_file_name = generate_matlab_style_filename(
+            title_str=paths.title_str,
+            plot_type_flag=shared.av[0],
+            figure_number=14,  # Scatter temperature and moisture is figure 14
+            plot_name="Scatter_temp_moisture",
+            date_num=shared.date_num,
+            min_time=shared.i_min,
+            max_time=shared.i_max
+        )
+        plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))

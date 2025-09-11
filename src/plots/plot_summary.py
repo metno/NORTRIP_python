@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 import constants
 from functions.average_data_func import average_data_func
@@ -8,6 +9,7 @@ from .shared_plot_data import shared_plot_data
 from .helpers import (
     matlab_datenum_to_datetime_array,
     format_time_axis,
+    generate_matlab_style_filename,
 )
 
 
@@ -1010,3 +1012,15 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         print(
             f"{observed_concentrations:<12.2f}\t{total_concentrations:<12.2f}\t{obs_c_per:<12.2f}\t{mod_c_per:<12.2f}\t{r_sq_net_pm10:<12.2f}\t{fb_net:<12.2f}\t{rel_prop_wet:<12.2f}\t{f_q_hits:<12.2f}"
         )
+
+    if shared.save_plots:
+        plot_file_name = generate_matlab_style_filename(
+            title_str=paths.title_str,
+            plot_type_flag=shared.av[0],
+            figure_number=13,  # Summary is figure 13
+            plot_name="Summary",
+            date_num=shared.date_num,
+            min_time=shared.i_min,
+            max_time=shared.i_max
+        )
+        plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))

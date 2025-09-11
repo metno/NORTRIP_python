@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 import constants
 from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
-from .helpers import matlab_datenum_to_datetime_array, format_time_axis, mask_nodata
+from .helpers import matlab_datenum_to_datetime_array, format_time_axis, mask_nodata, generate_matlab_style_filename
 
 
 def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
@@ -158,3 +159,14 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=150)
 
     plt.tight_layout()
+    if shared.save_plots:
+        plot_file_name = generate_matlab_style_filename(
+            title_str=paths.title_str,
+            plot_type_flag=shared.av[0],
+            figure_number=1,  # Traffic is figure 1
+            plot_name="Traffic",
+            date_num=shared.date_num,
+            min_time=shared.i_min,
+            max_time=shared.i_max
+        )
+        plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))

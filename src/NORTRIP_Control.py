@@ -3,6 +3,7 @@ Main script for the NORTRIP Road Dust Model in Python.
 """
 
 from importlib.metadata import version
+import os
 from ospm import OSPM_Main
 import constants
 import numpy as np
@@ -46,10 +47,14 @@ def main():
     print_results = bool(args.print)
     use_fortran = bool(args.fortran)
     use_logging = bool(args.log)
+    save_plots = bool(args.save_plots)
     plot_figure = args.plot
 
     if not use_logging:
         logging.disable()
+
+   
+
         
     print("-" * 33)
     print(f"Starting NORTRIP_python_v{version('nortrip-python')}...")
@@ -62,6 +67,9 @@ def main():
 
     # args.paths is now positional and points to the model paths Excel file
     paths = read_road_dust_paths(read_as_text=read_as_text, paths_xlsx=args.paths)
+
+    if save_plots and not os.path.exists(paths.path_outputfig):
+        os.makedirs(paths.path_outputfig)
 
     model_parameters, model_flags, model_activities = read_road_dust_parameters(
         paths.path_filename_inputparam, read_as_text=read_as_text
@@ -330,6 +338,7 @@ def main():
         ro=0,
         plot_figure=plot_figure,
         print_result=print_results,
+        save_plots=save_plots,
     )
 
     logger.info("End of NORTRIP_Control")

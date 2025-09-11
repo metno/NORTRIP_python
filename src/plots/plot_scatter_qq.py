@@ -1,11 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
 from functions import rmse_func as rmse
 import constants
+from .helpers import generate_matlab_style_filename
 
 
 def _compute_scatter_inputs(
@@ -286,3 +288,15 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax4.set_ylabel("PM2.5 observed concentration (µg/m³)")
     ax4.set_xlabel("PM2.5 modelled concentration (µg/m³)")
     ax4.grid(True)
+
+    if shared.save_plots:
+        plot_file_name = generate_matlab_style_filename(
+            title_str=paths.title_str,
+            plot_type_flag=shared.av[0],
+            figure_number=11,  # Scatter/QQ plots is figure 11
+            plot_name="Scatter_QQ",
+            date_num=shared.date_num,
+            min_time=shared.i_min,
+            max_time=shared.i_max
+        )
+        plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))

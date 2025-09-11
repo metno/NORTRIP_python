@@ -29,6 +29,7 @@ def init_shared_data(
     ro: int,
     plot_size_fraction: int,
     print_result: bool,
+    save_plots: bool,
 ) -> shared_plot_data:
     # Convenience aliases
     mv = model_variables
@@ -210,4 +211,5 @@ def init_shared_data(
         EP_emis_available=EP_emis_available,
         salt2_str=input_activity.salt2_str,
         print_result=print_result,
+        save_plots=save_plots,
     )

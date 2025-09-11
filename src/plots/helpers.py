@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from typing import Tuple, Any
+from datetime import datetime, timedelta
 
 import numpy as np
 import matplotlib.dates as mdates
 from matplotlib.axes import Axes
 
+import constants
 from functions import average_data_func
 
 
@@ -62,3 +64,43 @@ def mask_nodata(arr: np.ndarray, nodata: float) -> np.ndarray:
     a = np.asarray(arr, dtype=float).copy()
     a[a == nodata] = np.nan
     return a
+
+
+def matlab_datenum_to_datetime(datenum: float) -> datetime:
+    """Convert a single MATLAB datenum to Python datetime."""
+    matlab_epoch = datetime(1, 1, 1)
+    return matlab_epoch + timedelta(days=float(datenum) - 1.0)
+
+
+def generate_matlab_style_filename(
+    title_str: str,
+    plot_type_flag: int,
+    figure_number: int,
+    plot_name: str,
+    date_num: np.ndarray,
+    min_time: int,
+    max_time: int
+) -> str:
+    """Generate filename in MATLAB format: title_av_fig_i_plotname_startdate-enddate.png
+
+    Matches the MATLAB format from:
+    filename_outputfigures=[title_str,'_',char(av_str{plot_type_flag}),'_fig'];
+    filename=[path_outputfig,filename_outputfigures,'_',num2str(i),'_',plot_name,'_',file_start_date,'-',file_end_date];
+    """
+    # Get the averaging string (MATLAB is 1-based, Python is 0-based)
+    av_str = constants.av_str[plot_type_flag - 1]
+
+    # Convert MATLAB datenums to Python datetimes and format as yyyymmdd
+    start_date_datenum = date_num[min_time]
+    end_date_datenum = date_num[max_time]
+
+    start_datetime = matlab_datenum_to_datetime(start_date_datenum)
+    end_datetime = matlab_datenum_to_datetime(end_date_datenum)
+
+    file_start_date = start_datetime.strftime('%Y%m%d')
+    file_end_date = end_datetime.strftime('%Y%m%d')
+
+    # Construct filename following MATLAB pattern
+    filename = f"{title_str}_{av_str}_fig_{figure_number}_{plot_name}_{file_start_date}-{file_end_date}.png"
+
+    return filename

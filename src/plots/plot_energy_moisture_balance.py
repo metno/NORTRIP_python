@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 import constants
 from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
-from .helpers import matlab_datenum_to_datetime_array, format_time_axis
+from .helpers import matlab_datenum_to_datetime_array, format_time_axis, generate_matlab_style_filename
 
 
 def plot_energy_moisture_balance(
@@ -347,3 +348,15 @@ def plot_energy_moisture_balance(
                 ]
             )
         )
+
+    if shared.save_plots:
+        plot_file_name = generate_matlab_style_filename(
+            title_str=paths.title_str,
+            plot_type_flag=shared.av[0],
+            figure_number=6,  # Energy and moisture balance is figure 6
+            plot_name="Energy_moisture_balance",
+            date_num=shared.date_num,
+            min_time=shared.i_min,
+            max_time=shared.i_max
+        )
+        plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))
