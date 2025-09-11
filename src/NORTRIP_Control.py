@@ -32,7 +32,7 @@ import logging
 from model_args import create_arg_parser
 from fortran import NORTRIP_fortran_control
 from plots import plot_road_dust_result
-
+from output import save_road_dust_results_average
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -316,9 +316,11 @@ def main():
     time_config.min_time = time_config.min_time_save
     time_config.max_time = time_config.max_time_save
 
-    # Plots are saved if save_type_flag is 2 or 3
-    save_plots = model_flags.save_type_flag == 2 or model_flags.save_type_flag == 3
+    min_time_original = time_config.min_time
+    max_time_original = time_config.max_time
 
+    # Plots are saved if save_type_flag is 2 or 3
+    save_plots = model_flags.save_type_flag in [2, 3]
     if save_plots:
         if not os.path.exists(paths.path_outputfig):
             os.makedirs(paths.path_outputfig)
@@ -340,6 +342,30 @@ def main():
         print_result=print_results,
         save_plots=save_plots,
     )
+
+    time_config.min_time = min_time_original
+    time_config.max_time = max_time_original
+
+    save_data = model_flags.save_type_flag in [1, 3, 4]
+    save_as_text = model_flags.save_type_flag == 4
+
+    if save_data:
+        save_road_dust_results_average(
+            time_config=time_config,
+            converted_data=converted_data,
+            metadata=metadata_input,
+            airquality_data=airquality_input,
+            model_parameters=model_parameters,
+            model_flags=model_flags,
+            model_variables=model_variables,
+            input_activity=activity_input,
+            av=[model_flags.plot_type_flag],
+            save_as_text=save_as_text,
+        )
+        # Saving to text/excel will be implemented next; for now we just build the DataFrame
+        
+        
+
 
     logger.info("End of NORTRIP_Control")
 
