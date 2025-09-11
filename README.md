@@ -24,14 +24,9 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    cd NORTRIP-python
    ```
 
-3. **Install the package**:
+3. **Install the packages**:
    ```bash
    uv sync
-   ```
-
-4. **Run the package**:
-   ```bash
-   uv run nortrip
    ```
 
 ### Option 2: Using pip and venv
@@ -53,20 +48,10 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    .venv\Scripts\activate     # On Windows
    ```
 
-4. **Install the package**:
+4. **Install the packages**:
    ```bash
-   # Install in development mode with all dependencies
-   pip install -e ".[dev]"
-   
-   # Or install in production mode
    pip install -e .
    ```
-
-5. **Run the package**:
-   ```bash
-   nortrip
-   ```
-
 
 ## Usage
 
