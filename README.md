@@ -26,10 +26,6 @@ Containing scripts, example data and documentation for running NORTRIP in Python
 
 3. **Install the package**:
    ```bash
-   # Install in development mode with all dependencies
-   uv sync --dev
-   
-   # Or install in production mode
    uv sync
    ```
 
@@ -71,58 +67,6 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    nortrip
    ```
 
-## Development Setup
-
-### Using uv (Recommended)
-
-1. **Install development dependencies**:
-   ```bash
-   uv sync --dev
-   ```
-
-2. **Run tests**:
-   ```bash
-   # Run all tests
-   uv run pytest
-   # Run specific test file
-   uv run pytest tests/functions/test_antoine_func.py
-   ```
-
-3. **Run linting**:
-
-   Recomended to configure ruff in your editor to run linting and formatting automatically.
-   ```bash
-   # Run linting
-   uv run ruff check src tests
-   # Run formatting
-   uv run ruff format src tests
-   ```
-
-### Using pip and venv
-
-1. **Install development dependencies**:
-   ```bash
-   pip install -e ".[dev]"
-   ```
-
-2. **Run tests**:
-   ```bash
-   pytest
-   
-   # Run tests with coverage
-   pytest --cov=src
-   
-   # Run specific test file
-   pytest tests/functions/test_antoine_func.py
-   ```
-
-3. **Run linting**:
-   ```bash
-   ruff check src tests
-   ruff format src tests
-   ```
-
-
 
 ## Usage
 
@@ -136,16 +80,6 @@ uv run nortrip
 nortrip
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Run tests: `uv run pytest` or `pytest`
-5. Run linting: `uv run ruff check src tests` or `ruff check src tests`
-6. Commit your changes: `git commit -m 'Add feature'`
-7. Push to the branch: `git push origin feature-name`
-8. Submit a pull request
 
 ## License
 

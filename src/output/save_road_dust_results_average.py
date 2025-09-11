@@ -79,4 +79,4 @@ def save_road_dust_results_average(
                         writer, index=False, sheet_name=sheet_name
                     )
 
-    logger.info(f"Successfully saved results to {out_file}!")
+    logger.info("Successfully saved results!")
