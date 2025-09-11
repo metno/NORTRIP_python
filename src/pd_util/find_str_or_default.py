@@ -9,6 +9,10 @@ def find_str_or_default(
     default_val: str,
 ) -> str:
     result = find_value(search_text, header_series, data_series)
-    if result == "" or pd.isna(result) or str(result).strip() == "":
+    if (result == "" or 
+        pd.isna(result) or 
+        str(result).strip() == "" or 
+        result == "nan"):
+        
         return default_val
     return str(result)

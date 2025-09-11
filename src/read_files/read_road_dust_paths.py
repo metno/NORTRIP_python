@@ -1,6 +1,6 @@
 from config_classes.model_file_paths import model_file_paths
 import pandas as pd
-from pd_util import find_value, read_txt
+from pd_util import read_txt, find_str_or_default
 import logging
 
 logger = logging.getLogger(__name__)
@@ -44,33 +44,33 @@ def read_road_dust_paths(
     header_text = paths_df.iloc[:, 0]
     file_text = paths_df.iloc[:, 1]
     # Extract paths and filenames
-    paths.path_inputparam = find_value(
-        "Model input parameter path", header_text, file_text
+    paths.path_inputparam = find_str_or_default(
+        "Model input parameter path", header_text, file_text, ""
     )
-    paths.path_inputdata = find_value("Model input data path", header_text, file_text)
-    paths.path_outputdata = find_value("Model output data path", header_text, file_text)
-    paths.path_outputfig = find_value(
-        "Model output figures path", header_text, file_text
-    )
-
-    paths.filename_inputparam = find_value(
-        "Model parameter filename", header_text, file_text
-    )
-    paths.filename_inputdata = find_value(
-        "Model input data filename", header_text, file_text
-    )
-    paths.filename_outputdata = find_value(
-        "Model output data filename", header_text, file_text
+    paths.path_inputdata = find_str_or_default("Model input data path", header_text, file_text, "")
+    paths.path_outputdata = find_str_or_default("Model output data path", header_text, file_text, "")
+    paths.path_outputfig = find_str_or_default(
+        "Model output figures path", header_text, file_text, ""
     )
 
-    paths.path_ospm = find_value("Model ospm path", header_text, file_text)
-    paths.path_fortran = find_value("Model fortran path", header_text, file_text)
-    paths.path_fortran_output = find_value(
-        "Model fortran output path", header_text, file_text
+    paths.filename_inputparam = find_str_or_default(
+        "Model parameter filename", header_text, file_text, ""
     )
-    paths.filename_log = find_value("Log file name", header_text, file_text)
-    paths.file_fortran_exe = find_value(
-        "Model fortran executable filename", header_text, file_text
+    paths.filename_inputdata = find_str_or_default(
+        "Model input data filename", header_text, file_text, ""
+    )
+    paths.filename_outputdata = find_str_or_default(
+        "Model output data filename", header_text, file_text, ""
+    )
+
+    paths.path_ospm = find_str_or_default("Model ospm path", header_text, file_text, "")
+    paths.path_fortran = find_str_or_default("Model fortran path", header_text, file_text, "")
+    paths.path_fortran_output = find_str_or_default(
+        "Model fortran output path", header_text, file_text, ""
+    )
+    paths.filename_log = find_str_or_default("Log file name", header_text, file_text, "")
+    paths.file_fortran_exe = find_str_or_default(
+        "Model fortran executable filename", header_text, file_text, ""
     )
 
     # Set automatic defaults if not found

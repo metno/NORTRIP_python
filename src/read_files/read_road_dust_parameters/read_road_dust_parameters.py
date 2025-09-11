@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def read_road_dust_parameters(
     parameter_file_path: str,
     read_as_text=False,
-) -> tuple[model_parameters, model_flags, model_activities]:
+) -> tuple[model_parameters, model_flags, model_activities, dict[str, pd.DataFrame]]:
     """
     Read road dust model parameters, flags, and activities from specified file.
 
@@ -26,6 +26,7 @@ def read_road_dust_parameters(
             - model_parameters: An instance of model_parameters with loaded values.
             - model_flags: An instance of model_flags with loaded values.
             - model_activities: An instance of model_activities with loaded values.
+            - all_sheets: A dictionary containing all sheets from the input file or None if read_as_text is True.
     """
 
     if read_as_text:
@@ -42,6 +43,12 @@ def read_road_dust_parameters(
             parameter_df = read_txt(parameters_path)
             flags_df = read_txt(flags_path)
             activities_df = read_txt(activities_path)
+
+            all_sheets = {}
+            all_sheets["Parameters"] = parameter_df
+            all_sheets["Flags"] = flags_df
+            all_sheets["Activities"] = activities_df
+
         except FileNotFoundError as e:
             logger.error(f"File not found: {e.filename}")
             exit(1)
@@ -60,4 +67,4 @@ def read_road_dust_parameters(
     flags = read_model_flags(flags_df)  # type: ignore
     activities = read_model_activities(activities_df, parameters)  # type: ignore
 
-    return parameters, flags, activities
+    return parameters, flags, activities, all_sheets

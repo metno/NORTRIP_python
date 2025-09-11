@@ -146,4 +146,4 @@ def plot_road_dust_result(
         logger.info("Plotting figure 14: scatter temperature and moisture")
         plot_scatter_temp_moisture(shared, paths)
 
-    plt.show()
+    plt.show(block=False)

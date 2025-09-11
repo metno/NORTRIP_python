@@ -65,7 +65,7 @@ def main():
     paths = read_road_dust_paths(read_as_text=read_as_text, paths_xlsx=args.paths)
 
 
-    model_parameters, model_flags, model_activities = read_road_dust_parameters(
+    model_parameters, model_flags, model_activities, parameter_sheets = read_road_dust_parameters(
         paths.path_filename_inputparam, read_as_text=read_as_text
     )
 
@@ -361,14 +361,14 @@ def main():
             input_activity=activity_input,
             av=[model_flags.plot_type_flag],
             save_as_text=save_as_text,
+            paths=paths,
+            parameter_sheets=parameter_sheets,
         )
-        # Saving to text/excel will be implemented next; for now we just build the DataFrame
-        
         
 
 
     logger.info("End of NORTRIP_Control")
-
+    input("Press Enter to close...")
 
 if __name__ == "__main__":
     main()
