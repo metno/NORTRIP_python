@@ -32,4 +32,9 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
         loaded_count += 1
 
     logger.info(f"Successfully loaded {loaded_count} model flags")
+
+    if loaded_flags.use_multiple_save_dates_flag != 0:
+        print("The 'use multiple save dates' feature is no longer supported, remove the flag or set it to 0")
+        exit()
+
     return loaded_flags

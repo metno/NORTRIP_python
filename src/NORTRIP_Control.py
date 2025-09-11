@@ -47,15 +47,11 @@ def main():
     print_results = bool(args.print)
     use_fortran = bool(args.fortran)
     use_logging = bool(args.log)
-    save_plots = bool(args.save_plots)
     plot_figure = args.plot
 
     if not use_logging:
         logging.disable()
 
-   
-
-        
     print("-" * 33)
     print(f"Starting NORTRIP_python_v{version('nortrip-python')}...")
     print("-" * 33)
@@ -68,8 +64,6 @@ def main():
     # args.paths is now positional and points to the model paths Excel file
     paths = read_road_dust_paths(read_as_text=read_as_text, paths_xlsx=args.paths)
 
-    if save_plots and not os.path.exists(paths.path_outputfig):
-        os.makedirs(paths.path_outputfig)
 
     model_parameters, model_flags, model_activities = read_road_dust_parameters(
         paths.path_filename_inputparam, read_as_text=read_as_text
@@ -322,7 +316,13 @@ def main():
     time_config.min_time = time_config.min_time_save
     time_config.max_time = time_config.max_time_save
 
-    # Generate plots
+    # Plots are saved if save_type_flag is 2 or 3
+    save_plots = model_flags.save_type_flag == 2 or model_flags.save_type_flag == 3
+
+    if save_plots:
+        if not os.path.exists(paths.path_outputfig):
+            os.makedirs(paths.path_outputfig)
+        logger.info(f"Creating and saving plots to {paths.path_outputfig}...")
 
     plot_road_dust_result(
         time_config=time_config,

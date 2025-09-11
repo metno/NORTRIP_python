@@ -84,13 +84,6 @@ def create_arg_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "-sp",
-        "--save-plots",
-        action="store_true",
-        help="Save plots to output_figures directory.",
-    )
-
-    parser.add_argument(
         "-pl",
         "--plot",
         dest="plot",
