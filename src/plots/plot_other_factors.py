@@ -279,7 +279,7 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
     plt.tight_layout()
     if shared.save_plots:
         plot_file_name = generate_matlab_style_filename(
-            title_str=getattr(paths, "title_str", ""),
+            title_str=paths.title_str,
             plot_type_flag=shared.av[0],
             figure_number=5,  # Other factors is figure 5
             plot_name="Other_factors",

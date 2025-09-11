@@ -251,7 +251,7 @@ def plot_concentrations(shared: shared_plot_data, paths: model_file_paths) -> No
     plt.tight_layout()
     if shared.save_plots:
         plot_file_name = generate_matlab_style_filename(
-            title_str=getattr(paths, "title_str", ""),
+            title_str=paths.title_str,
             plot_type_flag=shared.av[0],
             figure_number=7,  # Concentrations is figure 7
             plot_name="Concentrations",

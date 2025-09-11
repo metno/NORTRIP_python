@@ -144,7 +144,7 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
     plt.tight_layout()
     if shared.save_plots:
         plot_file_name = generate_matlab_style_filename(
-            title_str=getattr(paths, "title_str", ""),
+            title_str=paths.title_str,
             plot_type_flag=shared.av[0],
             figure_number=2,  # Meteorology is figure 2
             plot_name="Meteorology",
