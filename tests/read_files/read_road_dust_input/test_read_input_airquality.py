@@ -26,7 +26,6 @@ def test_read_input_airquality_basic():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check basic structure
@@ -66,7 +65,6 @@ def test_read_input_airquality_empty_data():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Should return default initialized dataclass
@@ -95,7 +93,6 @@ def test_read_input_airquality_minimal_data():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that basic data is read
@@ -134,7 +131,6 @@ def test_read_input_airquality_missing_columns():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that data is read correctly
@@ -169,7 +165,6 @@ def test_read_input_airquality_nan_handling():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that NaN values are converted to 0.0 by safe_float, then we don't have special logic for 0.0 here
@@ -208,7 +203,6 @@ def test_read_input_airquality_net_concentration_calculation():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check positive net concentrations
@@ -269,7 +263,6 @@ def test_read_input_airquality_daily_average_filling():
         traffic_hour=traffic_hour,
         N_total_nodata=N_total_nodata,
         N_good_data=N_good_data,
-        print_results=False,
     )
 
     # Check that daily averages were applied
@@ -310,7 +303,6 @@ def test_read_input_airquality_ospm_data():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that OSPM data exists
@@ -361,7 +353,6 @@ def test_read_input_airquality_osmp_missing_data():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that OSMP data exists
@@ -392,7 +383,6 @@ def test_read_input_airquality_no_osmp_data():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that OSMP data does not exist
@@ -425,7 +415,6 @@ def test_read_input_airquality_salt_observations():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check salt data availability
@@ -459,7 +448,6 @@ def test_read_input_airquality_emission_availability():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that emission data is marked as unavailable
@@ -484,7 +472,6 @@ def test_read_input_airquality_emission_availability():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that emission data with some valid values is marked as available
@@ -512,7 +499,6 @@ def test_read_input_airquality_array_dimensions():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     n_date = result.n_date
@@ -554,7 +540,6 @@ def test_read_input_airquality_edge_cases():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check zero concentrations
@@ -586,7 +571,6 @@ def test_read_input_airquality_data_consistency():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that net concentrations are calculated consistently
@@ -634,7 +618,6 @@ def test_read_input_airquality_comprehensive_missing_data():
         traffic_hour=np.array([]),
         N_total_nodata=[],
         N_good_data=np.array([]),
-        print_results=False,
     )
 
     # Check that missing data is properly handled

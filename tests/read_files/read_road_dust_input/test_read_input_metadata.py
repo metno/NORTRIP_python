@@ -31,7 +31,7 @@ def test_read_input_metadata_basic():
     ]
 
     metadata_df = pd.DataFrame(test_data)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
 
     # Check basic numeric fields
     assert result.b_road == 15.0
@@ -79,7 +79,7 @@ def test_read_input_metadata_minimal_data():
     ]
 
     metadata_df = pd.DataFrame(test_data)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
 
     # Check that specified values are set
     assert result.b_road == 10.0
@@ -123,7 +123,7 @@ def test_read_input_metadata_canyon_height_logic():
     ]
 
     metadata_df = pd.DataFrame(test_data_north_south)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
     assert result.h_canyon == [25.0, 24.0]
 
     # Test with single value
@@ -139,7 +139,7 @@ def test_read_input_metadata_canyon_height_logic():
     ]
 
     metadata_df = pd.DataFrame(test_data_single)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
     assert result.h_canyon == [30.0, 30.0]
 
     # Test with no canyon height values (should default to [0.0, 0.0])
@@ -154,7 +154,7 @@ def test_read_input_metadata_canyon_height_logic():
     ]
 
     metadata_df = pd.DataFrame(test_data_none)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
     assert result.h_canyon == [0.0, 0.0]
 
 
@@ -175,7 +175,7 @@ def test_read_input_metadata_date_formatting():
     ]
 
     metadata_df = pd.DataFrame(test_data)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
 
     assert result.start_date_str == "2023-01-01 00:00:00"
     assert result.end_date_str == "2023-12-31 23:59:59"
@@ -201,7 +201,7 @@ def test_read_input_metadata_emission_factors():
     ]
 
     metadata_df = pd.DataFrame(test_data_with_ef)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
 
     assert result.exhaust_EF == [1.5, 0.8]
     assert result.exhaust_EF_available == 1  # Should be 1 since sum is not zero
@@ -220,7 +220,7 @@ def test_read_input_metadata_emission_factors():
     ]
 
     metadata_df = pd.DataFrame(test_data_without_ef)
-    result = read_input_metadata(metadata_df, print_results=False)
+    result = read_input_metadata(metadata_df)
 
     assert result.exhaust_EF == [0.0, 0.0]
     assert result.exhaust_EF_available == 0

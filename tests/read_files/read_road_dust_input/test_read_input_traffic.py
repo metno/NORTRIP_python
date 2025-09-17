@@ -16,7 +16,7 @@ def test_read_input_traffic_basic():
 
     df = pd.DataFrame(test_data)
 
-    result = read_input_traffic(df, nodata=-99.0, print_results=False)
+    result = read_input_traffic(df, nodata=-99.0)
 
     # Basic assertions
     assert result.n_traffic == 3
@@ -49,7 +49,7 @@ def test_read_input_traffic_missing_data_forward_fill():
     # fmt: on
     df = pd.DataFrame(test_data)
 
-    result = read_input_traffic(df, nodata=-99.0, print_results=False)
+    result = read_input_traffic(df, nodata=-99.0)
 
     assert len(result.N_total_nodata) == 0  # No missing data in this simple test
     assert len(result.month) == 3
@@ -71,7 +71,7 @@ def test_read_input_traffic_missing_data_complex():
 
     df = pd.DataFrame(test_data)
 
-    result = read_input_traffic(df, nodata=-99.0, print_results=False)
+    result = read_input_traffic(df, nodata=-99.0)
 
     # Basic checks for date data
     assert len(result.month) == 3
@@ -96,7 +96,7 @@ def test_read_input_traffic_date_string_formatting():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_traffic(df, nodata=-99.0, print_results=False)
+    result = read_input_traffic(df, nodata=-99.0)
 
     # Check format 1: "%Y.%m.%d %H" format
     expected_format1 = ["2023.03.15 09", "2023.12.05 14", "2024.01.01 00"]
@@ -125,7 +125,7 @@ def test_read_input_traffic_missing_minute_column():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_traffic(df, nodata=-99.0, print_results=False)
+    result = read_input_traffic(df, nodata=-99.0)
 
     # Minutes should default to 0 when column is missing
     np.testing.assert_array_equal(result.minute, [0, 0])
@@ -152,7 +152,7 @@ def test_read_input_traffic_nodata_handling():
     # fmt: on
 
     df = pd.DataFrame(test_data)
-    result = read_input_traffic(df, nodata=-99.0, print_results=False)
+    result = read_input_traffic(df, nodata=-99.0)
 
     # Basic structure checks
     assert result.n_traffic == 5

@@ -296,7 +296,7 @@ def test_read_input_initial_with_print_results():
 
     # Test with print_results=True
     result = read_input_initial(
-        initial_df, test_model_params, test_metadata, print_results=True
+        initial_df, test_model_params, test_metadata
     )
 
     assert result.m_road_init[constants.road_index, 0] == 50.0

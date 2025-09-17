@@ -105,8 +105,8 @@ def test_find_column_index_print_results():
     headers = pd.Series(["Year", "Month", "Year", "Day"])
 
     # This should work without errors even with duplicates
-    result = find_column_index("Year", headers, print_results=True, exact_match=True)
+    result = find_column_index("Year", headers, exact_match=True)
     assert result == 0
 
-    result = find_column_index("Year", headers, print_results=False, exact_match=True)
+    result = find_column_index("Year", headers, exact_match=True)
     assert result == 0
