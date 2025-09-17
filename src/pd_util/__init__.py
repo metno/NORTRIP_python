@@ -6,6 +6,7 @@ from .safe_float import safe_float
 from .find_column_index import find_column_index
 from .check_data_availability import check_data_availability
 from .forward_fill_missing import forward_fill_missing
+from .apply_safe_float import apply_safe_float
 
 __all__ = [
     "find_value",
@@ -16,4 +17,5 @@ __all__ = [
     "find_column_index",
     "check_data_availability",
     "forward_fill_missing",
+    "apply_safe_float",
 ]
