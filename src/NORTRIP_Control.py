@@ -73,7 +73,6 @@ def main():
         paths.path_filename_inputdata,
         model_parameters,
         read_as_text,
-        print_results,
     )
 
     activity_input = input_data.activity

@@ -13,7 +13,6 @@ def read_input_initial(
     initial_df: pd.DataFrame,
     model_parameters: model_parameters,
     input_metadata: input_metadata,
-    print_results: bool = False,
 ) -> input_initial:
     """
     Read and process initial input data for NORTRIP.
@@ -22,7 +21,6 @@ def read_input_initial(
         initial_df (pd.DataFrame): DataFrame containing the initial data
         model_parameters (model_parameters): Model parameters
         input_metadata (input_metadata): Input metadata
-        print_results (bool): Whether to print the results to the console
 
     Returns:
         input_initial: Dataclass containing the initial data

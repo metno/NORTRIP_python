@@ -7,14 +7,13 @@ logger = logging.getLogger(__name__)
 
 
 def read_input_metadata(
-    metadata_df: pd.DataFrame, print_results: bool = False
+    metadata_df: pd.DataFrame
 ) -> input_metadata:
     """
     Reads the metadata from the input DataFrame and returns an instance of input_metadata.
 
     Args:
         metadata_df (pd.DataFrame): DataFrame containing metadata information.
-        print_results (bool): Whether to print the results to the console
 
     Returns:
         input_metadata: An instance of input_metadata containing the metadata.

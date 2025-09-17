@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 def find_column_index(
     search_text: str,
     header_text: pd.Series,
-    print_results: bool = False,
     exact_match: bool = False,
 ) -> int:
     """
@@ -16,7 +15,6 @@ def find_column_index(
     Args:
         search_text (str): Text to search for in headers
         header_text (pd.Series): Series containing header text
-        print_results (bool): Whether to print warning messages for duplicates
         exact_match (bool): If True, use exact string match. If False, use substring search.
 
     Returns:
@@ -31,7 +29,7 @@ def find_column_index(
             search_text, case=False, na=False, regex=False
         )
 
-    if matches.sum() > 1 and print_results:
+    if matches.sum() > 1:
         logger.warning(
             f"Double occurrence of input data header '{search_text}': USING THE FIRST"
         )

@@ -15,7 +15,6 @@ def read_input_activity(
     traffic_day: np.ndarray | None = None,
     traffic_hour: np.ndarray | None = None,
     traffic_minute: np.ndarray | None = None,
-    print_results: bool = False,
     nodata: float = -99.0,
 ) -> input_activity:
     """
@@ -28,7 +27,6 @@ def read_input_activity(
         traffic_day: Day array from traffic data for redistribution (optional)
         traffic_hour: Hour array from traffic data for redistribution (optional)
         traffic_minute: Minute array from traffic data for redistribution (optional)
-        print_results: Whether to print results to console
 
     Returns:
         input_activity: input_activity object containing parsed data
@@ -78,7 +76,7 @@ def read_input_activity(
     loaded_activity.hour = activity_df["Hour"].values.astype(int)
 
     # Handle optional minute column
-    col_idx = find_column_index("Minute", header_text, print_results)
+    col_idx = find_column_index("Minute", header_text)
     if col_idx != -1:
         loaded_activity.minute = (
             apply_safe_float(activity_df, col_idx, nodata).astype(int)
@@ -102,20 +100,18 @@ def read_input_activity(
     M_fugitive = np.zeros(n_act)
 
     # Read M_sanding (optional)
-    col_idx = find_column_index("M_sanding", header_text, print_results)
+    col_idx = find_column_index("M_sanding", header_text)
     if col_idx != -1:
         M_sanding = apply_safe_float(activity_df, col_idx, nodata)
     else:
-        if print_results:
-            logger.info("M_sanding column not found - using zeros")
+        logger.info("M_sanding column not found - using zeros")
 
     # Read primary salt (na) - always first salt type
-    col_idx = find_column_index("M_salting(na)", header_text, print_results)
+    col_idx = find_column_index("M_salting(na)", header_text)
     if col_idx != -1:
         M_salting[0, :] = apply_safe_float(activity_df, col_idx, nodata)
     else:
-        if print_results:
-            logger.info("M_salting(na) column not found - using zeros")
+        logger.info("M_salting(na) column not found - using zeros")
 
     # Read secondary salt with priority: mg > cma > ca
     second_salt_available = 0
@@ -123,7 +119,7 @@ def read_input_activity(
     salt2_str = ""
 
     # Try mg first
-    col_idx = find_column_index("M_salting(mg)", header_text, print_results)
+    col_idx = find_column_index("M_salting(mg)", header_text)
     if col_idx != -1:
         M_salting[1, :] = apply_safe_float(activity_df, col_idx, nodata)
         second_salt_type = constants.mg
@@ -131,7 +127,7 @@ def read_input_activity(
         salt2_str = "mg"
     else:
         # Try cma if mg not available
-        col_idx = find_column_index("M_salting(cma)", header_text, print_results)
+        col_idx = find_column_index("M_salting(cma)", header_text)
         if col_idx != -1:
             M_salting[1, :] = apply_safe_float(activity_df, col_idx, nodata)
             second_salt_type = constants.cma
@@ -139,7 +135,7 @@ def read_input_activity(
             salt2_str = "cma"
         else:
             # Try ca if neither mg nor cma available
-            col_idx = find_column_index("M_salting(ca)", header_text, print_results)
+            col_idx = find_column_index("M_salting(ca)", header_text)
             if col_idx != -1:
                 M_salting[1, :] = apply_safe_float(activity_df, col_idx, nodata)
                 second_salt_type = constants.ca
@@ -149,42 +145,37 @@ def read_input_activity(
     if second_salt_available == 0:
         second_salt_type = constants.mg
         salt2_str = "mg"
-        if print_results:
-            logger.info("No secondary salt data found - defaulting to mg")
+        logger.info("No secondary salt data found - defaulting to mg")
 
     # Read Wetting (optional)
-    col_idx = find_column_index("Wetting", header_text, print_results)
+    col_idx = find_column_index("Wetting", header_text)
     g_road_wetting_available = 0
     if col_idx != -1:
         g_road_wetting = apply_safe_float(activity_df, col_idx, nodata)
         g_road_wetting_available = 1
     else:
-        if print_results:
-            logger.info("Wetting column not found - using zeros")
+        logger.info("Wetting column not found - using zeros")
 
     # Read Ploughing_road (required for MATLAB compatibility)
-    col_idx = find_column_index("Ploughing_road", header_text, print_results)
+    col_idx = find_column_index("Ploughing_road", header_text)
     if col_idx != -1:
         t_ploughing = apply_safe_float(activity_df, col_idx, nodata)
     else:
-        if print_results:
-            logger.warning("Ploughing_road column not found - using zeros")
+        logger.warning("Ploughing_road column not found - using zeros")
 
     # Read Cleaning_road (required for MATLAB compatibility)
-    col_idx = find_column_index("Cleaning_road", header_text, print_results)
+    col_idx = find_column_index("Cleaning_road", header_text)
     if col_idx != -1:
         t_cleaning = apply_safe_float(activity_df, col_idx, nodata)
     else:
-        if print_results:
-            logger.warning("Cleaning_road column not found - using zeros")
+        logger.warning("Cleaning_road column not found - using zeros")
 
     # Read Fugitive (optional)
-    col_idx = find_column_index("Fugitive", header_text, print_results)
+    col_idx = find_column_index("Fugitive", header_text)
     if col_idx != -1:
         M_fugitive = apply_safe_float(activity_df, col_idx, nodata)
     else:
-        if print_results:
-            logger.info("Fugitive column not found - using zeros")
+        logger.info("Fugitive column not found - using zeros")
 
     # Set salt type information
     loaded_activity.salt_type = np.array(
@@ -197,8 +188,7 @@ def read_input_activity(
 
     # If activity dates don't correspond to traffic dates, redistribute data
     if traffic_year is not None and len(loaded_activity.year) != len(traffic_year):
-        if print_results:
-            logger.info("Redistributing activity input data to match traffic timeline")
+        logger.info("Redistributing activity input data to match traffic timeline")
 
         n_traf = len(traffic_year)
 
@@ -238,7 +228,7 @@ def read_input_activity(
                 g_road_wetting[r] += g_road_wetting_act[i]
                 t_ploughing[r] += t_ploughing_act[i]
                 t_cleaning[r] += t_cleaning_act[i]
-            elif len(matches) > 1 and print_results:
+            elif len(matches) > 1:
                 logger.warning(
                     "Problem with activity input data - multiple time matches found"
                 )

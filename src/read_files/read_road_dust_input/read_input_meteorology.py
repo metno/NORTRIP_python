@@ -64,7 +64,6 @@ def read_input_meteorology(
     nodata: float = -99.0,
     wind_speed_correction: float = 1.0,
     pressure_default: float = 101325.0,
-    print_results: bool = False,
 ) -> input_meteorology:
     """
     Read meteorological input data from a pandas DataFrame.
@@ -74,7 +73,6 @@ def read_input_meteorology(
         nodata (float): Nodata value to use for missing data
         wind_speed_correction (float): Correction factor for wind speed
         pressure_default (float): Default pressure value if not available
-        print_results (bool): Whether to print the results to the console
 
     Returns:
         input_meteorology: Dataclass containing the meteorological data
@@ -92,7 +90,7 @@ def read_input_meteorology(
     loaded_meteo.n_meteo = n_meteo
 
     # Read T2m (required)
-    col_idx = find_column_index("T2m", header_text, print_results)
+    col_idx = find_column_index("T2m", header_text)
     if col_idx == -1:
         logger.error("No T2m temperature data found - T2m column missing")
         loaded_meteo.n_meteo = 0
@@ -101,7 +99,7 @@ def read_input_meteorology(
     T_a_data = apply_safe_float(meteorology_df, col_idx, nodata)
 
     # Read T_a_alt (optional)
-    col_idx = find_column_index("T_a_alt", header_text, print_results)
+    col_idx = find_column_index("T_a_alt", header_text)
     if col_idx != -1:
         T2_a_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.T2_a_available = 1
@@ -110,7 +108,7 @@ def read_input_meteorology(
         loaded_meteo.T2_a_available = 0
 
     # Read FF (required)
-    col_idx = find_column_index("FF", header_text, print_results)
+    col_idx = find_column_index("FF", header_text)
     if col_idx == -1:
         logger.error("No wind speed data found - FF column missing")
         loaded_meteo.n_meteo = 0
@@ -119,7 +117,7 @@ def read_input_meteorology(
     FF_data = apply_safe_float(meteorology_df, col_idx, nodata)
 
     # Read DD (optional)
-    col_idx = find_column_index("DD", header_text, print_results)
+    col_idx = find_column_index("DD", header_text)
     if col_idx != -1:
         DD_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.DD_available = 1
@@ -128,7 +126,7 @@ def read_input_meteorology(
         loaded_meteo.DD_available = 0
 
     # Read RH (optional)
-    col_idx = find_column_index("RH", header_text, print_results)
+    col_idx = find_column_index("RH", header_text)
     if col_idx != -1:
         RH_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.RH_available = 1
@@ -137,7 +135,7 @@ def read_input_meteorology(
         loaded_meteo.RH_available = 0
 
     # Read T2m dewpoint (optional) - search for cleaned header
-    col_idx = find_column_index("T2mdewpoint", header_text, print_results)
+    col_idx = find_column_index("T2mdewpoint", header_text)
     if col_idx != -1:
         T_dewpoint_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.T_dewpoint_available = 1
@@ -146,7 +144,7 @@ def read_input_meteorology(
         loaded_meteo.T_dewpoint_available = 0
 
     # Read Rain (required)
-    col_idx = find_column_index("Rain", header_text, print_results)
+    col_idx = find_column_index("Rain", header_text)
     if col_idx == -1:
         logger.error("No rain data found - Rain column missing")
         loaded_meteo.n_meteo = 0
@@ -155,7 +153,7 @@ def read_input_meteorology(
     Rain_data = apply_safe_float(meteorology_df, col_idx, nodata)
 
     # Read Snow (required)
-    col_idx = find_column_index("Snow", header_text, print_results)
+    col_idx = find_column_index("Snow", header_text)
     if col_idx == -1:
         logger.error("No snow data found - Snow column missing")
         loaded_meteo.n_meteo = 0
@@ -164,7 +162,7 @@ def read_input_meteorology(
     Snow_data = apply_safe_float(meteorology_df, col_idx, nodata)
 
     # Read Global radiation (optional) - search for cleaned header
-    col_idx = find_column_index("Globalradiation", header_text, print_results)
+    col_idx = find_column_index("Globalradiation", header_text)
     if col_idx != -1:
         short_rad_in_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.short_rad_in_available = 1
@@ -173,7 +171,7 @@ def read_input_meteorology(
         loaded_meteo.short_rad_in_available = 0
 
     # Read Longwave radiation (optional) - search for cleaned header
-    col_idx = find_column_index("Longwaveradiation", header_text, print_results)
+    col_idx = find_column_index("Longwaveradiation", header_text)
     if col_idx != -1:
         long_rad_in_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.long_rad_in_available = 1
@@ -182,7 +180,7 @@ def read_input_meteorology(
         loaded_meteo.long_rad_in_available = 0
 
     # Read Cloud cover (optional) - search for cleaned header
-    col_idx = find_column_index("Cloudcover", header_text, print_results)
+    col_idx = find_column_index("Cloudcover", header_text)
     if col_idx != -1:
         cloud_cover_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.cloud_cover_available = 1
@@ -192,7 +190,7 @@ def read_input_meteorology(
 
     # Read Road wetness (optional) - search for cleaned header with substring match
     col_idx = find_column_index(
-        "Roadwetness", header_text, print_results, exact_match=False
+        "Roadwetness", header_text, exact_match=False
     )
     if col_idx != -1:
         road_wetness_obs_data = apply_safe_float(meteorology_df, col_idx, nodata)
@@ -210,7 +208,7 @@ def read_input_meteorology(
         loaded_meteo.road_wetness_obs_in_mm = 0
 
     # Read Road surface temperature (optional) - search for cleaned header
-    col_idx = find_column_index("Roadsurfacetemperature", header_text, print_results)
+    col_idx = find_column_index("Roadsurfacetemperature", header_text)
     if col_idx != -1:
         road_temperature_obs_data = (
             apply_safe_float(meteorology_df, col_idx, nodata)
@@ -221,7 +219,7 @@ def read_input_meteorology(
         loaded_meteo.road_temperature_obs_available = 0
 
     # Read Pressure (optional)
-    col_idx = find_column_index("Pressure", header_text, print_results)
+    col_idx = find_column_index("Pressure", header_text)
     if col_idx != -1:
         Pressure_a_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.pressure_obs_available = 1
@@ -230,7 +228,7 @@ def read_input_meteorology(
         loaded_meteo.pressure_obs_available = 1
 
     # Read T subsurface (optional) - search for cleaned header
-    col_idx = find_column_index("Tsubsurface", header_text, print_results)
+    col_idx = find_column_index("Tsubsurface", header_text)
     if col_idx != -1:
         T_sub_data = apply_safe_float(meteorology_df, col_idx, nodata)
         loaded_meteo.T_sub_available = 1

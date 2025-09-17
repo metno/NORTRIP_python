@@ -20,7 +20,6 @@ def read_input_airquality(
     traffic_hour: np.ndarray,
     N_total_nodata: list,
     N_good_data: np.ndarray | None,
-    print_results: bool = False,
 ) -> input_airquality:
     """
     Read air quality input data from a pandas DataFrame.
@@ -33,7 +32,6 @@ def read_input_airquality(
         traffic_hour (np.ndarray | None): Hour array from traffic data for missing data filling
         N_total_nodata (list | None): Indices of missing traffic data for emission data filling
         N_good_data (np.ndarray | None): Indices of good traffic data for daily average calculation
-        print_results (bool): Whether to print the results to the console
 
     Returns:
         input_airquality: Dataclass containing the air quality data
@@ -72,58 +70,58 @@ def read_input_airquality(
     f_dis_input = np.full(n_date, nodata)
 
     # Read PM10 observations
-    col_idx = find_column_index("PM10_obs", header_text, print_results)
+    col_idx = find_column_index("PM10_obs", header_text)
     if col_idx != -1:
         PM_obs[constants.pm_10, :] = apply_safe_float(airquality_df, col_idx, nodata)
 
     # Read PM10 background
-    col_idx = find_column_index("PM10_background", header_text, print_results)
+    col_idx = find_column_index("PM10_background", header_text)
     if col_idx != -1:
         PM_background[constants.pm_10, :] = apply_safe_float(airquality_df, col_idx, nodata)
 
     # Read PM25 observations
-    col_idx = find_column_index("PM25_obs", header_text, print_results)
+    col_idx = find_column_index("PM25_obs", header_text)
     if col_idx != -1:
         PM_obs[constants.pm_25, :] = apply_safe_float(airquality_df, col_idx, nodata)
 
     # Read PM25 background
-    col_idx = find_column_index("PM25_background", header_text, print_results)
+    col_idx = find_column_index("PM25_background", header_text)
     if col_idx != -1:
         PM_background[constants.pm_25, :] = apply_safe_float(airquality_df, col_idx, nodata)
 
     # Read NOX observations
-    col_idx = find_column_index("NOX_obs", header_text, print_results)
+    col_idx = find_column_index("NOX_obs", header_text)
     if col_idx != -1:
         NOX_obs[:] = apply_safe_float(airquality_df, col_idx, nodata)
 
     # Read NOX background
-    col_idx = find_column_index("NOX_background", header_text, print_results)
+    col_idx = find_column_index("NOX_background", header_text)
     if col_idx != -1:
         NOX_background[:] = apply_safe_float(airquality_df, col_idx, nodata)
 
     # Read NOX emissions (optional)
-    col_idx = find_column_index("NOX_emis", header_text, print_results)
+    col_idx = find_column_index("NOX_emis", header_text)
     NOX_emis_available = 0
     if col_idx != -1:
         NOX_emis[:] = apply_safe_float(airquality_df, col_idx, nodata)
         NOX_emis_available = 1
 
     # Read EP emissions (optional)
-    col_idx = find_column_index("EP_emis", header_text, print_results)
+    col_idx = find_column_index("EP_emis", header_text)
     EP_emis_available = 0
     if col_idx != -1:
         EP_emis[:] = apply_safe_float(airquality_df, col_idx, nodata)
         EP_emis_available = 1
 
     # Read Salt observations for sodium (optional)
-    col_idx = find_column_index("Salt_obs(na)", header_text, print_results)
+    col_idx = find_column_index("Salt_obs(na)", header_text)
     Salt_obs_available = np.zeros(constants.num_salt, dtype=int)
     if col_idx != -1:
         Salt_obs[constants.na, :] = apply_safe_float(airquality_df, col_idx, nodata)
         Salt_obs_available[constants.na] = 1
 
     # Read dispersion factor (optional)
-    col_idx = find_column_index("Disp_fac", header_text, print_results)
+    col_idx = find_column_index("Disp_fac", header_text)
     f_dis_available = 0
     if col_idx != -1:
         f_dis_input[:] = apply_safe_float(airquality_df, col_idx, nodata)
@@ -242,24 +240,24 @@ def read_input_airquality(
         Vt_ospm_orig = np.full(n_ospm, nodata)
 
         # Read OSPM meteorological data
-        col_idx = find_column_index("FFospm(m/s)", ospm_header_text, print_results)
+        col_idx = find_column_index("FFospm(m/s)", ospm_header_text)
         if col_idx != -1:
             U_mast_ospm_orig[:] = (
                 apply_safe_float(ospm_working_df, col_idx, nodata)
             )
 
-        col_idx = find_column_index("DDospm(deg)", ospm_header_text, print_results)
+        col_idx = find_column_index("DDospm(deg)", ospm_header_text)
         if col_idx != -1:
             wind_dir_ospm_orig[:] = (
                 apply_safe_float(ospm_working_df, col_idx, nodata)
             )
 
-        col_idx = find_column_index("TKospm(degK)", ospm_header_text, print_results)
+        col_idx = find_column_index("TKospm(degK)", ospm_header_text)
         if col_idx != -1:
             TK_ospm_orig[:] = apply_safe_float(ospm_working_df, col_idx, nodata)
 
         col_idx = find_column_index(
-            "Globalradiationospm(W/m^2)", ospm_header_text, print_results
+            "Globalradiationospm(W/m^2)", ospm_header_text
         )
         if col_idx != -1:
             GlobalRad_ospm_orig[:] = (
@@ -267,7 +265,7 @@ def read_input_airquality(
             )
 
         col_idx = find_column_index(
-            "Cbackgroundospm(ug/m^3)", ospm_header_text, print_results
+            "Cbackgroundospm(ug/m^3)", ospm_header_text
         )
         if col_idx != -1:
             cNOx_b_ospm_orig[:] = (
@@ -275,28 +273,28 @@ def read_input_airquality(
             )
 
         # Read OSPM traffic data
-        col_idx = find_column_index("N(li)ospm", ospm_header_text, print_results)
+        col_idx = find_column_index("N(li)ospm", ospm_header_text)
         if col_idx != -1:
             NNp_ospm_orig[:] = apply_safe_float(ospm_working_df, col_idx, nodata)
 
-        col_idx = find_column_index("N(he)ospm", ospm_header_text, print_results)
+        col_idx = find_column_index("N(he)ospm", ospm_header_text)
         if col_idx != -1:
             NNt_ospm_orig[:] = apply_safe_float(ospm_working_df, col_idx, nodata)
 
         col_idx = find_column_index(
-            "V_veh(li)ospm(km/hr)", ospm_header_text, print_results
+            "V_veh(li)ospm(km/hr)", ospm_header_text
         )
         if col_idx != -1:
             Vp_ospm_orig[:] = apply_safe_float(ospm_working_df, col_idx, nodata)
 
         col_idx = find_column_index(
-            "V_veh(he)ospm(km/hr)", ospm_header_text, print_results
+            "V_veh(he)ospm(km/hr)", ospm_header_text
         )
         if col_idx != -1:
             Vt_ospm_orig[:] = apply_safe_float(ospm_working_df, col_idx, nodata)
 
         col_idx = find_column_index(
-            "Cemisospm(ug/m/s)", ospm_header_text, print_results
+            "Cemisospm(ug/m/s)", ospm_header_text
         )
         if col_idx != -1:
             qNOX_ospm_orig[:] = (

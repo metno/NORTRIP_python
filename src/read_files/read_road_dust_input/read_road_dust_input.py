@@ -19,7 +19,6 @@ def read_road_dust_input(
     input_file_path: str,
     model_parameters: model_parameters,
     read_as_text=False,
-    print_results=False,
 ):
     """
     Read road dust input data from specified file.
@@ -28,7 +27,6 @@ def read_road_dust_input(
         input_file_path (str): Path to the input file.
         model_parameters (model_parameters): Model parameters needed for initial data reading
         read_as_text (bool, optional): If True, read the file as text. Will reformat input_file_path to text format.
-        print_results (bool, optional): If True, print the results to the console
     Returns:
         input_data: A dataclass containing all input dataclasses:
             activity: input_activity dataclass
@@ -40,9 +38,13 @@ def read_road_dust_input(
 
     """
 
-    activity_df = airquality_df = meteorology_df = traffic_df = initial_df = (
-        metadata_df
-    ) = ospm_df = None
+    activity_df = None
+    airquality_df = None
+    meteorology_df = None
+    traffic_df = None
+    initial_df = None
+    metadata_df = None
+    ospm_df = None
 
     if read_as_text:
         # Extract directory and base filename without extension
@@ -109,17 +111,16 @@ def read_road_dust_input(
         logger.error("One or more required sheets are missing from the input file.")
         exit(1)
 
-    metadata_data = read_input_metadata(metadata_df, print_results)
+    metadata_data = read_input_metadata(metadata_df)
     initial_data = read_input_initial(
-        initial_df, model_parameters, metadata_data, print_results
+        initial_df, model_parameters, metadata_data
     )
-    traffic_data = read_input_traffic(traffic_df, metadata_data.nodata, print_results)
+    traffic_data = read_input_traffic(traffic_df, metadata_data.nodata)
     meteorology_data = read_input_meteorology(
         meteorology_df,
         nodata=metadata_data.nodata,
         wind_speed_correction=metadata_data.wind_speed_correction,
         pressure_default=metadata_data.Pressure,
-        print_results=print_results,
     )
     activity_data = read_input_activity(
         activity_df,
@@ -128,7 +129,6 @@ def read_road_dust_input(
         traffic_data.day,
         traffic_data.hour,
         traffic_data.minute,
-        print_results,
         nodata=metadata_data.nodata,
     )
 
@@ -147,7 +147,6 @@ def read_road_dust_input(
         traffic_hour=traffic_data.hour,
         N_total_nodata=traffic_data.N_total_nodata,
         N_good_data=N_good_data,
-        print_results=print_results,
     )
 
     return input_data(

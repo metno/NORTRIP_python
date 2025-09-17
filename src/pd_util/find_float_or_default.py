@@ -9,7 +9,7 @@ def find_float_or_default(
     default_val: float,
 ) -> float:
     result = find_value(search_text, header_series, data_series)
-    if result == "" or result == "nan" or pd.isna(result):
+    if result == "" or result.lower() == "nan" or pd.isna(result):
         return default_val
 
     return float(result.replace(",", "."))

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def read_input_traffic(
-    traffic_df: pd.DataFrame, nodata: float = -99.0, print_results: bool = False
+    traffic_df: pd.DataFrame, nodata: float = -99.0
 ) -> input_traffic:
     """
     Read traffic data from DataFrame into input_traffic dataclass.
@@ -19,7 +19,6 @@ def read_input_traffic(
     Args:
         traffic_df (pd.DataFrame): DataFrame containing the traffic data
         nodata (float): Nodata value to use for missing data
-        print_results (bool): Whether to print the results to the console
 
     Returns:
         input_traffic: Dataclass containing the traffic data
@@ -79,7 +78,7 @@ def read_input_traffic(
     # Read traffic volumes
     # Total traffic
     col_idx = find_column_index(
-        "N(total)", header_text, print_results, exact_match=True
+        "N(total)", header_text, exact_match=True
     )
     if col_idx == -1:
         logger.error("No traffic data found - N(total) column missing")
@@ -95,7 +94,7 @@ def read_input_traffic(
     # Vehicle type traffic volumes
     for v, veh_type in enumerate(["he", "li"]):
         col_idx = find_column_index(
-            f"N({veh_type})", header_text, print_results, exact_match=True
+            f"N({veh_type})", header_text, exact_match=True
         )
         if col_idx != -1:
             loaded_traffic.N_v[v, :] = traffic_df.iloc[:, col_idx].values.astype(float)
@@ -106,7 +105,6 @@ def read_input_traffic(
             col_idx = find_column_index(
                 f"N({tyre_type},{veh_type})",
                 header_text,
-                print_results,
                 exact_match=True,
             )
             if col_idx != -1:
@@ -117,7 +115,7 @@ def read_input_traffic(
     # Vehicle speeds
     for v, veh_type in enumerate(["he", "li"]):
         col_idx = find_column_index(
-            f"V_veh({veh_type})", header_text, print_results, exact_match=False
+            f"V_veh({veh_type})", header_text, exact_match=False
         )
         if col_idx != -1:
             loaded_traffic.V_veh[v, :] = traffic_df.iloc[:, col_idx].values.astype(
@@ -134,6 +132,7 @@ def read_input_traffic(
     temp[4, :] = loaded_traffic.N[constants.wi, constants.li, :]
     temp[5, :] = loaded_traffic.N[constants.su, constants.li, :]
 
+    # This look horrible TODO: Fix this.
     N_good_data = np.where(
         (loaded_traffic.N_total != nodata)
         & (~np.isnan(loaded_traffic.N_total))

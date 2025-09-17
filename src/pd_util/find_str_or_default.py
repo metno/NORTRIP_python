@@ -12,7 +12,7 @@ def find_str_or_default(
     if (result == "" or 
         pd.isna(result) or 
         str(result).strip() == "" or 
-        result == "nan"):
+        result.lower() == "nan"):
         
         return default_val
     return str(result)
