@@ -98,12 +98,12 @@ def read_input_meteorology(
         loaded_meteo.n_meteo = 0
         return loaded_meteo
 
-    T_a_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+    T_a_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
 
     # Read T_a_alt (optional)
     col_idx = find_column_index("T_a_alt", header_text, print_results)
     if col_idx != -1:
-        T2_a_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        T2_a_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.T2_a_available = 1
     else:
         T2_a_data = np.zeros_like(T_a_data)
@@ -116,12 +116,12 @@ def read_input_meteorology(
         loaded_meteo.n_meteo = 0
         return loaded_meteo
 
-    FF_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+    FF_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
 
     # Read DD (optional)
     col_idx = find_column_index("DD", header_text, print_results)
     if col_idx != -1:
-        DD_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        DD_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.DD_available = 1
     else:
         DD_data = np.zeros_like(FF_data)
@@ -130,7 +130,7 @@ def read_input_meteorology(
     # Read RH (optional)
     col_idx = find_column_index("RH", header_text, print_results)
     if col_idx != -1:
-        RH_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        RH_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.RH_available = 1
     else:
         RH_data = np.full_like(T_a_data, nodata)
@@ -139,7 +139,7 @@ def read_input_meteorology(
     # Read T2m dewpoint (optional) - search for cleaned header
     col_idx = find_column_index("T2mdewpoint", header_text, print_results)
     if col_idx != -1:
-        T_dewpoint_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        T_dewpoint_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.T_dewpoint_available = 1
     else:
         T_dewpoint_data = np.full_like(T_a_data, nodata)
@@ -152,7 +152,7 @@ def read_input_meteorology(
         loaded_meteo.n_meteo = 0
         return loaded_meteo
 
-    Rain_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+    Rain_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
 
     # Read Snow (required)
     col_idx = find_column_index("Snow", header_text, print_results)
@@ -161,12 +161,12 @@ def read_input_meteorology(
         loaded_meteo.n_meteo = 0
         return loaded_meteo
 
-    Snow_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+    Snow_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
 
     # Read Global radiation (optional) - search for cleaned header
     col_idx = find_column_index("Globalradiation", header_text, print_results)
     if col_idx != -1:
-        short_rad_in_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        short_rad_in_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.short_rad_in_available = 1
     else:
         short_rad_in_data = np.zeros_like(T_a_data)
@@ -175,7 +175,7 @@ def read_input_meteorology(
     # Read Longwave radiation (optional) - search for cleaned header
     col_idx = find_column_index("Longwaveradiation", header_text, print_results)
     if col_idx != -1:
-        long_rad_in_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        long_rad_in_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.long_rad_in_available = 1
     else:
         long_rad_in_data = np.zeros_like(T_a_data)
@@ -184,7 +184,7 @@ def read_input_meteorology(
     # Read Cloud cover (optional) - search for cleaned header
     col_idx = find_column_index("Cloudcover", header_text, print_results)
     if col_idx != -1:
-        cloud_cover_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        cloud_cover_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.cloud_cover_available = 1
     else:
         cloud_cover_data = np.zeros_like(T_a_data)
@@ -195,7 +195,7 @@ def read_input_meteorology(
         "Roadwetness", header_text, print_results, exact_match=False
     )
     if col_idx != -1:
-        road_wetness_obs_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        road_wetness_obs_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.road_wetness_obs_available = 1
 
         # Check if road wetness is in mm - check the cleaned header since we already found it
@@ -213,7 +213,7 @@ def read_input_meteorology(
     col_idx = find_column_index("Roadsurfacetemperature", header_text, print_results)
     if col_idx != -1:
         road_temperature_obs_data = (
-            meteorology_df.iloc[:, col_idx].apply(safe_float).values
+            meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         )
         loaded_meteo.road_temperature_obs_available = 1
     else:
@@ -223,7 +223,7 @@ def read_input_meteorology(
     # Read Pressure (optional)
     col_idx = find_column_index("Pressure", header_text, print_results)
     if col_idx != -1:
-        Pressure_a_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        Pressure_a_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.pressure_obs_available = 1
     else:
         Pressure_a_data = np.full(n_meteo, pressure_default)
@@ -232,7 +232,7 @@ def read_input_meteorology(
     # Read T subsurface (optional) - search for cleaned header
     col_idx = find_column_index("Tsubsurface", header_text, print_results)
     if col_idx != -1:
-        T_sub_data = meteorology_df.iloc[:, col_idx].apply(safe_float).values
+        T_sub_data = meteorology_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         loaded_meteo.T_sub_available = 1
     else:
         T_sub_data = np.full_like(T_a_data, nodata)
@@ -285,6 +285,16 @@ def read_input_meteorology(
         if loaded_meteo.T_sub_available:
             T_sub_data, _ = forward_fill_missing(T_sub_data, nodata)
 
+    # Dewpoint optional: if provided, check and forward fill; if entirely missing but RH exists, compute later
+    if loaded_meteo.T_dewpoint_available:
+        T_dewpoint_data, loaded_meteo.T_dewpoint_available, _ = (
+            check_data_availability(
+                T_dewpoint_data, loaded_meteo.T_dewpoint_available, nodata
+            )
+        )
+        if loaded_meteo.T_dewpoint_available:
+            T_dewpoint_data, _ = forward_fill_missing(T_dewpoint_data, nodata)
+
     # Check data availability for optional fields
     if loaded_meteo.short_rad_in_available:
         (
@@ -294,6 +304,8 @@ def read_input_meteorology(
         ) = check_data_availability(
             short_rad_in_data, loaded_meteo.short_rad_in_available, nodata
         )
+        if loaded_meteo.short_rad_in_available:
+            short_rad_in_data, _ = forward_fill_missing(short_rad_in_data, nodata)
 
     if loaded_meteo.long_rad_in_available:
         (
@@ -303,6 +315,8 @@ def read_input_meteorology(
         ) = check_data_availability(
             long_rad_in_data, loaded_meteo.long_rad_in_available, nodata
         )
+        if loaded_meteo.long_rad_in_available:
+            long_rad_in_data, _ = forward_fill_missing(long_rad_in_data, nodata)
 
     if loaded_meteo.cloud_cover_available:
         (
@@ -312,6 +326,8 @@ def read_input_meteorology(
         ) = check_data_availability(
             cloud_cover_data, loaded_meteo.cloud_cover_available, nodata
         )
+        if loaded_meteo.cloud_cover_available:
+            cloud_cover_data, _ = forward_fill_missing(cloud_cover_data, nodata)
 
     if loaded_meteo.road_wetness_obs_available:
         (
@@ -321,6 +337,10 @@ def read_input_meteorology(
         ) = check_data_availability(
             road_wetness_obs_data, loaded_meteo.road_wetness_obs_available, nodata
         )
+        if loaded_meteo.road_wetness_obs_available:
+            road_wetness_obs_data, _ = forward_fill_missing(
+                road_wetness_obs_data, nodata
+            )
 
     if loaded_meteo.road_temperature_obs_available:
         (
@@ -332,6 +352,10 @@ def read_input_meteorology(
             loaded_meteo.road_temperature_obs_available,
             nodata,
         )
+        if loaded_meteo.road_temperature_obs_available:
+            road_temperature_obs_data, _ = forward_fill_missing(
+                road_temperature_obs_data, nodata
+            )
 
     if loaded_meteo.pressure_obs_available:
         (
@@ -341,6 +365,8 @@ def read_input_meteorology(
         ) = check_data_availability(
             Pressure_a_data, loaded_meteo.pressure_obs_available, nodata
         )
+        if loaded_meteo.pressure_obs_available:
+            Pressure_a_data, _ = forward_fill_missing(Pressure_a_data, nodata)
 
     # If pressure is all nodata, use default
     if not loaded_meteo.pressure_obs_available:

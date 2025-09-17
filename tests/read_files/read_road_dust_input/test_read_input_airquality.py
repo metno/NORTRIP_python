@@ -155,7 +155,7 @@ def test_read_input_airquality_nan_handling():
     test_data = [
         ["PM10_obs", "PM10_background", "PM25_obs", "PM25_background", "NOX_obs", "NOX_background", "NOX_emis", "EP_emis"],
         ["25.5", "15.0", "18.2", "12.0", "45.0", "25.0", "0.8", "0.6"],
-        ["NaN", "16.5", "22.8", "NaN", "52.3", "28.1", "NaN", "0.7"],
+        ["NAN", "NaN", "22.8", "NaN", "52.3", "28.1", "NaN", "0.7"],
         ["28.7", "14.8", "20.5", "11.8", "48.9", "26.5", "0.85", "NaN"],
     ]
     # fmt: on
@@ -175,13 +175,13 @@ def test_read_input_airquality_nan_handling():
     # Check that NaN values are converted to 0.0 by safe_float, then we don't have special logic for 0.0 here
     # The "NaN" string gets converted to 0.0 by safe_float, not to nodata
     assert (
-        result.PM_obs[constants.pm_10, 1] == 0.0
+        result.PM_obs[constants.pm_10, 1] == -99.0
     )  # Was "NaN" string, converted to 0.0
     assert (
-        result.PM_background[constants.pm_25, 1] == 0.0
+        result.PM_background[constants.pm_25, 1] == -99.0
     )  # Was "NaN" string, converted to 0.0
-    assert result.NOX_emis[1] == 0.0  # Was "NaN" string, converted to 0.0
-    assert result.EP_emis[2] == 0.0  # Was "NaN" string, converted to 0.0
+    assert result.NOX_emis[1] == -99.0  # Was "NaN" string, converted to 0.0
+    assert result.EP_emis[2] == -99.0  # Was "NaN" string, converted to 0.0
 
     # Check that valid values are preserved
     assert result.PM_obs[constants.pm_10, 0] == 25.5
@@ -435,8 +435,8 @@ def test_read_input_airquality_salt_observations():
     assert result.Salt_obs[constants.na, 0] == 2.1
     assert result.Salt_obs[constants.na, 1] == 2.5
     assert (
-        result.Salt_obs[constants.na, 2] == 0.0
-    )  # "NaN" string converted to 0.0 by safe_float
+        result.Salt_obs[constants.na, 2] == -99.0
+    )  # "NaN" string converted to -99.0 by safe_float
 
 
 def test_read_input_airquality_emission_availability():

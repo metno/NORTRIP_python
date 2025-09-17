@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 
 def create_arg_parser() -> argparse.ArgumentParser:
@@ -19,12 +20,31 @@ def create_arg_parser() -> argparse.ArgumentParser:
         - "normal" -> enable all plots except temperature and moisture
         - "temperature" -> enable temperature and moisture plots
         - 14-character bitstring like "11110000000010"
-        - Comma-separated 0/1 list like "1,1,1,1,1,0,0,0,0,0,0,0,1,0"
         """
 
         text = value.strip().lower()
         num_flags = 14
 
+        if text == "list":
+            print("Available plots:")
+            print("  1: Traffic")
+            print("  2: Meteorology")
+            print("  3: Emissions and mass balance")
+            print("  4: Road wetness")
+            print("  5: Other factors")
+            print("  6: Energy and moisture balance")
+            print("  7: Concentrations")
+            print("  8: AE")
+            print(" 11: Scatter/QQ")
+            print(" 13: Summary")
+            print(" 14: Scatter temperature and moisture")
+            print("\nUse --plot with one of:")
+            print("  'all' - enable all plots")
+            print("  'none' - disable all plots")
+            print("  'normal' - enable plots 1-7,11,13 (default)")
+            print("  'temperature' - enable plots 2,4,6,13,14")
+            print("  Or a 14-digit binary string (e.g., '11110000000010')")
+            sys.exit(0)
         if text == "all":
             return [1] * num_flags
         if text == "none":
@@ -53,11 +73,7 @@ def create_arg_parser() -> argparse.ArgumentParser:
             )
         return path_value
 
-    parser.add_argument(
-        "paths",
-        type=validate_xlsx_path,
-        help="Relative or absolute path to an .xlsx file containing the model file paths. (Eg. model_paths/model_paths.xlsx)",
-    )
+    
     parser.add_argument(
         "-t",
         "--text",
@@ -82,17 +98,28 @@ def create_arg_parser() -> argparse.ArgumentParser:
         action="store_false",
         help="Disables logging.",
     )
-
+    parser.add_argument(
+        "paths",
+        type=validate_xlsx_path,
+        help="Relative or absolute path to an .xlsx file containing the model file paths. (Eg. model_paths/model_paths.xlsx)",
+    )
     parser.add_argument(
         "-pl",
         "--plot",
         dest="plot",
         type=parse_plot_figure_arg,
         default=parse_plot_figure_arg("normal"),
-        metavar="SPEC",
-        help=(
-            "Which plots to generate. One of: 'all', 'none', 'normal' (default), 'temperature', a 14-digit 0/1 bitstring. (eg. '11110000000010')"
-        ),
+        metavar="<plot type>",
+        help="""
+            Which plots to generate. One of:
+            \n   'all', 
+            \n   'none', 
+            \n   'normal' (default), 
+            \n   'temperature', 
+            \n   or a 14-digit 0/1 bitstring. (eg. '11110000000010')
+            \nOr 'list' to see available plots.
+        """,
     )
+
 
     return parser

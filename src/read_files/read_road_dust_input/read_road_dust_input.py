@@ -129,6 +129,7 @@ def read_road_dust_input(
         traffic_data.hour,
         traffic_data.minute,
         print_results,
+        nodata=metadata_data.nodata,
     )
 
     # Calculate N_good_data from traffic data for emission data filling

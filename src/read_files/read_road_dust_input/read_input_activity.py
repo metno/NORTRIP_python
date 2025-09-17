@@ -16,6 +16,7 @@ def read_input_activity(
     traffic_hour: np.ndarray | None = None,
     traffic_minute: np.ndarray | None = None,
     print_results: bool = False,
+    nodata: float = -99.0,
 ) -> input_activity:
     """
     Read activity input data from a pandas DataFrame.
@@ -80,7 +81,7 @@ def read_input_activity(
     col_idx = find_column_index("Minute", header_text, print_results)
     if col_idx != -1:
         loaded_activity.minute = (
-            activity_df.iloc[:, col_idx].apply(safe_float).values.astype(int)
+            activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values.astype(int)
         )
     else:
         loaded_activity.minute = np.zeros_like(loaded_activity.year)
@@ -103,7 +104,7 @@ def read_input_activity(
     # Read M_sanding (optional)
     col_idx = find_column_index("M_sanding", header_text, print_results)
     if col_idx != -1:
-        M_sanding = activity_df.iloc[:, col_idx].apply(safe_float).values
+        M_sanding = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
     else:
         if print_results:
             logger.info("M_sanding column not found - using zeros")
@@ -111,7 +112,7 @@ def read_input_activity(
     # Read primary salt (na) - always first salt type
     col_idx = find_column_index("M_salting(na)", header_text, print_results)
     if col_idx != -1:
-        M_salting[0, :] = activity_df.iloc[:, col_idx].apply(safe_float).values
+        M_salting[0, :] = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
     else:
         if print_results:
             logger.info("M_salting(na) column not found - using zeros")
@@ -124,7 +125,7 @@ def read_input_activity(
     # Try mg first
     col_idx = find_column_index("M_salting(mg)", header_text, print_results)
     if col_idx != -1:
-        M_salting[1, :] = activity_df.iloc[:, col_idx].apply(safe_float).values
+        M_salting[1, :] = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         second_salt_type = constants.mg
         second_salt_available = 1
         salt2_str = "mg"
@@ -132,7 +133,7 @@ def read_input_activity(
         # Try cma if mg not available
         col_idx = find_column_index("M_salting(cma)", header_text, print_results)
         if col_idx != -1:
-            M_salting[1, :] = activity_df.iloc[:, col_idx].apply(safe_float).values
+            M_salting[1, :] = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
             second_salt_type = constants.cma
             second_salt_available = 1
             salt2_str = "cma"
@@ -140,7 +141,7 @@ def read_input_activity(
             # Try ca if neither mg nor cma available
             col_idx = find_column_index("M_salting(ca)", header_text, print_results)
             if col_idx != -1:
-                M_salting[1, :] = activity_df.iloc[:, col_idx].apply(safe_float).values
+                M_salting[1, :] = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
                 second_salt_type = constants.ca
                 second_salt_available = 1
                 salt2_str = "ca"
@@ -155,7 +156,7 @@ def read_input_activity(
     col_idx = find_column_index("Wetting", header_text, print_results)
     g_road_wetting_available = 0
     if col_idx != -1:
-        g_road_wetting = activity_df.iloc[:, col_idx].apply(safe_float).values
+        g_road_wetting = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
         g_road_wetting_available = 1
     else:
         if print_results:
@@ -164,7 +165,7 @@ def read_input_activity(
     # Read Ploughing_road (required for MATLAB compatibility)
     col_idx = find_column_index("Ploughing_road", header_text, print_results)
     if col_idx != -1:
-        t_ploughing = activity_df.iloc[:, col_idx].apply(safe_float).values
+        t_ploughing = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
     else:
         if print_results:
             logger.warning("Ploughing_road column not found - using zeros")
@@ -172,7 +173,7 @@ def read_input_activity(
     # Read Cleaning_road (required for MATLAB compatibility)
     col_idx = find_column_index("Cleaning_road", header_text, print_results)
     if col_idx != -1:
-        t_cleaning = activity_df.iloc[:, col_idx].apply(safe_float).values
+        t_cleaning = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
     else:
         if print_results:
             logger.warning("Cleaning_road column not found - using zeros")
@@ -180,7 +181,7 @@ def read_input_activity(
     # Read Fugitive (optional)
     col_idx = find_column_index("Fugitive", header_text, print_results)
     if col_idx != -1:
-        M_fugitive = activity_df.iloc[:, col_idx].apply(safe_float).values
+        M_fugitive = activity_df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
     else:
         if print_results:
             logger.info("Fugitive column not found - using zeros")
