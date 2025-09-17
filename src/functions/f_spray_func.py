@@ -4,7 +4,7 @@ def f_spray_func(
     V_ref_spray: float,
     V_thresh_spray: float,
     a_spray: float,
-    water_spray_flag: bool,
+    water_spray_flag: int,
 ) -> float:
     """
     Calculate spray factor for water spray from vehicles.

@@ -1,5 +1,5 @@
 from .energy_correction_func import energy_correction_func
-
+import numpy as np
 
 def e_diff_func(
     T_obs: float,
@@ -17,8 +17,8 @@ def e_diff_func(
     L: float,
     G_freeze: float,
     G_melt: float,
-    sub_surf_param: list,
-    use_subsurface_flag: bool,
+    sub_surf_param: np.ndarray,
+    use_subsurface_flag: int,
 ) -> tuple[float, float, float]:
     """
     Calculate energy difference for surface energy balance.

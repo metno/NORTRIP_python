@@ -7,7 +7,7 @@ import numpy as np
 import logging
 
 from initialise import time_config, model_variables
-from input_classes import converted_data, input_metadata, input_airquality
+from input_classes import input_metadata, input_airquality
 from config_classes import model_parameters
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 def road_dust_dispersion(
     time_config: time_config,
-    converted_data: converted_data,
     model_variables: model_variables,
     model_parameters: model_parameters,
     metadata: input_metadata,
@@ -31,7 +30,6 @@ def road_dust_dispersion(
 
     Args:
         time_config: Time configuration with min_time, max_time, dt, etc.
-        converted_data: Consolidated input data arrays
         model_variables: Model variables containing f_q array
         model_parameters: Model parameters including conc_min and emis_min
         metadata: Metadata including nodata value

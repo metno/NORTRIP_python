@@ -6,17 +6,17 @@ import pandas as pd
 
 import constants
 from functions.average_data_func import average_data_func
-from initialise import time_config as time_config_cls
-from initialise.road_dust_initialise_variables import model_variables as model_vars_cls
+from initialise import time_config
+from initialise.road_dust_initialise_variables import model_variables
 from input_classes import (
-    converted_data as converted_data_cls,
-    input_metadata as input_metadata_cls,
-    input_airquality as input_airquality_cls,
-    input_activity as input_activity_cls,
+    converted_data,
+    input_metadata,
+    input_airquality,
+    input_activity
 )
 from config_classes import (
-    model_parameters as model_parameters_cls,
-    model_flags as model_flags_cls,
+    model_parameters,
+    model_flags,
 )
 
 
@@ -34,14 +34,14 @@ def _avg(
 
 def build_results_dataframe(
     *,
-    time_config: time_config_cls,
-    converted_data: converted_data_cls,
-    metadata: input_metadata_cls,
-    airquality_data: input_airquality_cls,
-    model_parameters: model_parameters_cls,
-    model_flags: model_flags_cls,
-    model_variables: model_vars_cls,
-    input_activity: input_activity_cls,
+    time_config: time_config,
+    converted_data: converted_data,
+    metadata: input_metadata,
+    airquality_data: input_airquality,
+    model_parameters: model_parameters,
+    model_flags: model_flags,
+    model_variables: model_variables,
+    input_activity: input_activity,
     av: List[int] | None = None,
 ) -> pd.DataFrame:
     """

@@ -290,7 +290,6 @@ def main():
         else:
             road_dust_dispersion(
                 time_config=time_config,
-                converted_data=converted_data,
                 model_variables=model_variables,
                 model_parameters=model_parameters,
                 metadata=metadata_input,
