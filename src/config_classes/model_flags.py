@@ -33,12 +33,19 @@ class model_flags:
     auto_ploughing_flag: int = 0
     auto_cleaning_flag: int = 0
     use_stability_flag: int = 1
-    use_salting_data_1_flag: int = 1
-    use_salting_data_2_flag: int = 1
-    use_sanding_data_flag: int = 0
-    use_ploughing_data_flag: int = 0
-    use_cleaning_data_flag: int = 0
-    use_wetting_data_flag: int = 0
+    #These flags are scaling factors so need to be floats
+    # use_salting_data_1_flag: int = 1
+    # use_salting_data_2_flag: int = 1
+    # use_sanding_data_flag: int = 0
+    # use_ploughing_data_flag: int = 0
+    # use_cleaning_data_flag: int = 0
+    # use_wetting_data_flag: int = 0
+    use_salting_data_1_flag: float = 1.
+    use_salting_data_2_flag: float = 1.
+    use_sanding_data_flag: float = 0.
+    use_ploughing_data_flag: float = 0.
+    use_cleaning_data_flag: float = 0.
+    use_wetting_data_flag: float = 0.
     water_spray_flag: int = 0
     drainage_type_flag: int = 2
     surface_humidity_flag: int = 1

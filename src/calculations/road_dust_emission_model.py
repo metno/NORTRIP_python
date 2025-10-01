@@ -650,6 +650,7 @@ def road_dust_emission_model(
 
     if model_flags.drainage_type_flag == 1 or model_flags.drainage_type_flag == 3:
         snow_limit = 1.5  # snow_dust_drainage_retainment_limit equivalent
+        snow_limit = model_parameters.snow_dust_drainage_retainment_limit #Replaced with this
         if (
             model_variables.g_road_data[constants.snow_index, ti, tr, ro] < snow_limit
             and model_flags.dust_drainage_flag > 0
@@ -802,6 +803,7 @@ def road_dust_emission_model(
 
     if model_flags.drainage_type_flag == 2 or model_flags.drainage_type_flag == 3:
         g_road_drainable_min = 0.1  # g_road_drainable_min equivalent
+        g_road_drainable_min = model_parameters.g_road_drainable_min
         drain_factor = (
             model_variables.g_road_balance_data[
                 constants.water_index, constants.S_drainage_index, ti, tr, ro

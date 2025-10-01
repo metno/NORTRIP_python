@@ -28,7 +28,7 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
         new_value = find_float_or_default(
             field_name, header_col, data_col, getattr(loaded_flags, field_name)
         )
-        setattr(loaded_flags, field_name, int(new_value))
+        setattr(loaded_flags, field_name, new_value)
         loaded_count += 1
 
     logger.info(f"Successfully loaded {loaded_count} model flags")

@@ -54,7 +54,7 @@ def read_input_metadata(
         ("Receptor height for ospm", "RecHeight_ospm"),
         ("f_turb factor for ospm", "f_turb_ospm"),
     ]
-
+    
     loaded_count = 0
 
     # Set all simple fields using dataclass default as fallback

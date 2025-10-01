@@ -132,7 +132,7 @@ def calc_radiation(
                     model_variables.road_meteo_data[
                         constants.short_rad_net_index, ti, tr, ro
                     ] = short_rad_net_temp
-
+               
             # Calculate clear sky short radiation
             datenum_value = (
                 converted_data.date_data[constants.datenum_index, ti, 0] + dt_day_sw
@@ -209,6 +209,7 @@ def calc_radiation(
                 converted_data.meteo_data[constants.cloud_cover_index, ti, ro] = (
                     cloud_cover_default
                 )
+            
 
         # Calculate incoming long wave radiation
         if not long_rad_in_available:

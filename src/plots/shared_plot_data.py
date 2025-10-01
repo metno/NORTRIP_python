@@ -54,10 +54,15 @@ class shared_plot_data:
     use_wetting_data_flag: int
 
     # Plot gating flags (from model flags)
-    use_salting_data_1_flag: int
-    use_salting_data_2_flag: int
-    use_sanding_data_flag: int
-    use_cleaning_data_flag: int
+    # These are for scaling so need to be floats
+    # use_salting_data_1_flag: int
+    # use_salting_data_2_flag: int
+    # use_sanding_data_flag: int
+    # use_cleaning_data_flag: int
+    use_salting_data_1_flag: float
+    use_salting_data_2_flag: float
+    use_sanding_data_flag: float
+    use_cleaning_data_flag: float
 
     # Derived course-fraction (present only if requested)
     pm_course_derived: bool
