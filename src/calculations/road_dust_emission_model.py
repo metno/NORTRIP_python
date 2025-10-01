@@ -211,11 +211,8 @@ def road_dust_emission_model(
         f_abrasion_temp[:] = 0.0
         WR_temp = 0.0
 
-        for s in range(constants.num_source_all):
-            if (
-                s < len(model_parameters.p_0_abrasion)
-                and model_parameters.p_0_abrasion[s] > 0
-            ):
+        for s in range(constants.num_source):
+            if model_parameters.p_0_abrasion[s] > 0:
                 for t in range(constants.num_tyre):
                     for v in range(constants.num_veh):
                         snow_ice_sum = np.sum(
@@ -291,11 +288,8 @@ def road_dust_emission_model(
     ] = 0.0
 
     if model_flags.crushing_flag:
-        for s in range(constants.num_source_all):
-            if (
-                s < len(model_parameters.p_0_crushing)
-                and model_parameters.p_0_crushing[s] > 0
-            ):
+        for s in range(constants.num_source):
+            if model_parameters.p_0_crushing[s] > 0:
                 for t in range(constants.num_tyre):
                     for v in range(constants.num_veh):
                         snow_ice_sum = np.sum(
@@ -493,12 +487,8 @@ def road_dust_emission_model(
     R_suspension = np.zeros((constants.num_source_all, constants.num_size))
     R_suspension_array = np.zeros(constants.num_size)
 
-    for s in range(constants.num_source_all):
+    for s in range(constants.num_source):
         R_suspension[s, :] = 0.0
-
-        # Skip if source index is beyond the parameter arrays
-        if s >= len(model_parameters.h_0_sus):
-            continue
 
         # Check if dissolved ratio should be used
         not_dissolved_ratio_temp = 1.0
@@ -556,11 +546,7 @@ def road_dust_emission_model(
     # --------------------------------------------------------------------------
     R_windblown = np.zeros((constants.num_source_all, constants.num_size))
 
-    for s in range(constants.num_source_all):
-        # Skip if source index is beyond the arrays
-        if s >= constants.num_source:
-            continue
-
+    for s in range(constants.num_source):
         R_windblown[s, constants.pm_sus] = (
             r_0_wind_func(
                 converted_data.meteo_data[constants.FF_index, ti, ro],
@@ -591,11 +577,7 @@ def road_dust_emission_model(
         np.sum(model_variables.g_road_data[: constants.num_moisture, ti, tr, ro]) > 0
         and model_flags.dust_spray_flag
     ):
-        for s in range(constants.num_source_all):
-            # Skip if source index is beyond the parameter arrays
-            if s >= model_parameters.h_eff.shape[1]:
-                continue
-
+        for s in range(constants.num_source):
             if s == constants.salt_index[0] and use_dissolved_ratio:
                 dissolved_ratio_temp = model_variables.road_salt_data[
                     constants.dissolved_ratio_index, 0, ti, tr, ro
@@ -649,17 +631,12 @@ def road_dust_emission_model(
     dissolved_ratio_temp = 1.0
 
     if model_flags.drainage_type_flag == 1 or model_flags.drainage_type_flag == 3:
-        snow_limit = 1.5  # snow_dust_drainage_retainment_limit equivalent
-        snow_limit = model_parameters.snow_dust_drainage_retainment_limit #Replaced with this
+        snow_limit = model_parameters.snow_dust_drainage_retainment_limit
         if (
             model_variables.g_road_data[constants.snow_index, ti, tr, ro] < snow_limit
             and model_flags.dust_drainage_flag > 0
         ):
-            for s in range(constants.num_source_all):
-                # Skip if source index is beyond the parameter arrays
-                if s >= model_parameters.h_eff.shape[1]:
-                    continue
-
+            for s in range(constants.num_source):
                 if s == constants.salt_index[0] and use_dissolved_ratio:
                     dissolved_ratio_temp = model_variables.road_salt_data[
                         constants.dissolved_ratio_index, 0, ti, tr, ro
@@ -692,11 +669,7 @@ def road_dust_emission_model(
     # --------------------------------------------------------------------------
     R_cleaning = np.zeros((constants.num_source_all, constants.num_size))
 
-    for s in range(constants.num_source_all):
-        # Skip if source index is beyond the parameter arrays
-        if s >= model_parameters.h_eff.shape[1]:
-            continue
-
+    for s in range(constants.num_source):
         R_cleaning[s, :] = (
             -np.log(
                 1
@@ -719,11 +692,7 @@ def road_dust_emission_model(
     # --------------------------------------------------------------------------
     R_ploughing = np.zeros((constants.num_source_all, constants.num_size))
 
-    for s in range(constants.num_source_all):
-        # Skip if source index is beyond the parameter arrays
-        if s >= model_parameters.h_eff.shape[1]:
-            continue
-
+    for s in range(constants.num_source):
         R_ploughing[s, :] = (
             -np.log(
                 1
@@ -778,7 +747,7 @@ def road_dust_emission_model(
     # --------------------------------------------------------------------------
     # Calculate mass balance for the road
     # --------------------------------------------------------------------------
-    for s in range(constants.num_source_all):
+    for s in range(constants.num_source):
         for x in range(constants.num_size):
             model_variables.M_road_bin_data[s, x, ti, tr, ro] = mass_balance_func(
                 M_road_bin_0_data[s, x],
@@ -818,11 +787,7 @@ def road_dust_emission_model(
             )
         )
 
-        for s in range(constants.num_source_all):
-            # Skip if source index is beyond the parameter arrays
-            if s >= model_parameters.h_eff.shape[1]:
-                continue
-
+        for s in range(constants.num_source):
             if s == constants.salt_index[0] and use_dissolved_ratio:
                 dissolved_ratio_temp = model_variables.road_salt_data[
                     constants.dissolved_ratio_index, 0, ti, tr, ro
@@ -877,7 +842,7 @@ def road_dust_emission_model(
     # --------------------------------------------------------------------------
     # Remove any negative values in mass (round off errors)
     # --------------------------------------------------------------------------
-    for s in range(constants.num_source_all):
+    for s in range(constants.num_source):
         for x in range(constants.num_size):
             model_variables.M_road_bin_data[s, x, ti, tr, ro] = max(
                 0.0, model_variables.M_road_bin_data[s, x, ti, tr, ro]

@@ -21,7 +21,9 @@ class model_variables:
     """
 
     # Forecast missing data array
-    road_temperature_forecast_missing: list = field(default_factory=list)
+    road_temperature_forecast_missing: np.ndarray = field(
+        default_factory=lambda: np.array([])
+    )
 
     # Main model data arrays
     M_road_data: np.ndarray = field(default_factory=lambda: np.array([]))

@@ -100,7 +100,9 @@ def main_nortrip_loop(
             if model_flags.forecast_hour == 0:
                 forecast_index = 0
             else:
-                forecast_index = max(0, round(model_flags.forecast_hour / time_config.dt - 1))
+                forecast_index = max(
+                    0, round(model_flags.forecast_hour / time_config.dt - 1)
+                )
 
             # Print the date
             if converted_data.date_data[constants.hour_index, tf, ro] == 1:
@@ -198,7 +200,8 @@ def main_nortrip_loop(
 
                 # Linear extrapolation. Set use_observed_temperature_init_flag=0
                 elif (
-                    model_flags.forecast_type_flag == 4 and tf - 1 > time_config.min_time
+                    model_flags.forecast_type_flag == 4
+                    and tf - 1 > time_config.min_time
                 ):
                     # Get datenum values for interpolation
                     x_dates = converted_data.date_data[
@@ -260,5 +263,3 @@ def main_nortrip_loop(
         )
 
     return model_variables
-
-

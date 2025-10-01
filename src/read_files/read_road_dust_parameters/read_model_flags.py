@@ -22,19 +22,24 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
     loaded_flags = model_flags()
     header_col = flags_df.iloc[:, 0]
     data_col = flags_df.iloc[:, 1]
-    loaded_count = 0
 
     for field_name in loaded_flags.__dataclass_fields__:
+        default_value = getattr(loaded_flags, field_name)
         new_value = find_float_or_default(
-            field_name, header_col, data_col, getattr(loaded_flags, field_name)
+            field_name, header_col, data_col, default_value
         )
-        setattr(loaded_flags, field_name, new_value)
-        loaded_count += 1
+        # Cast to int if defined default is int
+        if type(default_value) is int:
+            setattr(loaded_flags, field_name, int(new_value))
+        else:
+            setattr(loaded_flags, field_name, new_value)
 
-    logger.info(f"Successfully loaded {loaded_count} model flags")
+    logger.info("Successfully loaded model flags")
 
     if loaded_flags.use_multiple_save_dates_flag != 0:
-        print("The 'use multiple save dates' feature is no longer supported, remove the flag or set it to 0")
+        print(
+            "The 'use multiple save dates' feature is no longer supported, remove the flag or set it to 0"
+        )
         exit()
 
     return loaded_flags
