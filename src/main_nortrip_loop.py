@@ -13,6 +13,17 @@ from calculations import (
     road_dust_concentrations,
     road_dust_convert_variables,
 )
+from config_classes import model_flags, model_parameters, model_activities
+from initialise import time_config
+from input_classes import (
+    converted_data,
+    input_metadata,
+    input_initial,
+    input_traffic,
+    input_activity,
+    input_airquality,
+    input_meteorology,
+)
 from ospm import OSPM_Main
 from initialise import road_dust_initialise_variables
 
@@ -22,17 +33,17 @@ logger = logging.getLogger(__name__)
 
 def main_nortrip_loop(
     *,
-    time_config,
-    converted_data,
-    metadata_input,
-    initial_input,
-    model_flags,
-    model_parameters,
-    meteorology_input,
-    traffic_input,
-    activity_input,
-    airquality_input,
-    model_activities,
+    time_config: time_config,
+    converted_data: converted_data,
+    metadata_input: input_metadata,
+    initial_input: input_initial,
+    model_flags: model_flags,
+    model_parameters: model_parameters,
+    meteorology_input: input_meteorology,
+    traffic_input: input_traffic,
+    activity_input: input_activity,
+    airquality_input: input_airquality,
+    model_activities: model_activities,
 ):
     """
     Execute the core NORTRIP model loop over roads, time, and (future) tracks.

@@ -46,11 +46,12 @@ def main():
     print(f"Print results to terminal: {print_results}")
     print(f"Run fortran model: {use_fortran}")
 
-
     paths = read_road_dust_paths(read_as_text=read_as_text, paths_xlsx=args.paths)
 
-    model_parameters, model_flags, model_activities, parameter_sheets = read_road_dust_parameters(
-        paths.path_filename_inputparam, read_as_text=read_as_text
+    model_parameters, model_flags, model_activities, parameter_sheets = (
+        read_road_dust_parameters(
+            paths.path_filename_inputparam, read_as_text=read_as_text
+        )
     )
 
     input_data = read_road_dust_input(
@@ -79,7 +80,6 @@ def main():
         return
 
     # Initialize model variables
-    
 
     if use_fortran:
         NORTRIP_fortran_control()
@@ -152,6 +152,7 @@ def main():
 
     logger.info("End of NORTRIP_Control")
     input("Press Enter to close...")
+
 
 if __name__ == "__main__":
     main()
