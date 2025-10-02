@@ -48,6 +48,23 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
+        },
+        {
+            "name": "Debug NORTRIP (test)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "NORTRIP_Control",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "args": [
+                "C:/WORK/NORTRIP_python/model_paths/model_paths_and_files.xlsx",
+                "--plot",
+                "none",
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
         }
     ]
 }

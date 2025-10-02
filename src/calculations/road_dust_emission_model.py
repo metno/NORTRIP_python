@@ -509,12 +509,12 @@ def road_dust_emission_model(
 
         for t in range(constants.num_tyre):
             for v in range(constants.num_veh):
-                f_0_suspension_temp = model_parameters.h_0_sus[s, :] * f_susroad_func(
+                #f_0_suspension_temp = model_parameters.h_0_sus[s, :] * f_susroad_func(
+                f_0_suspension_temp = metadata.h_sus * f_susroad_func(
                     model_parameters.f_0_suspension[s, :, t, v],
                     converted_data.traffic_data[constants.V_veh_index[v], ti, ro],
                     model_parameters.a_sus,
                 )
-
                 R_suspension_array[:] = (
                     converted_data.traffic_data[constants.N_t_v_index[(t, v)], ti, ro]
                     / metadata.n_lanes
