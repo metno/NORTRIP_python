@@ -42,7 +42,7 @@ def main():
     print(f"Starting NORTRIP_python_v{version('nortrip-python')}...")
     print("-" * 33)
 
-    print(f"Read as inputs as text: {read_as_text}")
+    print(f"Read inputs as text: {read_as_text}")
     print(f"Print results to terminal: {print_results}")
     print(f"Run fortran model: {use_fortran}")
 

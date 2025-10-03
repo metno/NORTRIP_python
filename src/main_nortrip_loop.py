@@ -116,7 +116,7 @@ def main_nortrip_loop(
                 )
 
             # Print the date
-            if converted_data.date_data[constants.hour_index, tf, ro] == 1:
+            if converted_data.date_data[constants.hour_index, tf, ro] == 1 and converted_data.date_data[constants.day_index, tf, ro] == 1:
                 full_date_str = traffic_input.date_str[1, tf]
                 date_str = full_date_str[6:12].strip()
 
