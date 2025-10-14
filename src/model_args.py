@@ -65,21 +65,16 @@ def create_arg_parser() -> argparse.ArgumentParser:
             "Invalid --plot format. Use 'all', 'none', 'normal', 'temperature', or a 14-digit 0/1 bitstring."
         )
 
-    def validate_xlsx_path(path_value: str) -> str:
-        """Ensure provided path points to a .xlsx file (relative or absolute)."""
-        if not isinstance(path_value, str) or not path_value.lower().endswith(".xlsx"):
+    def validate_path_file(path_value: str) -> str:
+        """Ensure provided path points to a .xlsx or .txt file (relative or absolute)."""
+        if not isinstance(path_value, str) or not path_value.lower().endswith(
+            (".xlsx", ".txt")
+        ):
             raise argparse.ArgumentTypeError(
-                "Path must be a relative or absolute path to a .xlsx file"
+                "Path must be a relative or absolute path to a .xlsx or .txt file"
             )
         return path_value
 
-    
-    parser.add_argument(
-        "-t",
-        "--text",
-        action="store_true",
-        help="Read paths as text file instead of Excel.",
-    )
     parser.add_argument(
         "-p",
         "--print",
@@ -100,7 +95,7 @@ def create_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "paths",
-        type=validate_xlsx_path,
+        type=validate_path_file,
         help="Relative or absolute path to an .xlsx file containing the model file paths. (Eg. model_paths/model_paths.xlsx)",
     )
     parser.add_argument(
@@ -120,6 +115,5 @@ def create_arg_parser() -> argparse.ArgumentParser:
             \nOr 'list' to see available plots.
         """,
     )
-
 
     return parser

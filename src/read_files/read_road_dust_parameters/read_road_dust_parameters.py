@@ -6,20 +6,19 @@ import pandas as pd
 import os
 import logging
 from pd_util import read_txt
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
 def read_road_dust_parameters(
     parameter_file_path: str,
-    read_as_text=False,
 ) -> tuple[model_parameters, model_flags, model_activities, dict[str, pd.DataFrame]]:
     """
     Read road dust model parameters, flags, and activities from specified file.
 
     Args:
-        parameter_file_path (str): Path to the xlsx containing model parameters.
-        read_as_text (bool, optional): If True, read the file as text. Will reformat parameter_file_path to text format.
+        parameter_file_path (str): Path to the xlsx or txt containing model parameters.
 
     Returns:
         tuple: A tuple containing:
@@ -29,15 +28,14 @@ def read_road_dust_parameters(
             - all_sheets: A dictionary containing all sheets from the input file or None if read_as_text is True.
     """
 
-    if read_as_text:
+    if parameter_file_path.endswith(".txt"):
         # Extract directory and base filename without extension
         base_dir = os.path.dirname(parameter_file_path)
-        base_name = os.path.splitext(os.path.basename(parameter_file_path))[0]
-        text_dir = os.path.join(base_dir, "text")
+        base_name = Path(parameter_file_path).stem
 
-        parameters_path = os.path.join(text_dir, f"{base_name}_params.txt")
-        flags_path = os.path.join(text_dir, f"{base_name}_flag.txt")
-        activities_path = os.path.join(text_dir, f"{base_name}_activities.txt")
+        parameters_path = os.path.join(base_dir, f"{base_name}_params.txt")
+        flags_path = os.path.join(base_dir, f"{base_name}_flag.txt")
+        activities_path = os.path.join(base_dir, f"{base_name}_activities.txt")
 
         try:
             parameter_df = read_txt(parameters_path)
@@ -50,18 +48,22 @@ def read_road_dust_parameters(
             all_sheets["Activities"] = activities_df
 
         except FileNotFoundError as e:
-            logger.error(f"File not found: {e.filename}")
+            logger.error(f"Parameter file not found: {e.filename}")
             exit(1)
 
-    else:
+    elif parameter_file_path.endswith(".xlsx"):
         try:
             all_sheets = pd.read_excel(parameter_file_path, sheet_name=None)
         except FileNotFoundError:
-            logger.error(f"File not found: {parameter_file_path}")
+            logger.error(f"Parameter file not found: {parameter_file_path}")
             exit(1)
         parameter_df = all_sheets["Parameters"]
         flags_df = all_sheets["Flags"]
         activities_df = all_sheets["Activities"]
+
+    else:
+        logger.error(f"Invalid parameter file type: {parameter_file_path}")
+        exit(1)
 
     parameters = read_model_parameters(parameter_df)  # type: ignore
     flags = read_model_flags(flags_df)  # type: ignore

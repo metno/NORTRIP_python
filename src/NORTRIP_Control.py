@@ -29,36 +29,28 @@ logger = logging.getLogger(__name__)
 
 def main():
     args = create_arg_parser().parse_args()
-    read_as_text = bool(args.text)
     print_results = bool(args.print)
     use_fortran = bool(args.fortran)
     use_logging = bool(args.log)
     plot_figure = args.plot
 
     if not use_logging:
-        logging.disable()
+        logging.disable(25)
 
     print("-" * 33)
     print(f"Starting NORTRIP_python_v{version('nortrip-python')}...")
     print("-" * 33)
 
-    print(f"Read inputs as text: {read_as_text}")
     print(f"Print results to terminal: {print_results}")
     print(f"Run fortran model: {use_fortran}")
 
-    paths = read_road_dust_paths(read_as_text=read_as_text, paths_xlsx=args.paths)
+    paths = read_road_dust_paths(paths_path=args.paths)
 
     model_parameters, model_flags, model_activities, parameter_sheets = (
-        read_road_dust_parameters(
-            paths.path_filename_inputparam, read_as_text=read_as_text
-        )
+        read_road_dust_parameters(paths.path_filename_inputparam)
     )
 
-    input_data = read_road_dust_input(
-        paths.path_filename_inputdata,
-        model_parameters,
-        read_as_text,
-    )
+    input_data = read_road_dust_input(paths.path_filename_inputdata, model_parameters)
 
     activity_input = input_data.activity
     airquality_input = input_data.airquality
@@ -129,8 +121,7 @@ def main():
     time_config.min_time = min_time_original
     time_config.max_time = max_time_original
 
-    save_data = model_flags.save_type_flag in [1, 3, 4]
-    save_as_text = model_flags.save_type_flag == 4
+    save_data = model_flags.save_type_flag in [1, 3]
 
     if save_data:
         save_road_dust_results_average(
@@ -143,7 +134,6 @@ def main():
             model_variables=model_variables,
             input_activity=activity_input,
             av=[model_flags.plot_type_flag],
-            save_as_text=save_as_text,
             paths=paths,
             parameter_sheets=parameter_sheets,
         )

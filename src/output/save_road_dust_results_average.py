@@ -35,7 +35,6 @@ def save_road_dust_results_average(
     model_variables: model_variables,
     input_activity: input_activity,
     av: list[int],
-    save_as_text: bool,
     paths: model_file_paths,
     parameter_sheets: dict[str, pd.DataFrame],
 ):
@@ -62,14 +61,12 @@ def save_road_dust_results_average(
     av_index = av[0] if av else model_flags.plot_type_flag
 
     av_label = constants.av_str[max(0, av_index - 1)]
-    if paths.filename_outputdata == "":
-        paths.filename_outputdata = "missing_filename.xlsx"
     base = os.path.join(paths.path_outputdata, Path(paths.filename_outputdata).stem)
-    if save_as_text:
+    if paths.filename_outputdata.endswith(".txt"):
         out_file = f"{base}_{av_label}.txt"
         logger.info(f"Saving results to {out_file}...")
         df_results.to_csv(out_file, sep="\t", index=False, na_rep="-999")
-    else:
+    elif paths.filename_outputdata.endswith(".xlsx"):
         out_file = f"{base}_{av_label}.xlsx"
         logger.info(f"Saving results to {out_file}...")
         with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
@@ -79,5 +76,10 @@ def save_road_dust_results_average(
                     parameter_sheets[sheet_name].to_excel(
                         writer, index=False, sheet_name=sheet_name
                     )
+    else:
+        logger.error(
+            f"Invalid output data file type: {paths.filename_outputdata}. Must be .txt or .xlsx."
+        )
+        exit(1)
 
     logger.info("Successfully saved results!")

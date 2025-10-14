@@ -11,6 +11,7 @@ import pandas as pd
 import os
 import logging
 from pd_util import read_txt
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,6 @@ logger = logging.getLogger(__name__)
 def read_road_dust_input(
     input_file_path: str,
     model_parameters: model_parameters,
-    read_as_text=False,
 ):
     """
     Read road dust input data from specified file.
@@ -46,19 +46,18 @@ def read_road_dust_input(
     metadata_df = None
     ospm_df = None
 
-    if read_as_text:
+    if input_file_path.endswith(".txt"):
         # Extract directory and base filename without extension
         base_dir = os.path.dirname(input_file_path)
-        base_name = os.path.splitext(os.path.basename(input_file_path))[0]
-        text_dir = os.path.join(base_dir, "text")
+        base_name = Path(input_file_path).stem
 
-        activity_path = os.path.join(text_dir, f"{base_name}_activity.txt")
-        airquality_path = os.path.join(text_dir, f"{base_name}_airquality.txt")
-        meteorology_path = os.path.join(text_dir, f"{base_name}_meteorology.txt")
-        traffic_path = os.path.join(text_dir, f"{base_name}_traffic.txt")
-        initial_path = os.path.join(text_dir, f"{base_name}_initial.txt")
-        metadata_path = os.path.join(text_dir, f"{base_name}_metadata.txt")
-        ospm_path = os.path.join(text_dir, f"{base_name}_ospm.txt")
+        activity_path = os.path.join(base_dir, f"{base_name}_activity.txt")
+        airquality_path = os.path.join(base_dir, f"{base_name}_airquality.txt")
+        meteorology_path = os.path.join(base_dir, f"{base_name}_meteorology.txt")
+        traffic_path = os.path.join(base_dir, f"{base_name}_traffic.txt")
+        initial_path = os.path.join(base_dir, f"{base_name}_initial.txt")
+        metadata_path = os.path.join(base_dir, f"{base_name}_metadata.txt")
+        ospm_path = os.path.join(base_dir, f"{base_name}_ospm.txt")
 
         try:
             activity_df = read_txt(activity_path)
@@ -75,14 +74,14 @@ def read_road_dust_input(
                 ospm_df = None
 
         except FileNotFoundError as e:
-            logger.error(f"File not found: {e.filename}")
+            logger.error(f"Input file not found: {e.filename}")
             exit(1)
 
-    else:
+    elif input_file_path.endswith(".xlsx"):
         try:
             all_sheets = pd.read_excel(input_file_path, sheet_name=None, header=None)
         except FileNotFoundError:
-            logger.error(f"File not found: {input_file_path}")
+            logger.error(f"Input file not found: {input_file_path}")
             exit(1)
 
         try:
@@ -100,6 +99,10 @@ def read_road_dust_input(
             logger.error(f"Sheet not found in file: {input_file_path}")
             exit(1)
 
+    else:
+        logger.error(f"Invalid input file type: {input_file_path}")
+        exit(1)
+
     if (
         metadata_df is None
         or initial_df is None
@@ -112,9 +115,7 @@ def read_road_dust_input(
         exit(1)
 
     metadata_data = read_input_metadata(metadata_df)
-    initial_data = read_input_initial(
-        initial_df, model_parameters, metadata_data
-    )
+    initial_data = read_input_initial(initial_df, model_parameters, metadata_data)
     traffic_data = read_input_traffic(traffic_df, metadata_data.nodata)
     meteorology_data = read_input_meteorology(
         meteorology_df,

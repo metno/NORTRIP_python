@@ -6,16 +6,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def read_road_dust_paths(
-    read_as_text=0, paths_xlsx: str | None = None
-) -> model_file_paths:
+def read_road_dust_paths(paths_path: str) -> model_file_paths:
     """
     Load model paths and filenames from the configured paths file.
 
     Args:
-        read_as_text (int): 0 to read Excel, 1 to read text file equivalent.
-        paths_xlsx (str | None): Optional override for the Excel file that defines
-            model paths (relative or absolute path to a .xlsx file).
+        paths_path (str): Path to the Excel file that defines model paths.
 
     Returns:
         model_file_paths: Dataclass with populated path settings.
@@ -23,19 +19,19 @@ def read_road_dust_paths(
     paths = model_file_paths()
 
     try:
-        if read_as_text == 0:
-            use_file = paths_xlsx or "model_paths/model_paths_and_files.xlsx"
-            logger.info(f"Setting paths from Excel file: {use_file}")
+        if paths_path.endswith(".xlsx"):
+            logger.info(f"Setting paths from Excel file: {paths_path}")
             paths_df = pd.read_excel(
-                use_file,
+                paths_path,
                 sheet_name="Filenames",
                 header=None,
             )
-        else:
+        elif paths_path.endswith(".txt"):
             logger.info("Setting paths from text file")
-            # Convert Excel file to text equivalent
-            txt_filename = "model_paths/text/model_paths_and_files.txt"
-            paths_df = read_txt(txt_filename)
+            paths_df = read_txt(paths_path)
+        else:
+            logger.error(f"Invalid file type: {paths_path}")
+            exit(1)
 
     except FileNotFoundError as e:
         print(f"Error: {e}. The file was not found.")
@@ -47,8 +43,12 @@ def read_road_dust_paths(
     paths.path_inputparam = find_str_or_default(
         "Model input parameter path", header_text, file_text, ""
     )
-    paths.path_inputdata = find_str_or_default("Model input data path", header_text, file_text, "")
-    paths.path_outputdata = find_str_or_default("Model output data path", header_text, file_text, "")
+    paths.path_inputdata = find_str_or_default(
+        "Model input data path", header_text, file_text, ""
+    )
+    paths.path_outputdata = find_str_or_default(
+        "Model output data path", header_text, file_text, ""
+    )
     paths.path_outputfig = find_str_or_default(
         "Model output figures path", header_text, file_text, ""
     )
@@ -64,11 +64,15 @@ def read_road_dust_paths(
     )
 
     paths.path_ospm = find_str_or_default("Model ospm path", header_text, file_text, "")
-    paths.path_fortran = find_str_or_default("Model fortran path", header_text, file_text, "")
+    paths.path_fortran = find_str_or_default(
+        "Model fortran path", header_text, file_text, ""
+    )
     paths.path_fortran_output = find_str_or_default(
         "Model fortran output path", header_text, file_text, ""
     )
-    paths.filename_log = find_str_or_default("Log file name", header_text, file_text, "")
+    paths.filename_log = find_str_or_default(
+        "Log file name", header_text, file_text, ""
+    )
     paths.file_fortran_exe = find_str_or_default(
         "Model fortran executable filename", header_text, file_text, ""
     )

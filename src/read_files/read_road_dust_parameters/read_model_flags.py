@@ -42,4 +42,10 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
         )
         exit()
 
+    if loaded_flags.save_type_flag == 4:
+        logger.error(
+            "Saving data as text is no longer defined using the save_type_flag, change the Model output data filename to .txt instead"
+        )
+        exit(1)
+
     return loaded_flags
