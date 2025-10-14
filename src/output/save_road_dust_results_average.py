@@ -5,6 +5,7 @@ import pandas as pd
 
 from initialise import time_config
 from initialise.road_dust_initialise_variables import model_variables
+from pathlib import Path
 from input_classes import (
     converted_data,
     input_metadata,
@@ -21,6 +22,7 @@ from .results_dataframe import build_results_dataframe
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 def save_road_dust_results_average(
     *,
@@ -54,7 +56,7 @@ def save_road_dust_results_average(
         input_activity=input_activity,
         av=av,
     )
-    
+
     os.makedirs(paths.path_outputdata, exist_ok=True)
 
     av_index = av[0] if av else model_flags.plot_type_flag
@@ -64,12 +66,11 @@ def save_road_dust_results_average(
         paths.filename_outputdata = "missing_filename.xlsx"
     base = os.path.join(paths.path_outputdata, paths.filename_outputdata)
     if save_as_text:
-        out_file = f"{base[:-5]}_{av_label}.txt"
-
+        out_file = f"{Path(base).stem}_{av_label}.txt"
         logger.info(f"Saving results to {out_file}...")
         df_results.to_csv(out_file, sep="\t", index=False, na_rep="-999")
     else:
-        out_file = f"{base[:-5]}_{av_label}.xlsx"
+        out_file = f"{Path(base).stem}_{av_label}.xlsx"
         logger.info(f"Saving results to {out_file}...")
         with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
             df_results.to_excel(writer, index=False, sheet_name="data")
