@@ -34,18 +34,19 @@ def read_model_flags(flags_df: pd.DataFrame) -> model_flags:
         else:
             setattr(loaded_flags, field_name, new_value)
 
-    logger.info("Successfully loaded model flags")
-
     if loaded_flags.use_multiple_save_dates_flag != 0:
-        print(
+        logger.error(
             "The 'use multiple save dates' feature is no longer supported, remove the flag or set it to 0"
         )
-        exit()
+        exit(1)
 
     if loaded_flags.save_type_flag == 4:
         logger.error(
-            "Saving data as text is no longer defined using the save_type_flag, change the Model output data filename to .txt instead"
+            "Saving data as text is no longer defined using the save_type_flag.\n"
+            + "Its now defined by the Model output data filename postfix (either .txt or .xlsx)"
         )
         exit(1)
+
+    logger.info("Successfully loaded model flags")
 
     return loaded_flags

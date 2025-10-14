@@ -9,7 +9,7 @@ from .shared_plot_data import shared_plot_data
 from .helpers import (
     matlab_datenum_to_datetime_array,
     format_time_axis,
-    generate_matlab_style_filename,
+    generate_plot_filename,
 )
 
 
@@ -855,8 +855,10 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         # Mean ADT totals and HDV share
         mean_ADT_li_safe = mean_ADT_li if np.isfinite(mean_ADT_li) else 0.0
         mean_ADT_he_safe = mean_ADT_he if np.isfinite(mean_ADT_he) else 0.0
-        mean_ADT_total_safe = mean_ADT_total if np.isfinite(mean_ADT_total) else (
-            mean_ADT_li_safe + mean_ADT_he_safe
+        mean_ADT_total_safe = (
+            mean_ADT_total
+            if np.isfinite(mean_ADT_total)
+            else (mean_ADT_li_safe + mean_ADT_he_safe)
         )
         hdv_pct = (
             mean_ADT_he_safe / mean_ADT_total_safe * 100.0
@@ -869,7 +871,9 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         mean_speed_avg = float(np.mean(speeds)) if len(speeds) > 0 else float("nan")
 
         # Studded proportions
-        mean_studded_ldv_pct = prop_st_li * 100.0 if np.isfinite(prop_st_li) else float("nan")
+        mean_studded_ldv_pct = (
+            prop_st_li * 100.0 if np.isfinite(prop_st_li) else float("nan")
+        )
 
         # Max studded share for LDV across window
         N_li_series = traffic[constants.N_v_index[li], mask_range]
@@ -888,15 +892,19 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         activity_win = shared.activity_data_ro.astype(float).copy()
         activity_win[activity_win == nodata] = np.nan
         salting_sum = float(
-            np.nansum(
-                activity_win[constants.M_salting_index[0], mask_range]
-            )
+            np.nansum(activity_win[constants.M_salting_index[0], mask_range])
             + np.nansum(activity_win[constants.M_salting_index[1], mask_range])
         )
         salting_total_g_per_km = (
-            salting_sum / shared.b_factor if shared.b_factor not in (0.0, np.nan) else float("nan")
+            salting_sum / shared.b_factor
+            if shared.b_factor not in (0.0, np.nan)
+            else float("nan")
         )
-        salting_total_ton_per_km = salting_total_g_per_km * 1e-6 if np.isfinite(salting_total_g_per_km) else float("nan")
+        salting_total_ton_per_km = (
+            salting_total_g_per_km * 1e-6
+            if np.isfinite(salting_total_g_per_km)
+            else float("nan")
+        )
 
         print("Traffic and activity data")
         print(
@@ -917,15 +925,15 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             f"{'Total precip(mm)':<18}\t{'Frequency precip(%)':<18}\t{'Frequency wet(%)':<18}\t{'Mean dispersion':<18}"
         )
         print(
-            f"{mean_Ta:<18.2f}\t{mean_RH:<18.2f}\t{mean_short_rad:<18.2f}\t{(mean_cloud*100.0):<18.2f}\t"
-            f"{total_precip:<18.2f}\t{(freq_precip*100.0):<18.2f}\t{(prop_wet*100.0):<18.2f}\t{mean_f_conc:<18.3f}"
+            f"{mean_Ta:<18.2f}\t{mean_RH:<18.2f}\t{mean_short_rad:<18.2f}\t{(mean_cloud * 100.0):<18.2f}\t"
+            f"{total_precip:<18.2f}\t{(freq_precip * 100.0):<18.2f}\t{(prop_wet * 100.0):<18.2f}\t{mean_f_conc:<18.3f}"
         )
 
         # 3) Source contribution (ug/m^3)
         print("Source contribution (ug/m^3)")
         print(
             f"{'Observed total':<18}\t{'Model total':<18}\t{'Model road':<18}\t{'Model tyre':<18}\t{'Model brake':<18}\t"
-            f"{'Model sand':<18}\t{'Model salt(na)':<18}\t{'Model salt('+shared.salt2_str+')':<18}\t{'Model exhaust':<18}"
+            f"{'Model sand':<18}\t{'Model salt(na)':<18}\t{'Model salt(' + shared.salt2_str + ')':<18}\t{'Model exhaust':<18}"
         )
         print(
             f"{observed_concentrations:<18.2f}\t{total_concentrations:<18.2f}\t{roadwear_concentrations:<18.2f}\t{tyrewear_concentrations:<18.2f}\t{brakewear_concentrations:<18.2f}\t"
@@ -964,12 +972,12 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
             (y_obs_net_av + y_obs_bg_av)[r_av], (y_mod_net_av + y_obs_bg_av)[r_av]
         )
         nrmse_net = (
-            rmse_net / float(np.nanmean(y_obs_net_av[r_av])) * 100.0 if np.any(r_av) else float("nan")
+            rmse_net / float(np.nanmean(y_obs_net_av[r_av])) * 100.0
+            if np.any(r_av)
+            else float("nan")
         )
         nrmse_bg = (
-            rmse_bg
-            / float(np.nanmean((y_obs_net_av + y_obs_bg_av)[r_av]))
-            * 100.0
+            rmse_bg / float(np.nanmean((y_obs_net_av + y_obs_bg_av)[r_av])) * 100.0
             if np.any(r_av)
             else float("nan")
         )
@@ -1014,13 +1022,13 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         )
 
     if shared.save_plots:
-        plot_file_name = generate_matlab_style_filename(
+        plot_file_name = generate_plot_filename(
             title_str=paths.title_str,
             plot_type_flag=shared.av[0],
             figure_number=13,  # Summary is figure 13
             plot_name="Summary",
             date_num=shared.date_num,
             min_time=shared.i_min,
-            max_time=shared.i_max
+            max_time=shared.i_max,
         )
         plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))

@@ -6,7 +6,11 @@ import constants
 from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
-from .helpers import matlab_datenum_to_datetime_array, format_time_axis, generate_matlab_style_filename
+from .helpers import (
+    matlab_datenum_to_datetime_array,
+    format_time_axis,
+    generate_plot_filename,
+)
 
 
 def plot_concentrations(shared: shared_plot_data, paths: model_file_paths) -> None:
@@ -250,13 +254,13 @@ def plot_concentrations(shared: shared_plot_data, paths: model_file_paths) -> No
 
     plt.tight_layout()
     if shared.save_plots:
-        plot_file_name = generate_matlab_style_filename(
+        plot_file_name = generate_plot_filename(
             title_str=paths.title_str,
             plot_type_flag=shared.av[0],
             figure_number=7,  # Concentrations is figure 7
             plot_name="Concentrations",
             date_num=shared.date_num,
             min_time=shared.i_min,
-            max_time=shared.i_max
+            max_time=shared.i_max,
         )
         plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))

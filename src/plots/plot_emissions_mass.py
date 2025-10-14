@@ -8,7 +8,12 @@ import constants
 from config_classes import model_file_paths
 from functions import average_data_func
 from .shared_plot_data import shared_plot_data
-from .helpers import matlab_datenum_to_datetime_array, format_time_axis, mask_nodata, generate_matlab_style_filename
+from .helpers import (
+    matlab_datenum_to_datetime_array,
+    format_time_axis,
+    mask_nodata,
+    generate_plot_filename,
+)
 
 
 def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> None:
@@ -279,16 +284,17 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     ]
     ax3.legend(handles, legend_text, loc="upper left")
 
-    
     plt.tight_layout()
 
     # ---------------- Optional textual summaries (post-plot prints) ----------------
     if shared.print_result:
         pm_text_print = (
-            "PM10" if x_size == constants.pm_10 else ("PM2.5" if x_size == constants.pm_25 else "PM")
+            "PM10"
+            if x_size == constants.pm_10
+            else ("PM2.5" if x_size == constants.pm_25 else "PM")
         )
         title_str = paths.title_str
-        
+
         av_label = constants.av_str[shared.av[0] - 1]
 
         print(f"{title_str} ({pm_text_print}) {av_label}")
@@ -297,7 +303,9 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
         # Total surface mass budget (g/m^2) over selected period
         # y_* arrays are in g/m^2/hr; integrate by multiplying with dt
         dt = float(shared.dt)
-        sum_P_road_wearsource_print = float(np.nansum(y_wear_retention[mask_range])) * dt
+        sum_P_road_wearsource_print = (
+            float(np.nansum(y_wear_retention[mask_range])) * dt
+        )
         sum_P_road_allother_print = float(np.nansum(y_other_prod[mask_range])) * dt
         sum_S_suspension_print = float(np.nansum(y_susp_sink[mask_range])) * dt
         sum_S_drainage_print = float(np.nansum(y_drain_sink[mask_range])) * dt
@@ -341,87 +349,125 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
         salt_species_index = constants.salt_index[0]
         b_factor_local = float(b_factor)
 
-        sum_salt_application = float(
-            np.nansum(
-                MB_sum[
-                    salt_species_index, constants.pm_all, constants.P_depo_index, mask_range
-                ]
+        sum_salt_application = (
+            float(
+                np.nansum(
+                    MB_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.P_depo_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
-        sum_S_suspension_salt = float(
-            np.nansum(
-                -MB_sum[
-                    salt_species_index,
-                    constants.pm_all,
-                    constants.S_suspension_index,
-                    mask_range,
-                ]
+        sum_S_suspension_salt = (
+            float(
+                np.nansum(
+                    -MB_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.S_suspension_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
-        sum_S_emission_salt = float(
-            np.nansum(
-                -E_sum[
-                    salt_species_index, constants.pm_all, constants.E_suspension_index, mask_range
-                ]
+        sum_S_emission_salt = (
+            float(
+                np.nansum(
+                    -E_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.E_suspension_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
-        sum_S_drainage_salt = float(
-            np.nansum(
-                -MB_sum[
-                    salt_species_index,
-                    constants.pm_all,
-                    constants.S_dustdrainage_index,
-                    mask_range,
-                ]
+        sum_S_drainage_salt = (
+            float(
+                np.nansum(
+                    -MB_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.S_dustdrainage_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
-        sum_S_spray_salt = float(
-            np.nansum(
-                -MB_sum[
-                    salt_species_index,
-                    constants.pm_all,
-                    constants.S_dustspray_index,
-                    mask_range,
-                ]
+        sum_S_spray_salt = (
+            float(
+                np.nansum(
+                    -MB_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.S_dustspray_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
-        sum_S_cleaning_salt = float(
-            np.nansum(
-                -MB_sum[
-                    salt_species_index,
-                    constants.pm_all,
-                    constants.S_cleaning_index,
-                    mask_range,
-                ]
+        sum_S_cleaning_salt = (
+            float(
+                np.nansum(
+                    -MB_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.S_cleaning_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
-        sum_S_ploughing_salt = float(
-            np.nansum(
-                -MB_sum[
-                    salt_species_index,
-                    constants.pm_all,
-                    constants.S_dustploughing_index,
-                    mask_range,
-                ]
+        sum_S_ploughing_salt = (
+            float(
+                np.nansum(
+                    -MB_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.S_dustploughing_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
-        sum_S_windblown_salt = float(
-            np.nansum(
-                -MB_sum[
-                    salt_species_index,
-                    constants.pm_all,
-                    constants.S_windblown_index,
-                    mask_range,
-                ]
+        sum_S_windblown_salt = (
+            float(
+                np.nansum(
+                    -MB_sum[
+                        salt_species_index,
+                        constants.pm_all,
+                        constants.S_windblown_index,
+                        mask_range,
+                    ]
+                )
             )
-        ) * dt * b_factor_local
+            * dt
+            * b_factor_local
+        )
 
         print("Total surface salt (NaCl) budget (g/m^2)")
         print(
@@ -454,13 +500,13 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
         )
 
     if shared.save_plots:
-        plot_file_name = generate_matlab_style_filename(
+        plot_file_name = generate_plot_filename(
             title_str=paths.title_str,
             plot_type_flag=shared.av[0],
             figure_number=3,  # Emissions and mass balance is figure 3
             plot_name="Emissions_mass_balance",
             date_num=shared.date_num,
             min_time=shared.i_min,
-            max_time=shared.i_max
+            max_time=shared.i_max,
         )
         plt.savefig(os.path.join(paths.path_outputfig, plot_file_name))
