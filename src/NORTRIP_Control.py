@@ -79,8 +79,6 @@ def main():
         logger.error("Time configuration failed - stopping execution")
         return
 
-    # Initialize model variables
-
     if use_fortran:
         NORTRIP_fortran_control()
 

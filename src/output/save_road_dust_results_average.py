@@ -64,13 +64,13 @@ def save_road_dust_results_average(
     av_label = constants.av_str[max(0, av_index - 1)]
     if paths.filename_outputdata == "":
         paths.filename_outputdata = "missing_filename.xlsx"
-    base = os.path.join(paths.path_outputdata, paths.filename_outputdata)
+    base = os.path.join(paths.path_outputdata, Path(paths.filename_outputdata).stem)
     if save_as_text:
-        out_file = f"{Path(base).stem}_{av_label}.txt"
+        out_file = f"{base}_{av_label}.txt"
         logger.info(f"Saving results to {out_file}...")
         df_results.to_csv(out_file, sep="\t", index=False, na_rep="-999")
     else:
-        out_file = f"{Path(base).stem}_{av_label}.xlsx"
+        out_file = f"{base}_{av_label}.xlsx"
         logger.info(f"Saving results to {out_file}...")
         with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
             df_results.to_excel(writer, index=False, sheet_name="data")
