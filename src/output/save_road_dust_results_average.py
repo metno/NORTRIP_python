@@ -65,17 +65,22 @@ def save_road_dust_results_average(
     if paths.filename_outputdata.endswith(".txt"):
         out_file = f"{base}_{av_label}.txt"
         logger.info(f"Saving results to {out_file}...")
+
         df_results.to_csv(out_file, sep="\t", index=False, na_rep="-999")
+
     elif paths.filename_outputdata.endswith(".xlsx"):
         out_file = f"{base}_{av_label}.xlsx"
         logger.info(f"Saving results to {out_file}...")
+
         with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
             df_results.to_excel(writer, index=False, sheet_name="data")
+
             if parameter_sheets:
                 for sheet_name in ("Parameters", "Flags", "Activities"):
                     parameter_sheets[sheet_name].to_excel(
                         writer, index=False, sheet_name=sheet_name
                     )
+
     else:
         logger.error(
             f"Invalid output data file type: {paths.filename_outputdata}. Must be .txt or .xlsx."

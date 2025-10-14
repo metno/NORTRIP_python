@@ -57,7 +57,10 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
         i_max,
         av,
     )
-    dt_x = matlab_datenum_to_datetime_array(xplot)
+    if shared.av[0] in (3, 5):
+        dt_x = xplot
+    else:
+        dt_x = matlab_datenum_to_datetime_array(xplot)
 
     # Prepare panel 2: traffic speed
     _, _, y_v_li = average_data_func(

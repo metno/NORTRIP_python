@@ -75,7 +75,10 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     _, _, y_direct_av = average_data_func(date_num, y_direct, i_min, i_max, av)
     _, _, y_susp_av = average_data_func(date_num, y_susp, i_min, i_max, av)
     _, _, y_exhaust_av = average_data_func(date_num, y_exhaust, i_min, i_max, av)
-    dt_x = matlab_datenum_to_datetime_array(xplot)
+    if shared.av[0] in (3, 5):
+        dt_x = xplot
+    else:
+        dt_x = matlab_datenum_to_datetime_array(xplot)
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 6), sharex=False)
     fig.subplots_adjust(hspace=0.4)

@@ -66,7 +66,10 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
         date_num, roadm[constants.T_sub_index, :n_date], i_min, i_max, av
     )
 
-    dt_x = matlab_datenum_to_datetime_array(xplot)
+    if shared.av[0] in (3, 5):
+        dt_x = xplot
+    else:
+        dt_x = matlab_datenum_to_datetime_array(xplot)
 
     fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(10, 6), sharex=False)
     fig.subplots_adjust(hspace=0.35)

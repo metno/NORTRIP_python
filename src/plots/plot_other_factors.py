@@ -66,7 +66,10 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
         y_ef_mod = np.asarray(y_E_all) / np.asarray(y_N_total)
         y_ef_obs = np.asarray(y_E_obs) / np.asarray(y_N_total)
 
-    dt_x = matlab_datenum_to_datetime_array(xplot)
+    if shared.av[0] in (3, 5):
+        dt_x = xplot
+    else:
+        dt_x = matlab_datenum_to_datetime_array(xplot)
 
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(8, 8))
     fig.subplots_adjust(hspace=0.35)
@@ -101,7 +104,10 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
     f_conc2 = shared.f_conc[:n_date].astype(float).copy()
     f_conc2[f_conc2 == nodata] = np.nan
     _xstr2, xplot2, y_fconc = average_data_func(date_num, f_conc2, i_min, i_max, av)
-    dt_x2 = matlab_datenum_to_datetime_array(xplot2)
+    if shared.av[0] in (3, 5):
+        dt_x2 = xplot2
+    else:
+        dt_x2 = matlab_datenum_to_datetime_array(xplot2)
     ax2.plot(
         dt_x2,
         np.asarray(y_fconc).squeeze(),
@@ -194,7 +200,10 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
         y_PM10_PM200_surface = np.asarray(y_M_pm10) / np.asarray(y_M_pm200)
         y_PM25_PM10_surface = np.asarray(y_M_pm25) / np.asarray(y_M_pm10)
 
-    dt_x3 = matlab_datenum_to_datetime_array(xp3)
+    if shared.av[0] in (3, 5):
+        dt_x3 = xp3
+    else:
+        dt_x3 = matlab_datenum_to_datetime_array(xp3)
     ax3.plot(
         dt_x3,
         np.asarray(y_salt_na).squeeze() * 100.0,
@@ -259,7 +268,10 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
 
     _xs4, xp4, y_bulk_with = average_data_func(date_num, bulk_with, i_min, i_max, av)
     _, _, y_bulk_without = average_data_func(date_num, bulk_without, i_min, i_max, av)
-    dt_x4 = matlab_datenum_to_datetime_array(xp4)
+    if shared.av[0] in (3, 5):
+        dt_x4 = xp4
+    else:
+        dt_x4 = matlab_datenum_to_datetime_array(xp4)
     ax4.plot(
         dt_x4,
         np.asarray(y_bulk_with).squeeze(),

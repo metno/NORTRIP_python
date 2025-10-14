@@ -88,14 +88,16 @@ def plot_ae(shared: shared_plot_data, paths: model_file_paths) -> None:
     _, _, y_wear = average_data_func(date_num, y_wear_series, i_min, i_max, av)
     _, _, y_sand = average_data_func(date_num, y_sand_series, i_min, i_max, av)
     _, _, y_salt_2 = average_data_func(date_num, y_salt_2_series, i_min, i_max, av)
-    dt_x = matlab_datenum_to_datetime_array(xplot)
+    if shared.av[0] in (3, 5):
+        dt_x = xplot
+    else:
+        dt_x = matlab_datenum_to_datetime_array(xplot)
 
     # Mass loading arrays at suspendable size; convert to g/m²
     M_sum = mask_nodata(shared.M_road_data_sum_tracks.copy(), nodata)
     y_mass_dust_series = M_sum[constants.total_dust_index, x_load, :n_date] * b_factor
     y_mass_salt_na_series = M_sum[constants.salt_index[0], x_load, :n_date] * b_factor
     y_mass_sand_series = M_sum[constants.sand_index, x_load, :n_date] * b_factor
-    # Optional: dissolved salt and non-suspendable sand shown in comments in MATLAB
 
     _, _, y_mass_dust = average_data_func(
         date_num, y_mass_dust_series, i_min, i_max, av
@@ -131,7 +133,10 @@ def plot_ae(shared: shared_plot_data, paths: model_file_paths) -> None:
     with np.errstate(divide="ignore", invalid="ignore"):
         y_ef_mod = np.asarray(y_E_all) / np.asarray(y_N_total)
         y_ef_obs = np.asarray(y_E_obs) / np.asarray(y_N_total)
-    dt_x_e = matlab_datenum_to_datetime_array(xp_e)
+    if shared.av[0] in (3, 5):
+        dt_x_e = xp_e
+    else:
+        dt_x_e = matlab_datenum_to_datetime_array(xp_e)
 
     # --- Figure and axes layout ---
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(9, 8))

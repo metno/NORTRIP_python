@@ -102,7 +102,10 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     _, _, y_salt_mg = average_data_func(date_num, y_salt_mg_series, i_min, i_max, av)
 
     # Convert MATLAB datenums to datetimes for plotting
-    dt_x = matlab_datenum_to_datetime_array(xplot)
+    if shared.av[0] in (3, 5):
+        dt_x = xplot
+    else:
+        dt_x = matlab_datenum_to_datetime_array(xplot)
 
     # Figure using a 4x3 grid: rows 0-1 span all 3 cols; row 2 has 3 small panels
     fig = plt.figure(figsize=(10, 8))
@@ -201,7 +204,10 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     _, _, y_sand = average_data_func(date_num, y_mass_sand, i_min, i_max, av)
     _, _, y_salt_mg = average_data_func(date_num, y_mass_salt_mg, i_min, i_max, av)
 
-    dt_x2 = matlab_datenum_to_datetime_array(xplot2)
+    if shared.av[0] in (3, 5):
+        dt_x2 = xplot2
+    else:
+        dt_x2 = matlab_datenum_to_datetime_array(xplot2)
 
     # Cleaning stairs normalization
     _, _, y_clean = average_data_func(

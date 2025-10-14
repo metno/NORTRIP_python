@@ -53,7 +53,10 @@ def plot_wetness(shared: shared_plot_data, paths: model_file_paths) -> None:
     else:
         obs_wet = None
 
-    dt_x = matlab_datenum_to_datetime_array(xplot)
+    if shared.av[0] in (3, 5):
+        dt_x = xplot
+    else:
+        dt_x = matlab_datenum_to_datetime_array(xplot)
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 6), sharex=False)
     fig.subplots_adjust(hspace=0.35)

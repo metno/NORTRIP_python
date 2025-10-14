@@ -110,7 +110,10 @@ def plot_energy_moisture_balance(
     if mean_E_corr is not None:
         legend_entries.append(f"Energy correction = {mean_E_corr:4.2f} W/m²")
 
-    dt_x_e = matlab_datenum_to_datetime_array(xplot_e)
+    if shared.av[0] in (3, 5):
+        dt_x_e = xplot_e
+    else:
+        dt_x_e = matlab_datenum_to_datetime_array(xplot_e)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 7))
     fig.subplots_adjust(hspace=0.35)
@@ -248,7 +251,10 @@ def plot_energy_moisture_balance(
     mean_rain = _mean_on_rw(y_rain)
     mean_drain = _mean_on_rw(y_drain)
 
-    dt_x_w = matlab_datenum_to_datetime_array(xplot_w)
+    if shared.av[0] in (3, 5):
+        dt_x_w = xplot_w
+    else:
+        dt_x_w = matlab_datenum_to_datetime_array(xplot_w)
     ax2.set_title(f"{title_str}: Surface water balance")
     ax2.plot(
         dt_x_w,
