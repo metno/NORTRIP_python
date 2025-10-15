@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import datetime
+from datetime import datetime
 import logging
 from input_classes import input_traffic
 from pd_util import find_column_index, check_data_availability, forward_fill_missing
@@ -45,7 +45,7 @@ def read_input_traffic(
 
     # Convert to datetime objects for processing
     datetime_objects = [
-        datetime.datetime(year, month, day, hour, minute, 0)
+        datetime(year, month, day, hour, minute, 0)
         for year, month, day, hour, minute in zip(
             loaded_traffic.year,
             loaded_traffic.month,
@@ -57,12 +57,7 @@ def read_input_traffic(
     ]
 
     # Create date_num similar to MATLAB datenum (days since year 1 + fractional day)
-    loaded_traffic.date_num = np.array(
-        [
-            dt.toordinal() + 366 + dt.hour / 24.0 + dt.minute / (24.0 * 60.0)
-            for dt in datetime_objects
-        ]
-    )
+    loaded_traffic.date_num = np.array([dt.timestamp() for dt in datetime_objects])
 
     # Create date_str arrays matching MATLAB datestr format
     date_str_format1 = np.array([dt.strftime("%Y.%m.%d %H") for dt in datetime_objects])
@@ -77,9 +72,7 @@ def read_input_traffic(
 
     # Read traffic volumes
     # Total traffic
-    col_idx = find_column_index(
-        "N(total)", header_text, exact_match=True
-    )
+    col_idx = find_column_index("N(total)", header_text, exact_match=True)
     if col_idx == -1:
         logger.error("No traffic data found - N(total) column missing")
         return loaded_traffic
@@ -93,9 +86,7 @@ def read_input_traffic(
 
     # Vehicle type traffic volumes
     for v, veh_type in enumerate(["he", "li"]):
-        col_idx = find_column_index(
-            f"N({veh_type})", header_text, exact_match=True
-        )
+        col_idx = find_column_index(f"N({veh_type})", header_text, exact_match=True)
         if col_idx != -1:
             loaded_traffic.N_v[v, :] = traffic_df.iloc[:, col_idx].values.astype(float)
 

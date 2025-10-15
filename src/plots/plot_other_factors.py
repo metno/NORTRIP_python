@@ -7,7 +7,7 @@ from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
 from .helpers import (
-    matlab_datenum_to_datetime_array,
+    unix_timestamp_to_datetime_array,
     format_time_axis,
     generate_plot_filename,
 )
@@ -69,7 +69,7 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
     if shared.av[0] in (3, 5):
         dt_x = xplot
     else:
-        dt_x = matlab_datenum_to_datetime_array(xplot)
+        dt_x = unix_timestamp_to_datetime_array(xplot)
 
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(8, 8))
     fig.subplots_adjust(hspace=0.35)
@@ -107,7 +107,7 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
     if shared.av[0] in (3, 5):
         dt_x2 = xplot2
     else:
-        dt_x2 = matlab_datenum_to_datetime_array(xplot2)
+        dt_x2 = unix_timestamp_to_datetime_array(xplot2)
     ax2.plot(
         dt_x2,
         np.asarray(y_fconc).squeeze(),
@@ -203,7 +203,7 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
     if shared.av[0] in (3, 5):
         dt_x3 = xp3
     else:
-        dt_x3 = matlab_datenum_to_datetime_array(xp3)
+        dt_x3 = unix_timestamp_to_datetime_array(xp3)
     ax3.plot(
         dt_x3,
         np.asarray(y_salt_na).squeeze() * 100.0,
@@ -271,7 +271,7 @@ def plot_other_factors(shared: shared_plot_data, paths: model_file_paths) -> Non
     if shared.av[0] in (3, 5):
         dt_x4 = xp4
     else:
-        dt_x4 = matlab_datenum_to_datetime_array(xp4)
+        dt_x4 = unix_timestamp_to_datetime_array(xp4)
     ax4.plot(
         dt_x4,
         np.asarray(y_bulk_with).squeeze(),

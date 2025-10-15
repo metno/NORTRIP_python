@@ -9,7 +9,7 @@ from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
 from .helpers import (
-    matlab_datenum_to_datetime_array,
+    unix_timestamp_to_datetime_array,
     format_time_axis,
     mask_nodata,
     generate_plot_filename,
@@ -91,7 +91,7 @@ def plot_ae(shared: shared_plot_data, paths: model_file_paths) -> None:
     if shared.av[0] in (3, 5):
         dt_x = xplot
     else:
-        dt_x = matlab_datenum_to_datetime_array(xplot)
+        dt_x = unix_timestamp_to_datetime_array(xplot)
 
     # Mass loading arrays at suspendable size; convert to g/m²
     M_sum = mask_nodata(shared.M_road_data_sum_tracks.copy(), nodata)
@@ -136,7 +136,7 @@ def plot_ae(shared: shared_plot_data, paths: model_file_paths) -> None:
     if shared.av[0] in (3, 5):
         dt_x_e = xp_e
     else:
-        dt_x_e = matlab_datenum_to_datetime_array(xp_e)
+        dt_x_e = unix_timestamp_to_datetime_array(xp_e)
 
     # --- Figure and axes layout ---
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(9, 8))

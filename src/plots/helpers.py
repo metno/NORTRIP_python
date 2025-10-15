@@ -11,8 +11,8 @@ import constants
 from functions import average_data_func, datenum_to_datetime
 
 
-def matlab_datenum_to_datetime_array(nums: np.ndarray) -> np.ndarray:
-    """Convert MATLAB datenums to Python datetimes for axis plotting."""
+def unix_timestamp_to_datetime_array(nums: np.ndarray) -> np.ndarray:
+    """Convert Unix timestamps to Python datetimes for axis plotting."""
     return np.array([datenum_to_datetime(d) for d in np.asarray(nums).ravel()])
 
 

@@ -7,7 +7,7 @@ from functions.average_data_func import average_data_func
 from config_classes import model_file_paths
 from .shared_plot_data import shared_plot_data
 from .helpers import (
-    matlab_datenum_to_datetime_array,
+    unix_timestamp_to_datetime_array,
     format_time_axis,
     generate_plot_filename,
 )
@@ -105,7 +105,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     if shared.av[0] in (3, 5):
         dt_x = xplot
     else:
-        dt_x = matlab_datenum_to_datetime_array(xplot)
+        dt_x = unix_timestamp_to_datetime_array(xplot)
 
     # Figure using a 4x3 grid: rows 0-1 span all 3 cols; row 2 has 3 small panels
     fig = plt.figure(figsize=(10, 8))
@@ -207,7 +207,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     if shared.av[0] in (3, 5):
         dt_x2 = xplot2
     else:
-        dt_x2 = matlab_datenum_to_datetime_array(xplot2)
+        dt_x2 = unix_timestamp_to_datetime_array(xplot2)
 
     # Cleaning stairs normalization
     _, _, y_clean = average_data_func(
@@ -632,7 +632,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     )
 
     # Number of days in window from datetimes
-    dt_slice = matlab_datenum_to_datetime_array(shared.date_num[i_min : i_max + 1])
+    dt_slice = unix_timestamp_to_datetime_array(shared.date_num[i_min : i_max + 1])
     if len(dt_slice) >= 2:
         num_days = (dt_slice[-1] - dt_slice[0]).total_seconds() / 86400.0
     else:

@@ -1,19 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+import numpy as np
 
 
-def datenum_to_datetime(datenum: float) -> datetime:
-    """Convert MATLAB datenum to Python datetime."""
-    # MATLAB datenum 1 = January 1, year 0000
-    # Python datetime reference is January 1, year 1
-    # Need to subtract 366 days because year 0 was a leap year
-    matlab_epoch = datetime(1, 1, 1)
+def datenum_to_datetime(datenum: np.float64) -> datetime:
+    """Convert datenum to Python datetime."""
 
-    # Use high precision calculation to avoid floating point errors
-    days_since_epoch = float(datenum) - 1.0 - 366.0  # Subtract 366 for year 0
-    total_seconds = days_since_epoch * 86400.0
+    dt = datetime.fromtimestamp(datenum)
 
-    # Round to nearest microsecond to handle floating point precision issues
-    total_seconds_rounded = round(total_seconds, 6)
-
-    dt = matlab_epoch + timedelta(seconds=total_seconds_rounded)
     return dt

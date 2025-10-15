@@ -3,15 +3,10 @@ from datetime import datetime, timedelta
 from src.functions.average_data_func import average_data_func
 
 
-def _generate_matlab_datenums(start_dt: datetime, n_hours: int) -> np.ndarray:
-    """Helper that mimics the MATLAB datenum generation used in the code base."""
+def _generate_unix_timestamps(start_dt: datetime, n_hours: int) -> np.ndarray:
+    """Helper that generates Unix timestamps for the given datetime range."""
     datetime_objects = [start_dt + timedelta(hours=i) for i in range(n_hours)]
-    return np.array(
-        [
-            dt.toordinal() + 366 + dt.hour / 24.0 + dt.minute / (24.0 * 60.0)
-            for dt in datetime_objects
-        ]
-    )
+    return np.array([dt.timestamp() for dt in datetime_objects])
 
 
 def test_average_data_func_mode_1_no_averaging():
@@ -19,7 +14,7 @@ def test_average_data_func_mode_1_no_averaging():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -51,7 +46,7 @@ def test_average_data_func_mode_2_daily_means():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -88,7 +83,7 @@ def test_average_data_func_mode_3_daily_cycles():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -131,7 +126,7 @@ def test_average_data_func_mode_4_12_hourly_means():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -162,7 +157,7 @@ def test_average_data_func_mode_5_weekly_cycles():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -197,7 +192,7 @@ def test_average_data_func_mode_6_daily_running_means():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -231,7 +226,7 @@ def test_average_data_func_mode_7_weekly_means():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -262,7 +257,7 @@ def test_average_data_func_mode_8_monthly_means():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -298,7 +293,7 @@ def test_average_data_func_mode_9_hourly_means():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -330,7 +325,7 @@ def test_average_data_func_use_max_parameter():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
@@ -360,7 +355,7 @@ def test_average_data_func_nan_handling():
     # Create test data: 3 days of hourly data
     start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
     n_hours = 72  # 3 days
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
+    date_num = _generate_unix_timestamps(start_dt, n_hours)
 
     # Create test values with some variation
     val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)

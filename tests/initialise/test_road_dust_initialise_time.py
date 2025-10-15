@@ -109,10 +109,8 @@ def test_road_dust_initialise_time_basic():
         date_data[constants.day_index, i, 0] = current_date.day
         date_data[constants.hour_index, i, 0] = current_date.hour
         date_data[constants.minute_index, i, 0] = current_date.minute
-        # Simulate MATLAB datenum (days since year 1 + fractional day)
-        date_data[constants.datenum_index, i, 0] = (
-            current_date.toordinal() + 366 + current_date.hour / 24.0
-        )
+        # Use Unix timestamp (seconds since epoch)
+        date_data[constants.datenum_index, i, 0] = current_date.timestamp()
 
     # Create converted_data object
     data = converted_data()
@@ -152,9 +150,7 @@ def test_road_dust_initialise_time_with_date_restrictions():
         date_data[constants.day_index, i, 0] = current_date.day
         date_data[constants.hour_index, i, 0] = current_date.hour
         date_data[constants.minute_index, i, 0] = current_date.minute
-        date_data[constants.datenum_index, i, 0] = (
-            current_date.toordinal() + 366 + current_date.hour / 24.0
-        )
+        date_data[constants.datenum_index, i, 0] = current_date.timestamp()
 
     # Create converted_data object
     data = converted_data()
@@ -193,9 +189,7 @@ def test_road_dust_initialise_time_invalid_dates():
         date_data[constants.day_index, i, 0] = current_date.day
         date_data[constants.hour_index, i, 0] = current_date.hour
         date_data[constants.minute_index, i, 0] = current_date.minute
-        date_data[constants.datenum_index, i, 0] = (
-            current_date.toordinal() + 366 + current_date.hour / 24.0
-        )
+        date_data[constants.datenum_index, i, 0] = current_date.timestamp()
 
     # Create converted_data object
     data = converted_data()
@@ -227,9 +221,7 @@ def test_road_dust_initialise_time_fortran_flag():
         date_data[constants.day_index, i, 0] = current_date.day
         date_data[constants.hour_index, i, 0] = current_date.hour
         date_data[constants.minute_index, i, 0] = current_date.minute
-        date_data[constants.datenum_index, i, 0] = (
-            current_date.toordinal() + 366 + current_date.hour / 24.0
-        )
+        date_data[constants.datenum_index, i, 0] = current_date.timestamp()
 
     # Create converted_data object
     data = converted_data()
@@ -265,9 +257,7 @@ def test_road_dust_initialise_time_subdate():
         date_data[constants.day_index, i, 0] = current_date.day
         date_data[constants.hour_index, i, 0] = current_date.hour
         date_data[constants.minute_index, i, 0] = current_date.minute
-        date_data[constants.datenum_index, i, 0] = (
-            current_date.toordinal() + 366 + current_date.hour / 24.0
-        )
+        date_data[constants.datenum_index, i, 0] = current_date.timestamp()
 
     # Create converted_data object
     data = converted_data()
@@ -304,7 +294,9 @@ def test_road_dust_initialise_time_single_timestep():
     date_data[constants.day_index, 0, 0] = 15
     date_data[constants.hour_index, 0, 0] = 10
     date_data[constants.minute_index, 0, 0] = 0
-    date_data[constants.datenum_index, 0, 0] = 738611.416667  # Example datenum
+    date_data[constants.datenum_index, 0, 0] = datetime.datetime(
+        2023, 3, 15, 10, 0, 0
+    ).timestamp()  # Example Unix timestamp
 
     # Create converted_data object
     data = converted_data()

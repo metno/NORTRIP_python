@@ -1,5 +1,5 @@
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
 from src.functions.global_radiation_func import global_radiation_func
 
 
@@ -14,11 +14,9 @@ def test_global_radiation_func():
     N_CLOUD = 0.3  # 30% cloud cover
     ALBEDO = 0.15  # Typical ground albedo
 
-    # Convert datetime to MATLAB datenum (June 21, 2023, noon)
+    # Convert datetime to Unix timestamp (June 21, 2023, noon)
     dt = datetime(2023, 6, 21, 12, 0, 0)
-    matlab_epoch = datetime(1, 1, 1)
-    delta = dt - matlab_epoch
-    datenum = delta.total_seconds() / 86400.0 + 1
+    datenum = np.float64(dt.timestamp())
 
     SOLAR_NET, azimuth_angle, zenith_angle = global_radiation_func(
         LAT, LON, datenum, DIFUTC_H, Z_SURF, N_CLOUD, ALBEDO
@@ -37,8 +35,7 @@ def test_global_radiation_func():
 
     # Test night time (midnight)
     dt_night = datetime(2023, 6, 21, 0, 0, 0)
-    delta_night = dt_night - matlab_epoch
-    datenum_night = delta_night.total_seconds() / 86400.0 + 1
+    datenum_night = np.float64(dt_night.timestamp())
 
     SOLAR_NET_night, azimuth_night, zenith_night = global_radiation_func(
         LAT, LON, datenum_night, DIFUTC_H, Z_SURF, N_CLOUD, ALBEDO
@@ -59,9 +56,7 @@ def test_global_radiation_func_cloud_effects():
 
     # Noon on a clear day
     dt = datetime(2023, 7, 15, 12, 0, 0)
-    matlab_epoch = datetime(1, 1, 1)
-    delta = dt - matlab_epoch
-    datenum = delta.total_seconds() / 86400.0 + 1
+    datenum = np.float64(dt.timestamp())
 
     # Clear sky
     N_CLOUD_clear = 0.0
@@ -91,9 +86,7 @@ def test_global_radiation_func_elevation_effects():
 
     # Noon on a summer day
     dt = datetime(2023, 7, 15, 12, 0, 0)
-    matlab_epoch = datetime(1, 1, 1)
-    delta = dt - matlab_epoch
-    datenum = delta.total_seconds() / 86400.0 + 1
+    datenum = np.float64(dt.timestamp())
 
     # Sea level
     Z_SURF_low = 0.0
@@ -127,9 +120,7 @@ def test_global_radiation_func_albedo_effects():
 
     # Noon on a summer day
     dt = datetime(2023, 7, 15, 12, 0, 0)
-    matlab_epoch = datetime(1, 1, 1)
-    delta = dt - matlab_epoch
-    datenum = delta.total_seconds() / 86400.0 + 1
+    datenum = np.float64(dt.timestamp())
 
     # Low albedo (dark surface)
     ALBEDO_low = 0.05
@@ -158,12 +149,9 @@ def test_global_radiation_func_seasonal_variation():
     N_CLOUD = 0.2
     ALBEDO = 0.2
 
-    matlab_epoch = datetime(1, 1, 1)
-
     # Summer solstice (June 21)
     dt_summer = datetime(2023, 6, 21, 12, 0, 0)
-    delta_summer = dt_summer - matlab_epoch
-    datenum_summer = delta_summer.total_seconds() / 86400.0 + 1
+    datenum_summer = np.float64(dt_summer.timestamp())
 
     SOLAR_NET_summer, _, zenith_summer = global_radiation_func(
         LAT, LON, datenum_summer, DIFUTC_H, Z_SURF, N_CLOUD, ALBEDO
@@ -171,8 +159,7 @@ def test_global_radiation_func_seasonal_variation():
 
     # Winter solstice (December 21)
     dt_winter = datetime(2023, 12, 21, 12, 0, 0)
-    delta_winter = dt_winter - matlab_epoch
-    datenum_winter = delta_winter.total_seconds() / 86400.0 + 1
+    datenum_winter = np.float64(dt_winter.timestamp())
 
     SOLAR_NET_winter, _, zenith_winter = global_radiation_func(
         LAT, LON, datenum_winter, DIFUTC_H, Z_SURF, N_CLOUD, ALBEDO

@@ -7,7 +7,7 @@ from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
 from .helpers import (
-    matlab_datenum_to_datetime_array,
+    unix_timestamp_to_datetime_array,
     format_time_axis,
     mask_nodata,
     generate_plot_filename,
@@ -60,7 +60,7 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     if shared.av[0] in (3, 5):
         dt_x = xplot
     else:
-        dt_x = matlab_datenum_to_datetime_array(xplot)
+        dt_x = unix_timestamp_to_datetime_array(xplot)
 
     # Prepare panel 2: traffic speed
     _, _, y_v_li = average_data_func(
@@ -124,8 +124,8 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax1.legend(loc="upper left")
     format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
     if len(dt_x) > 0:
-        dt_min = matlab_datenum_to_datetime_array(np.array([date_num[i_min]]))[0]
-        dt_max = matlab_datenum_to_datetime_array(np.array([date_num[i_max]]))[0]
+        dt_min = unix_timestamp_to_datetime_array(np.array([date_num[i_min]]))[0]
+        dt_max = unix_timestamp_to_datetime_array(np.array([date_num[i_max]]))[0]
         ax1.set_xlim(dt_min, dt_max)
 
     # Panel 2: traffic speed

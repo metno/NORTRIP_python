@@ -6,7 +6,7 @@ from .datenum_to_datetime import datenum_to_datetime
 def net_global_radiation_func(
     LAT: float,
     LON: float,
-    date_num: float,
+    date_num: np.float64,
     DIFUTC_H: float,
     Z_SURF: float,
     N_CLOUD: float,
@@ -20,7 +20,7 @@ def net_global_radiation_func(
     Args:
         LAT: Latitude in degrees
         LON: Longitude in degrees
-        date_num: Date number (MATLAB format)
+        date_num: Unix timestamp (seconds since epoch)
         DIFUTC_H: Time difference from UTC in hours
         Z_SURF: Surface elevation in meters
         N_CLOUD: Cloud cover fraction (0-1)
@@ -47,9 +47,9 @@ def net_global_radiation_func(
     Y = current_datetime.year
     M = current_datetime.month
     D = current_datetime.day
-    H = current_datetime.hour
-    MN = current_datetime.minute
-    S = current_datetime.second + current_datetime.microsecond / 1e6
+    _ = current_datetime.hour
+    _ = current_datetime.minute
+    _ = current_datetime.second + current_datetime.microsecond / 1e6
 
     # Calculate Julian day
     year_start = datetime(Y, 1, 1)

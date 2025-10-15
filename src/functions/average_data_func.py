@@ -16,7 +16,7 @@ def average_data_func(
     Average input data along various time scales.
 
     Args:
-        date_num: Date numbers (MATLAB format)
+        date_num: Unix timestamps (seconds since epoch)
         val: Values to average
         i_min: Minimum index
         i_max: Maximum index
@@ -35,7 +35,7 @@ def average_data_func(
     Returns:
         tuple: (av_date_str, av_date_num, av_val) where:
             av_date_str: List of formatted date strings
-            av_date_num: Array of averaged date numbers
+            av_date_num: Array of averaged Unix timestamps
             av_val: Array of averaged values
     """
     # Treats NaNs as non-valid data
@@ -45,12 +45,6 @@ def average_data_func(
     av_date_str: List[str] = []
     av_date_num = np.array([])
     av_val = np.array([])
-
-    def datetime_to_matlab_datenum(dt: datetime) -> float:
-        """Convert Python datetime to MATLAB datenum."""
-        matlab_epoch = datetime(1, 1, 1)
-        delta = dt - matlab_epoch
-        return delta.total_seconds() / 86400.0 + 1 + 366.0  # Add 366 for year 0
 
     # No averaging
     if index == 1:
@@ -92,14 +86,14 @@ def average_data_func(
             if len(r2) >= 1:
                 vals = val[r2]
                 valid = vals[~np.isnan(vals)]
-                if len(valid) > min_num:
+                if len(valid) >= min_num:
                     hourly_vals.append(np.max(valid) if use_max else np.mean(valid))
                 else:
                     hourly_vals.append(np.nan)
             else:
                 hourly_vals.append(np.nan)
 
-            hourly_dates.append(datetime_to_matlab_datenum(current_hour))
+            hourly_dates.append(current_hour.timestamp())
             current_hour += timedelta(hours=1)
 
         av_date_num = np.array(hourly_dates)
@@ -108,17 +102,30 @@ def average_data_func(
 
     # Daily means
     elif index == 2:
-        # Daily means - match MATLAB behavior
+        # Daily means - Unix timestamps grouped by calendar day (local time)
         min_num = int(index2) if not np.isnan(index2) else 6
 
-        start_day = int(np.floor(date_num[i_min]))
-        end_day = int(np.floor(date_num[i_max]))
+        # Convert only the relevant slice once
+        date_slice = date_num
+        dts = [datenum_to_datetime(d) for d in date_slice]
+
+        # Build continuous day range from start to end day (inclusive)
+        start_dt = datenum_to_datetime(date_num[i_min])
+        end_dt = datenum_to_datetime(date_num[i_max])
+        current_day = datetime(start_dt.year, start_dt.month, start_dt.day)
+        end_day = datetime(end_dt.year, end_dt.month, end_dt.day)
+
+        # Precompute year, month, day arrays for fast matching
+        years = np.array([dt.year for dt in dts])
+        months = np.array([dt.month for dt in dts])
+        days = np.array([dt.day for dt in dts])
 
         daily_dates = []
         daily_vals = []
 
-        for i_day in range(start_day, end_day + 1):
-            r = np.where(np.floor(date_num) == i_day)[0]
+        while current_day <= end_day:
+            y, m, d = current_day.year, current_day.month, current_day.day
+            r = np.where((years == y) & (months == m) & (days == d))[0]
             # Strict bounds (r > i_min & r < i_max)
             r2 = r[(r > i_min) & (r < i_max)]
             if len(r2) >= 12:
@@ -131,7 +138,9 @@ def average_data_func(
             else:
                 daily_vals.append(np.nan)
 
-            daily_dates.append(float(i_day))
+            # Use midnight local time for the day's timestamp label
+            daily_dates.append(float(datetime(y, m, d).timestamp()))
+            current_day += timedelta(days=1)
 
         av_date_num = np.array(daily_dates)
         av_val = np.array(daily_vals).reshape(-1, 1)

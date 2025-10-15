@@ -7,7 +7,7 @@ from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
 from .helpers import (
-    matlab_datenum_to_datetime_array,
+    unix_timestamp_to_datetime_array,
     format_time_axis,
     generate_plot_filename,
 )
@@ -113,7 +113,7 @@ def plot_energy_moisture_balance(
     if shared.av[0] in (3, 5):
         dt_x_e = xplot_e
     else:
-        dt_x_e = matlab_datenum_to_datetime_array(xplot_e)
+        dt_x_e = unix_timestamp_to_datetime_array(xplot_e)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 7))
     fig.subplots_adjust(hspace=0.35)
@@ -254,7 +254,7 @@ def plot_energy_moisture_balance(
     if shared.av[0] in (3, 5):
         dt_x_w = xplot_w
     else:
-        dt_x_w = matlab_datenum_to_datetime_array(xplot_w)
+        dt_x_w = unix_timestamp_to_datetime_array(xplot_w)
     ax2.set_title(f"{title_str}: Surface water balance")
     ax2.plot(
         dt_x_w,

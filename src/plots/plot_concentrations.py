@@ -7,7 +7,7 @@ from config_classes import model_file_paths
 from functions.average_data_func import average_data_func
 from .shared_plot_data import shared_plot_data
 from .helpers import (
-    matlab_datenum_to_datetime_array,
+    unix_timestamp_to_datetime_array,
     format_time_axis,
     generate_plot_filename,
 )
@@ -89,7 +89,7 @@ def plot_concentrations(shared: shared_plot_data, paths: model_file_paths) -> No
     if shared.av[0] in (3, 5):
         dt_x1 = xplot
     else:
-        dt_x1 = matlab_datenum_to_datetime_array(xplot)
+        dt_x1 = unix_timestamp_to_datetime_array(xplot)
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(9, 8))
     fig.subplots_adjust(hspace=0.35)
@@ -203,7 +203,7 @@ def plot_concentrations(shared: shared_plot_data, paths: model_file_paths) -> No
     if shared.av[0] in (3, 5):
         dt_x2 = xplot2
     else:
-        dt_x2 = matlab_datenum_to_datetime_array(xplot2)
+        dt_x2 = unix_timestamp_to_datetime_array(xplot2)
     ax2.set_title("")
     ax2.plot(
         dt_x2, np.asarray(y_obs_pm25).squeeze(), "k--", linewidth=1, label="Observed"
@@ -246,7 +246,7 @@ def plot_concentrations(shared: shared_plot_data, paths: model_file_paths) -> No
     if shared.av[0] in (3, 5):
         dt_x3 = xplot3
     else:
-        dt_x3 = matlab_datenum_to_datetime_array(xplot3)
+        dt_x3 = unix_timestamp_to_datetime_array(xplot3)
     ax3.set_title("")
     ax3.plot(
         dt_x3, np.asarray(y_NOX_obs).squeeze(), "r--", linewidth=0.5, label="Observed"

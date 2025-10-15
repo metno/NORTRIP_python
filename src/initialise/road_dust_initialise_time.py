@@ -147,12 +147,13 @@ def road_dust_initialise_time(
 
     # Set time step for iteration based on the first time step of the input data
     if converted_data.n_date > 1:
+        # Convert Unix timestamp difference to hours
+        timestamp_diff_seconds = (
+            converted_data.date_data[constants.datenum_index, 1, 0]
+            - converted_data.date_data[constants.datenum_index, 0, 0]
+        )
         config.dt = np.round(
-            (
-                converted_data.date_data[constants.datenum_index, 1, 0]
-                - converted_data.date_data[constants.datenum_index, 0, 0]
-            )
-            * 24,
+            timestamp_diff_seconds / 3600.0,  # Convert seconds to hours
             decimals=6,
         )
     else:

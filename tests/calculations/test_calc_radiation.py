@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import datetime
 from calculations.calc_radiation import calc_radiation
 from initialise import model_variables, time_config
 from input_classes import (
@@ -39,9 +40,10 @@ def test_calc_radiation():
         (constants.num_meteo_index, n_date, n_roads)
     )
 
-    # Fill with sample data
+    # Fill with sample data - use Unix timestamps
+    base_timestamp = datetime(2023, 6, 21, 12, 0, 0).timestamp()
     test_converted_data.date_data[constants.datenum_index, :, 0] = np.arange(
-        738611, 738611 + n_date
+        base_timestamp, base_timestamp + n_date * 3600, 3600
     )
     test_converted_data.meteo_data[constants.T_a_index, :, 0] = 10.0  # 10°C
     test_converted_data.meteo_data[constants.RH_index, :, 0] = 60.0  # 60% RH
@@ -136,9 +138,9 @@ def test_calc_radiation_with_canyon_effects():
 
     # Fill with sample data - use a realistic date in summer with daylight hours
     # Use July 15, 2023 around noon for better solar radiation
-    base_datenum = 738702.5  # Approximately July 15, 2023 12:00 PM
+    base_timestamp = datetime(2023, 7, 15, 12, 0, 0).timestamp()
     test_converted_data.date_data[constants.datenum_index, :, 0] = np.arange(
-        base_datenum, base_datenum + n_date
+        base_timestamp, base_timestamp + n_date * 3600, 3600
     )
     test_converted_data.meteo_data[constants.T_a_index, :, 0] = 15.0
     test_converted_data.meteo_data[constants.RH_index, :, 0] = 70.0
