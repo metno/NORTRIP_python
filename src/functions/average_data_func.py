@@ -1,6 +1,7 @@
 import numpy as np
 from datetime import datetime, timedelta
 from typing import Tuple, List
+from .datenum_to_datetime import datenum_to_datetime
 
 
 def average_data_func(
@@ -45,27 +46,18 @@ def average_data_func(
     av_date_num = np.array([])
     av_val = np.array([])
 
-    # Convert MATLAB datenum to Python datetime for processing
-    def matlab_datenum_to_datetime(datenum: float) -> datetime:
-        """Convert MATLAB datenum to Python datetime."""
-        # MATLAB datenum 1 = January 1, year 0000
-        # Python datetime reference is January 1, year 1
-        matlab_epoch = datetime(1, 1, 1)
-        days_since_epoch = datenum - 1
-        return matlab_epoch + timedelta(days=days_since_epoch)
-
     def datetime_to_matlab_datenum(dt: datetime) -> float:
         """Convert Python datetime to MATLAB datenum."""
         matlab_epoch = datetime(1, 1, 1)
         delta = dt - matlab_epoch
-        return delta.total_seconds() / 86400.0 + 1
+        return delta.total_seconds() / 86400.0 + 1 + 366.0  # Add 366 for year 0
 
     # No averaging
     if index == 1:
         av_date_num = date_num[i_min : i_max + 1]
         av_val = val[i_min : i_max + 1].reshape(-1, 1)
         av_date_str = [
-            matlab_datenum_to_datetime(d).strftime("%H:%M %d %b") for d in av_date_num
+            datenum_to_datetime(d).strftime("%H:%M %d %b") for d in av_date_num
         ]
 
     # Hourly means
@@ -73,8 +65,8 @@ def average_data_func(
         # Hourly means - match MATLAB behavior
         min_num = int(index2) if not np.isnan(index2) else 1
 
-        start_dt = matlab_datenum_to_datetime(date_num[i_min])
-        end_dt = matlab_datenum_to_datetime(date_num[i_max])
+        start_dt = datenum_to_datetime(date_num[i_min])
+        end_dt = datenum_to_datetime(date_num[i_max])
 
         # Build hourly grid from start to end inclusive of the last hour
         current_hour = start_dt.replace(minute=0, second=0, microsecond=0)
@@ -82,7 +74,7 @@ def average_data_func(
         hourly_vals = []
 
         # Precompute vectors
-        all_dt = [matlab_datenum_to_datetime(d) for d in date_num]
+        all_dt = [datenum_to_datetime(d) for d in date_num]
 
         while current_hour <= end_dt + timedelta(hours=1):
             # Find indices exactly matching this Y-M-D-H
@@ -112,9 +104,7 @@ def average_data_func(
 
         av_date_num = np.array(hourly_dates)
         av_val = np.array(hourly_vals).reshape(-1, 1)
-        av_date_str = [
-            matlab_datenum_to_datetime(d).strftime("%d %b") for d in av_date_num
-        ]
+        av_date_str = [datenum_to_datetime(d).strftime("%d %b") for d in av_date_num]
 
     # Daily means
     elif index == 2:
@@ -145,27 +135,26 @@ def average_data_func(
 
         av_date_num = np.array(daily_dates)
         av_val = np.array(daily_vals).reshape(-1, 1)
-        av_date_str = [
-            matlab_datenum_to_datetime(d).strftime("%d %b") for d in av_date_num
-        ]
+        av_date_str = [datenum_to_datetime(d).strftime("%d %b") for d in av_date_num]
 
     # Daily cycle
     elif index == 3:
         date_subset = date_num[i_min : i_max + 1]
         val_subset = val[i_min : i_max + 1]
 
+        # Convert all datenums to datetime objects before the loop
+        dts = [datenum_to_datetime(d) for d in date_subset]
+
         hourly_vals = []
         hourly_dates = []
 
         for j in range(24):
             # Find all data for this hour
-            hour_mask = np.array(
-                [matlab_datenum_to_datetime(d).hour == j for d in date_subset]
-            )
+            hour_mask = np.array([dt.hour == j for dt in dts])
 
             if np.any(hour_mask):
-                hour_vals = val_subset[hour_mask]
-                valid_vals = hour_vals[~np.isnan(hour_vals)]
+                hour_vals_subset = val_subset[hour_mask]
+                valid_vals = hour_vals_subset[~np.isnan(hour_vals_subset)]
 
                 if len(valid_vals) > 0:
                     hourly_vals.append(np.mean(valid_vals))
@@ -191,16 +180,10 @@ def average_data_func(
 
         # Find start and end indices for 12-hour periods
         hour_mask_1 = np.array(
-            [
-                matlab_datenum_to_datetime(d).hour == av_start_hour[0]
-                for d in date_subset
-            ]
+            [datenum_to_datetime(d).hour == av_start_hour[0] for d in date_subset]
         )
         hour_mask_2 = np.array(
-            [
-                matlab_datenum_to_datetime(d).hour == av_start_hour[1]
-                for d in date_subset
-            ]
+            [datenum_to_datetime(d).hour == av_start_hour[1] for d in date_subset]
         )
 
         start_indices_1 = np.where(hour_mask_1)[0]
@@ -229,8 +212,7 @@ def average_data_func(
             av_date_num = halfday_dates
             av_val = np.array(halfday_vals).reshape(-1, 1)
             av_date_str = [
-                matlab_datenum_to_datetime(d).strftime("%H:%M %d %b")
-                for d in av_date_num
+                datenum_to_datetime(d).strftime("%H:%M %d %b") for d in av_date_num
             ]
 
     # Week days
@@ -238,13 +220,14 @@ def average_data_func(
         date_subset = date_num[i_min : i_max + 1]
         val_subset = val[i_min : i_max + 1]
 
+        # Convert all datenums to datetime objects before the loop
+        dts = [datenum_to_datetime(d) for d in date_subset]
+
         weekday_vals = []
         weekday_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
         for j in range(7):
-            weekday_mask = np.array(
-                [matlab_datenum_to_datetime(d).weekday() == j for d in date_subset]
-            )
+            weekday_mask = np.array([dt.weekday() == j for dt in dts])
 
             if np.any(weekday_mask):
                 day_vals = val_subset[weekday_mask]
@@ -277,7 +260,7 @@ def average_data_func(
 
         av_val = np.array(running_vals).reshape(-1, 1)
         av_date_str = [
-            matlab_datenum_to_datetime(d).strftime("%H:%M %d %b") for d in av_date_num
+            datenum_to_datetime(d).strftime("%H:%M %d %b") for d in av_date_num
         ]
 
     # Weekly means starting on Monday
@@ -289,8 +272,8 @@ def average_data_func(
         monday_mask = np.array(
             [
                 (
-                    matlab_datenum_to_datetime(d).weekday() == 0
-                    and matlab_datenum_to_datetime(d).hour == 0
+                    datenum_to_datetime(d).weekday() == 0
+                    and datenum_to_datetime(d).hour == 0
                 )
                 for d in date_subset
             ]
@@ -331,9 +314,7 @@ def average_data_func(
             av_date_num = np.array([date_subset[0]])
             av_val = np.array([np.nan]).reshape(-1, 1)
 
-        av_date_str = [
-            matlab_datenum_to_datetime(d).strftime("%d %b") for d in av_date_num
-        ]
+        av_date_str = [datenum_to_datetime(d).strftime("%d %b") for d in av_date_num]
 
     # Monthly means
     elif index == 8:
@@ -342,8 +323,8 @@ def average_data_func(
         val_subset = val[i_min : i_max + 1]
 
         # Year-month arrays
-        Y = np.array([matlab_datenum_to_datetime(d).year for d in date_subset])
-        M = np.array([matlab_datenum_to_datetime(d).month for d in date_subset])
+        Y = np.array([datenum_to_datetime(d).year for d in date_subset])
+        M = np.array([datenum_to_datetime(d).month for d in date_subset])
 
         n_av = 24 * 30
         monthly_dates = []
@@ -369,8 +350,6 @@ def average_data_func(
 
         av_date_num = np.array(monthly_dates)
         av_val = np.array(monthly_vals).reshape(-1, 1)
-        av_date_str = [
-            matlab_datenum_to_datetime(d).strftime("%b %Y") for d in av_date_num
-        ]
+        av_date_str = [datenum_to_datetime(d).strftime("%b %Y") for d in av_date_num]
 
     return av_date_str, av_date_num, av_val

@@ -1,5 +1,6 @@
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
+from .datenum_to_datetime import datenum_to_datetime
 
 
 def net_global_radiation_func(
@@ -41,9 +42,7 @@ def net_global_radiation_func(
     SIGMA = 5.67e-8
 
     # Convert MATLAB datenum to Python datetime
-    matlab_epoch = datetime(1, 1, 1)
-    days_since_epoch = date_num - 1
-    current_datetime = matlab_epoch + timedelta(days=days_since_epoch)
+    current_datetime = datenum_to_datetime(date_num)
 
     Y = current_datetime.year
     M = current_datetime.month

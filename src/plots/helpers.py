@@ -8,18 +8,12 @@ import matplotlib.dates as mdates
 from matplotlib.axes import Axes
 
 import constants
-from functions import average_data_func
+from functions import average_data_func, datenum_to_datetime
 
 
-def matlab_datenum_to_datetime_array(nums: np.ndarray) -> list:
+def matlab_datenum_to_datetime_array(nums: np.ndarray) -> np.ndarray:
     """Convert MATLAB datenums to Python datetimes for axis plotting."""
-    from datetime import datetime, timedelta
-
-    def convert_one(d: float):
-        matlab_epoch = datetime(1, 1, 1)
-        return matlab_epoch + timedelta(days=float(d) - 1.0)
-
-    return [convert_one(d) for d in np.asarray(nums).ravel()]
+    return np.array([datenum_to_datetime(d) for d in np.asarray(nums).ravel()])
 
 
 def prepare_series(
@@ -35,14 +29,22 @@ def prepare_series(
 
 
 def format_time_axis(
-    ax: Axes, dt_x: list, av_index: int, day_tick_limit: int = 150
+    ax: Axes, dt_x: np.ndarray, av_index: int, day_tick_limit: int = 150
 ) -> None:
-    if av_index in (3, 5):
-        return  # handled separately using string ticks
-    if not dt_x:
+    if not dt_x.any():
         return
+
+    if av_index in (3, 5):
+        ax.set_xticks(dt_x)
+        # Set appropriate x-limits for these modes
+        ax.set_xlim(dt_x[0], dt_x[-1])
+        if av_index == 5:  # Weekly cycle: set weekday labels
+            weekday_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            ax.set_xticklabels(weekday_names)
+        return
+
     ax.set_xlim(dt_x[0], dt_x[-1])
-    span_days = (dt_x[-1] - dt_x[0]).days if len(dt_x) >= 2 else 0
+    span_days = (dt_x[-1] - dt_x[0]).days if dt_x.size >= 2 else 0
     if span_days > day_tick_limit:
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
@@ -66,12 +68,6 @@ def mask_nodata(arr: np.ndarray, nodata: float) -> np.ndarray:
     return a
 
 
-def matlab_datenum_to_datetime(datenum: float) -> datetime:
-    """Convert a single MATLAB datenum to Python datetime."""
-    matlab_epoch = datetime(1, 1, 1)
-    return matlab_epoch + timedelta(days=float(datenum) - 1.0)
-
-
 def generate_plot_filename(
     title_str: str,
     plot_type_flag: int,
@@ -92,8 +88,8 @@ def generate_plot_filename(
     start_date_datenum = date_num[min_time]
     end_date_datenum = date_num[max_time]
 
-    start_datetime = matlab_datenum_to_datetime(start_date_datenum)
-    end_datetime = matlab_datenum_to_datetime(end_date_datenum)
+    start_datetime = datenum_to_datetime(start_date_datenum)
+    end_datetime = datenum_to_datetime(end_date_datenum)
 
     file_start_date = start_datetime.strftime("%Y%m%d")
     file_end_date = end_datetime.strftime("%Y%m%d")

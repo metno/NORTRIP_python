@@ -28,6 +28,7 @@ from .grid_lines_func import grid_lines_func
 from .average_data_func import average_data_func
 from .salt_solution_func import salt_solution_func
 from .surface_energy_model_4_func import surface_energy_model_4_func
+from .datenum_to_datetime import datenum_to_datetime
 
 __all__ = [
     "q_sat_func",
@@ -60,4 +61,5 @@ __all__ = [
     "average_data_func",
     "salt_solution_func",
     "surface_energy_model_4_func",
+    "datenum_to_datetime",
 ]

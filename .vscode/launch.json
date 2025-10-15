@@ -65,6 +65,23 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
-        }
+        },
+        {
+            "name": "Debug NORTRIP (all plots)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "NORTRIP_Control",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "args": [
+                "model_paths/model_paths_and_files.xlsx",
+                "--plot",
+                "all",
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },
     ]
 }

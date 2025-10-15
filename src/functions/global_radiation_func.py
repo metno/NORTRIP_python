@@ -1,5 +1,6 @@
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
+from .datenum_to_datetime import datenum_to_datetime
 
 
 def global_radiation_func(
@@ -36,17 +37,8 @@ def global_radiation_func(
     PI = np.pi / 180.0
     S0 = 1367.0  # Solar constant
 
-    # Convert MATLAB datenum to date components
-    # MATLAB datenum is days since January 1, year 0
-    # Python datetime uses January 1, year 1 as reference
-    # Adjust by subtracting 366 days (leap year adjustment)
-
     # Convert MATLAB datenum to Python datetime
-    # MATLAB datenum 1 = January 1, year 0000
-    # Python datetime reference is January 1, year 1
-    matlab_epoch = datetime(1, 1, 1)  # Python epoch
-    days_since_epoch = datenum - 1  # MATLAB is 1-based
-    current_datetime = matlab_epoch + timedelta(days=days_since_epoch)
+    current_datetime = datenum_to_datetime(datenum)
 
     Y = current_datetime.year
     M = current_datetime.month

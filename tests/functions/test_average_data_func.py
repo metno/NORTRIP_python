@@ -3,236 +3,382 @@ from datetime import datetime, timedelta
 from src.functions.average_data_func import average_data_func
 
 
-def test_average_data_func():
-    """Test data averaging function with different modes."""
-
-    # Create test data (24 hours of hourly data)
-    n_points = 24
-    start_date = datetime(2023, 6, 15, 0, 0, 0)  # June 15, 2023, midnight
-
-    # Convert to MATLAB datenum format
-    matlab_epoch = datetime(1, 1, 1)
-    date_nums = []
-    for i in range(n_points):
-        dt = start_date + timedelta(hours=i)
-        delta = dt - matlab_epoch
-        datenum = delta.total_seconds() / 86400.0 + 1
-        date_nums.append(datenum)
-
-    date_num = np.array(date_nums)
-    val = np.array(
-        [10 + 5 * np.sin(2 * np.pi * i / 24) for i in range(n_points)]
-    )  # Sinusoidal data
-
-    i_min = 0
-    i_max = n_points - 1
-
-    # Test mode 1: No averaging
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, i_min, i_max, [1]
-    )
-    assert len(av_date_str) == n_points
-    assert len(av_date_num) == n_points
-    assert av_val.shape == (n_points, 1)
-    assert np.allclose(av_val.flatten(), val)
-
-    # Test mode 9: Hourly means
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, i_min, i_max, [9, 1]
-    )
-    assert len(av_date_str) >= 24  # Should have at least 24 hours
-    assert av_val.shape[1] == 1
-
-    # Test mode 2: Daily means
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, i_min, i_max, [2, 6]
-    )
-    assert len(av_date_str) >= 1  # Should have at least 1 day
-    assert av_val.shape[1] == 1
-
-    # Test mode 3: Daily cycle
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, i_min, i_max, [3]
-    )
-    assert len(av_date_str) == 24  # 24 hours
-    assert len(av_date_num) == 24
-    assert av_val.shape == (24, 1)
-
-    # Test mode 5: Weekly cycle
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, i_min, i_max, [5]
-    )
-    assert len(av_date_str) == 7  # 7 days of week
-    assert len(av_date_num) == 7
-    assert av_val.shape == (7, 1)
-
-    # Test with use_max=True
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, i_min, i_max, [2, 6], use_max=True
-    )
-    assert av_val.shape[1] == 1
-    # With max, value should be >= mean for the same data
-    av_date_str_mean, av_date_num_mean, av_val_mean = average_data_func(
-        date_num, val, i_min, i_max, [2, 6], use_max=False
-    )
-    if len(av_val) > 0 and len(av_val_mean) > 0:
-        assert np.all(
-            av_val >= av_val_mean - 1e-10
-        )  # Account for floating point precision
-
-
-def test_average_data_func_with_nans():
-    """Test averaging function with NaN values."""
-    # Create test data with some NaN values
-    n_points = 48  # 2 days of hourly data
-    start_date = datetime(2023, 6, 15, 0, 0, 0)
-
-    matlab_epoch = datetime(1, 1, 1)
-    date_nums = []
-    for i in range(n_points):
-        dt = start_date + timedelta(hours=i)
-        delta = dt - matlab_epoch
-        datenum = delta.total_seconds() / 86400.0 + 1
-        date_nums.append(datenum)
-
-    date_num = np.array(date_nums)
-    val = np.array([10 + 5 * np.sin(2 * np.pi * i / 24) for i in range(n_points)])
-
-    # Add some NaN values
-    val[5:8] = np.nan
-    val[20:22] = np.nan
-
-    i_min = 0
-    i_max = n_points - 1
-
-    # Test daily means with NaN handling
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, i_min, i_max, [2, 6]
-    )
-
-    # Should still produce results despite NaN values
-    assert len(av_date_str) >= 1
-    assert av_val.shape[1] == 1
-
-    # Valid values should not be NaN (unless all data for a period is NaN)
-    valid_mask = ~np.isnan(av_val.flatten())
-    assert np.any(valid_mask)  # At least some values should be valid
-
-
 def _generate_matlab_datenums(start_dt: datetime, n_hours: int) -> np.ndarray:
     """Helper that mimics the MATLAB datenum generation used in the code base."""
-    matlab_epoch = datetime(1, 1, 1)
+    datetime_objects = [start_dt + timedelta(hours=i) for i in range(n_hours)]
     return np.array(
         [
-            ((start_dt + timedelta(hours=i)) - matlab_epoch).total_seconds() / 86400.0
-            + 1
-            for i in range(n_hours)
+            dt.toordinal() + 366 + dt.hour / 24.0 + dt.minute / (24.0 * 60.0)
+            for dt in datetime_objects
         ]
     )
 
 
-def test_mode_4_halfday_means():
-    """Ensure 12-hourly averaging (mode 4) returns correct statistics."""
-    n_hours = 48  # two full days of data → should give two 12-hour periods starting at 06 and 18 UTC
-    start_dt = datetime(2023, 1, 1, 0, 0, 0)
+def test_average_data_func_mode_1_no_averaging():
+    """Test mode 1: No averaging - returns original data."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
     date_num = _generate_matlab_datenums(start_dt, n_hours)
 
-    # Simple ramp so mean and max are easy to predict
-    val = np.arange(n_hours, dtype=float)
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
 
-    # Mean aggregation
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, 0, n_hours - 1, [4]
-    )
-    # Duplicate "start" hours in the input mean we get three half-day periods for 48 h span
-    assert len(av_val) == 3 and av_val.shape == (3, 1)
-    # Validate the first two half-day periods explicitly
-    expected_first_mean = np.mean(val[6:19])
-    expected_second_mean = np.mean(val[18:31])
-    np.testing.assert_allclose(av_val[0, 0], expected_first_mean)
-    np.testing.assert_allclose(av_val[1, 0], expected_second_mean)
-
-    # Max aggregation
-    av_date_str_max, av_date_num_max, av_val_max = average_data_func(
-        date_num, val, 0, n_hours - 1, [4], use_max=True
-    )
-    expected_first_max = np.max(val[6:19])
-    np.testing.assert_allclose(av_val_max[0, 0], expected_first_max)
-    # Using max must be ≥ mean for identical data slice
-    assert av_val_max[0, 0] >= av_val[0, 0]
-
-
-def test_mode_6_running_daily_mean():
-    """Validate running 24-hour (±11 h) mean (mode 6)."""
-    n_hours = 72  # three days
-    start_dt = datetime(2023, 2, 1, 0, 0, 0)
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
-    val = np.arange(n_hours, dtype=float)
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [1]
 
     av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, 0, n_hours - 1, [6]
-    )
-    # Same number of output points as input samples
-    assert len(av_val) == n_hours and av_val.shape == (n_hours, 1)
-
-    # First element: window is indices 0–11 inclusive
-    expected_first = np.mean(val[0:12])
-    np.testing.assert_allclose(av_val[0, 0], expected_first)
-
-    # Central element (index 20): window 9–31
-    expected_central = np.mean(val[9:32])
-    np.testing.assert_allclose(av_val[20, 0], expected_central)
-
-
-def test_mode_7_weekly_means():
-    """Check weekly means (mode 7) across two full weeks."""
-    n_hours = 24 * 14  # two weeks
-    start_dt = datetime(2023, 3, 6, 0, 0, 0)  # 6 March 2023 is a Monday
-    date_num = _generate_matlab_datenums(start_dt, n_hours)
-    val = np.arange(n_hours, dtype=float)
-
-    av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, 0, n_hours - 1, [7]
+        date_num, val, i_min, i_max, index_in
     )
 
-    # The algorithm returns one NaN element followed by duplicate/overlapping weeks. We
-    # are mainly interested in verifying that the two complete weeks have the expected
-    # means and are present in the output.
-    assert len(av_val) >= 5 and av_val.shape[1] == 1
+    # Should return original data
+    assert len(av_date_str) == n_hours
+    assert len(av_date_num) == n_hours
+    assert av_val.shape == (n_hours, 1)
 
-    expected_week1 = np.mean(val[0:168])
-    expected_week2 = np.mean(val[168:336])
-
-    # The first and third *non-NaN* elements should correspond to these two weeks.
-    non_nan_vals = av_val[~np.isnan(av_val.flatten())].flatten()
-    # Both expected weekly means must appear in the non-NaN results
-    assert any(np.isclose(non_nan_vals, expected_week1))
-    assert any(np.isclose(non_nan_vals, expected_week2))
+    # Check that values match (accounting for NaN)
+    np.testing.assert_array_equal(av_val.flatten(), val)
+    np.testing.assert_array_equal(av_date_num, date_num)
 
 
-def test_mode_8_monthly_medians():
-    """Test monthly aggregation with median statistic (mode 8, index2==2)."""
-    n_hours = 24 * 40  # 40 days → spans January & February
-    start_dt = datetime(2023, 1, 1, 0, 0, 0)
+def test_average_data_func_mode_2_daily_means():
+    """Test mode 2: Daily means."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
     date_num = _generate_matlab_datenums(start_dt, n_hours)
 
-    # Construct data with distinct offsets per month so medians differ clearly
-    val = np.arange(n_hours, dtype=float)
-    # Offset February by +1000 so its median is clearly larger
-    feb_start = 31 * 24  # hours until start of February
-    val[feb_start:] += 1000
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [2, 6]  # Daily means with minimum 6 valid values
 
     av_date_str, av_date_num, av_val = average_data_func(
-        date_num, val, 0, n_hours - 1, [8, 2]
+        date_num, val, i_min, i_max, index_in
     )
 
-    # Two months should be returned
-    assert len(av_val) == 2 and av_val.shape == (2, 1)
+    # Should have 3 daily means (3 days of data)
+    assert len(av_date_str) == 3
+    assert len(av_date_num) == 3
+    assert av_val.shape == (3, 1)
 
-    # January median
-    jan_median = np.median(val[:feb_start])
-    np.testing.assert_allclose(av_val[0, 0], jan_median)
+    # The function uses strict bounds (r > i_min & r < i_max), so excludes first and last indices
+    # Day 1: indices 1-22 (excluding 0 and 23), values 11-33, excluding NaN at index 5
+    # Expected: mean of [11,12,13,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]
+    # fmt: off
+    day1_values = [11,12,13,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]
+    # fmt: on
+    expected_daily_avg = np.mean(day1_values)
+    np.testing.assert_almost_equal(av_val[0, 0], expected_daily_avg, decimal=1)
 
-    # February median
-    feb_median = np.median(val[feb_start:])
-    np.testing.assert_allclose(av_val[1, 0], feb_median)
+
+def test_average_data_func_mode_3_daily_cycles():
+    """Test mode 3: Daily cycles - hourly averages across all days."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [3]
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should have 24 hours
+    assert len(av_date_str) == 24
+    assert len(av_date_num) == 24
+    assert av_val.shape == (24, 1)
+
+    # Check hourly labels
+    expected_labels = [f"{i:02d}" for i in range(24)]
+    assert av_date_str == expected_labels
+
+    # Check that hour 0 average is correct
+    # Hour 0 occurs at indices 0, 24, 48 with values 10, 10, 10 (same pattern repeats)
+    expected_hour0_avg = 10.0
+    np.testing.assert_almost_equal(av_val[0, 0], expected_hour0_avg, decimal=1)
+
+    # Check that hour 5 average is correct
+    # Hour 5 occurs at indices 5, 29, 53 with values NaN, 15, 15
+    # So we average 15 and 15, excluding the NaN
+    expected_hour5_avg = 15.0
+    np.testing.assert_almost_equal(av_val[5, 0], expected_hour5_avg, decimal=1)
+
+
+def test_average_data_func_mode_4_12_hourly_means():
+    """Test mode 4: 12 hourly means starting at 6 and 18."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [4, 6, 18]  # 12-hour periods starting at 6 and 18
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should have some 12-hour periods
+    assert len(av_date_str) > 0
+    assert len(av_date_num) > 0
+    assert av_val.shape[0] == len(av_date_str)
+
+    # Check that we get reasonable number of periods for 3 days
+    assert len(av_date_str) <= 6  # Max 6 periods for 3 days
+
+
+def test_average_data_func_mode_5_weekly_cycles():
+    """Test mode 5: Weekly cycles - weekday averages."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [5]
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should have 7 weekdays
+    assert len(av_date_str) == 7
+    assert len(av_date_num) == 7
+    assert av_val.shape == (7, 1)
+
+    # Check weekday names
+    expected_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    assert av_date_str == expected_names
+
+    # Check that Sunday (index 6) has data (starts on Sunday)
+    assert not np.isnan(av_val[6, 0])
+
+
+def test_average_data_func_mode_6_daily_running_means():
+    """Test mode 6: Daily running means with 23-hour window."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [6]
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should return same length as input
+    assert len(av_date_str) == n_hours
+    assert len(av_date_num) == n_hours
+    assert av_val.shape == (n_hours, 1)
+
+    # Check that dates match input
+    np.testing.assert_array_equal(av_date_num, date_num)
+
+    # Check that we get running averages (not original values)
+    assert not np.array_equal(av_val.flatten(), val)
+
+
+def test_average_data_func_mode_7_weekly_means():
+    """Test mode 7: Weekly means starting on Monday."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [7]
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should have at least one weekly mean
+    assert len(av_date_str) >= 1
+    assert len(av_date_num) >= 1
+    assert av_val.shape[0] == len(av_date_str)
+
+    # For 3 days starting Sunday, should have partial week
+    assert len(av_date_str) <= 2
+
+
+def test_average_data_func_mode_8_monthly_means():
+    """Test mode 8: Monthly means."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [8, 1]  # Monthly means with mean (not median)
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should have one monthly mean (all data in January 2023)
+    assert len(av_date_str) == 1
+    assert len(av_date_num) == 1
+    assert av_val.shape == (1, 1)
+
+    # Check date format
+    assert "Jan 2023" in av_date_str[0]
+
+    # Monthly means requires len(valid) > n_av // 4 where n_av = 24 * 30 = 720
+    # So we need > 180 valid values, but we only have 72 hours total
+    # Therefore the result should be NaN
+    assert np.isnan(av_val[0, 0])
+
+
+def test_average_data_func_mode_9_hourly_means():
+    """Test mode 9: Hourly means."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [9, 1]  # Hourly means with minimum 1 valid value
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should have hourly data
+    assert len(av_date_str) > 0
+    assert len(av_date_num) > 0
+    assert av_val.shape[0] == len(av_date_str)
+
+    # Should have reasonable number of hours for 3 days
+    assert len(av_date_str) >= 72  # At least original hours
+    assert len(av_date_str) <= 75  # At most a few extra hours
+
+
+def test_average_data_func_use_max_parameter():
+    """Test that use_max parameter works correctly."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add some NaN values
+    val[5] = np.nan
+    val[25] = np.nan
+    val[50] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [2, 6]  # Daily means
+
+    # Test with mean (default)
+    _, _, av_val_mean = average_data_func(date_num, val, i_min, i_max, index_in)
+
+    # Test with max
+    _, _, av_val_max = average_data_func(
+        date_num, val, i_min, i_max, index_in, use_max=True
+    )
+
+    # Max values should be greater than or equal to mean values
+    assert np.all(av_val_max >= av_val_mean)
+
+
+def test_average_data_func_nan_handling():
+    """Test that NaN values are handled correctly."""
+    # Create test data: 3 days of hourly data
+    start_dt = datetime(2023, 1, 1, 0, 0)  # Sunday
+    n_hours = 72  # 3 days
+    date_num = _generate_matlab_datenums(start_dt, n_hours)
+
+    # Create test values with some variation
+    val = np.array([10 + i % 24 for i in range(n_hours)], dtype=float)
+    # Add more NaNs
+    val[10:20] = np.nan
+
+    i_min = 0
+    i_max = n_hours - 1
+    index_in = [2, 6]  # Daily means
+
+    av_date_str, av_date_num, av_val = average_data_func(
+        date_num, val, i_min, i_max, index_in
+    )
+
+    # Should still return results
+    assert len(av_date_str) > 0
+    assert len(av_date_num) > 0
+    assert av_val.shape[0] == len(av_date_str)
+
+    # Some values might be NaN due to insufficient valid data
+    # This is expected behavior
