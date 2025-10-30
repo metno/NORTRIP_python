@@ -95,6 +95,6 @@ def save_road_dust_results_average(
         logger.error(
             f"Invalid output data file type: {paths.filename_outputdata}. Must be .txt or .xlsx."
         )
-        exit(1)
+        return
 
     logger.info("Successfully saved results!")

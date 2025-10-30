@@ -1,6 +1,6 @@
 # NORTRIP Python
 
-Single road python version of NORTRIP
+Single road Python version of NORTRIP
 
 Containing scripts, example data and documentation for running NORTRIP in Python
 
@@ -43,7 +43,7 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    ```
 3. **Activate the virtual environment**:
    ```bash
-   source .venv/bin/activate  # On Unix/macOS
+   source .venv/bin/activate  # On Linux/macOS
    # or
    .venv\Scripts\activate     # On Windows
    ```
@@ -53,19 +53,51 @@ Containing scripts, example data and documentation for running NORTRIP in Python
    pip install -e .
    ```
 
-## Usage
+## Running the model
 
 After setup, you can run NORTRIP using:
-
 ```bash
-# If installed with uv
-uv run nortrip
-
-# Or if venv is active
-nortrip
+uv run nortrip model_paths/model_paths_and_files.xlsx
+```
+or with venv active:
+```bash
+nortrip model_paths/model_paths_and_files.xlsx
 ```
 
+### Full help:
+```bash
+uv run nortrip --help
+```
+or with venv active:
+```bash
+nortrip --help
+```
 
-## License
+All available arguments:
 
-[Add your license information here]
+- `paths` (required): Path to a `.xlsx` or `.txt` file describing the file paths and filenames used in the model run.
+- `-p`/`--print`: Print some plot results to the terminal.
+- `-f`/`--fortran`: Run the Fortran model implementation (work in progress).
+- `-l`/`--log`: Disable logging output except for errors.
+- `-pl`/`--plot <plot type>`: Choose which plots to generate. Accepted values are `all`, `none`, `normal` (default), `summary`, `temperature`, or an 11-digit bitstring like `11110000010`. Pass `list` to see a numbered description of each plot.
+
+## Reading and saving as text
+
+The reading and saving of data is implied by the file type of each file in the model paths file. Supported file types are `txt` and `xlsx`.
+
+### Reading input files
+For input files with multiple sheets the txt files end with with the sheet name. 
+
+Example:
+
+If the `Model parameter filename` in the model paths file is `Road_dust_parameter_table_example.txt` then the model parameters will be read from the following files:  
+
+- `Road_dust_parameter_table_example_params.txt`
+- `Road_dust_parameter_table_example_flags.txt`
+- `Road_dust_parameter_table_example_activities.txt`
+
+
+### Saving output file
+If the `Model output data filename` in the model paths file ends with `.txt` then the model output data will be saved in txt format.
+
+**Important:** Saving the used model parameters for the model run is only supported when saving is done in xlsx format.

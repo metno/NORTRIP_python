@@ -34,7 +34,7 @@ def read_road_dust_parameters(
         base_name = Path(parameter_file_path).stem
 
         parameters_path = os.path.join(base_dir, f"{base_name}_params.txt")
-        flags_path = os.path.join(base_dir, f"{base_name}_flag.txt")
+        flags_path = os.path.join(base_dir, f"{base_name}_flags.txt")
         activities_path = os.path.join(base_dir, f"{base_name}_activities.txt")
 
         try:
