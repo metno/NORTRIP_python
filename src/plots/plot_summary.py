@@ -113,7 +113,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         4, 3, hspace=0.3, wspace=0.25, left=0.06, right=0.99, top=0.95, bottom=0.06
     )
     try:
-        fig.canvas.manager.set_window_title("Figure 13: Summary")  # type: ignore
+        fig.canvas.manager.set_window_title("Figure 11: Summary")  # type: ignore
     except Exception:
         pass
 
@@ -1031,7 +1031,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         plot_file_name = generate_plot_filename(
             title_str=paths.title_str,
             plot_type_flag=shared.av[0],
-            figure_number=13,  # Summary is figure 13
+            figure_number=11,  # Summary is figure 11
             plot_name="Summary",
             date_num=shared.date_num,
             min_time=shared.i_min,

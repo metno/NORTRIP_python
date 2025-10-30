@@ -66,7 +66,7 @@ def plot_road_dust_result(
     """
 
     if plot_figure is None:
-        plot_figure = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        plot_figure = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     # Apply global plot style once per session
     try:
@@ -131,19 +131,19 @@ def plot_road_dust_result(
         logger.info("Plotting figure 8: AE")
         plot_ae(shared, paths)
 
-    # Scatter/QQ plots (plot_figure index 10)
-    if plot_figure[10]:
-        logger.info("Plotting figure 11: scatter/QQ")
+    # Scatter/QQ plots (plot_figure index 8)
+    if plot_figure[8]:
+        logger.info("Plotting figure 9: scatter/QQ")
         plot_scatter_qq(shared, paths)
 
-    # Summary figure
-    if plot_figure[12]:
-        logger.info("Plotting figure 13: summary")
-        plot_summary(shared, paths)
-
-    # Scatter temperature and moisture figure (plot_figure index 13)
-    if plot_figure[13]:
-        logger.info("Plotting figure 14: scatter temperature and moisture")
+    # Scatter temperature and moisture figure (plot_figure index 9)
+    if plot_figure[9]:
+        logger.info("Plotting figure 10: scatter temperature and moisture")
         plot_scatter_temp_moisture(shared, paths)
+
+    # Summary figure
+    if plot_figure[10]:
+        logger.info("Plotting figure 11: summary")
+        plot_summary(shared, paths)
 
     plt.show(block=False)

@@ -15,15 +15,15 @@ def create_arg_parser() -> argparse.ArgumentParser:
         """Parse plot figure selection from CLI.
 
         Supported forms:
-        - "all" -> enable all 14 plots
+        - "all" -> enable all 11 plots
         - "none" -> disable all plots
         - "normal" -> enable all plots except temperature and moisture
         - "temperature" -> enable temperature and moisture plots
-        - 14-character bitstring like "11110000000010"
+        - 11-character bitstring like "11110000010"
         """
 
         text = value.strip().lower()
-        num_flags = 14
+        num_flags = 11
 
         if text == "list":
             print("Available plots:")
@@ -35,24 +35,27 @@ def create_arg_parser() -> argparse.ArgumentParser:
             print("  6: Energy and moisture balance")
             print("  7: Concentrations")
             print("  8: AE")
-            print(" 11: Scatter/QQ")
-            print(" 13: Summary")
-            print(" 14: Scatter temperature and moisture")
+            print("  9: Scatter/QQ")
+            print(" 10: Scatter temperature and moisture")
+            print(" 11: Summary")
             print("\nUse --plot with one of:")
             print("  'all' - enable all plots")
             print("  'none' - disable all plots")
-            print("  'normal' - enable plots 1-7,11,13 (default)")
-            print("  'temperature' - enable plots 2,4,6,13,14")
-            print("  Or a 14-digit binary string (e.g., '11110000000010')")
+            print("  'normal' - enable plots 1-7,9,11 (default)")
+            print("  'summary' - enable summary plot (figure 11)")
+            print("  'temperature' - enable plots 2,4,6,10,11")
+            print("  Or a 11-digit binary string (e.g., '11110000010')")
             sys.exit(0)
         if text == "all":
             return [1] * num_flags
         if text == "none":
             return [0] * num_flags
         if text == "normal":
-            return [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0]
+            return [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1]
+        if text == "summary":
+            return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
         if text == "temperature":
-            return [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1]
+            return [0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1]
 
         if set(text).issubset({"0", "1"}):
             if len(text) != num_flags:
@@ -62,7 +65,7 @@ def create_arg_parser() -> argparse.ArgumentParser:
             return [int(ch) for ch in text]
 
         raise argparse.ArgumentTypeError(
-            "Invalid --plot format. Use 'all', 'none', 'normal', 'temperature', or a 14-digit 0/1 bitstring."
+            "Invalid --plot format. Use 'all', 'none', 'normal', 'summary', 'temperature', or a 11-digit 0/1 bitstring."
         )
 
     def validate_path_file(path_value: str) -> str:
@@ -107,12 +110,13 @@ def create_arg_parser() -> argparse.ArgumentParser:
         metavar="<plot type>",
         help="""
             Which plots to generate. One of:
-            \n   'all', 
-            \n   'none', 
-            \n   'normal' (default), 
-            \n   'temperature', 
-            \n   or a 14-digit 0/1 bitstring. (eg. '11110000000010')
-            \nOr 'list' to see available plots.
+            'all',
+            'none',
+            'normal' (default),
+            'summary',
+            'temperature',
+            a 11-digit 0/1 bitstring. (eg. '11110000010')
+            or 'list' to see available plots.
         """,
     )
 

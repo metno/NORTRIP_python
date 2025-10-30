@@ -78,7 +78,7 @@ def plot_scatter_temp_moisture(
     fig.subplots_adjust(wspace=0.35)
     try:
         fig.canvas.manager.set_window_title(  # type: ignore
-            "Figure 14: Scatter temperature and moisture"
+            "Figure 10: Scatter temperature and moisture"
         )
     except Exception:
         pass
@@ -255,7 +255,7 @@ def plot_scatter_temp_moisture(
         plot_file_name = generate_plot_filename(
             title_str=paths.title_str,
             plot_type_flag=shared.av[0],
-            figure_number=14,  # Scatter temperature and moisture is figure 14
+            figure_number=10,  # Scatter temperature and moisture is figure 10
             plot_name="Scatter_temp_moisture",
             date_num=shared.date_num,
             min_time=shared.i_min,

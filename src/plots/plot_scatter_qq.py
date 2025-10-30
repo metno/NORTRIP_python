@@ -96,7 +96,7 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(8, 8))
     fig.subplots_adjust(hspace=0.38, wspace=0.38)
     try:
-        fig.canvas.manager.set_window_title("Figure 11: Scatter/QQ plots")  # type: ignore
+        fig.canvas.manager.set_window_title("Figure 9: Scatter/QQ plots")  # type: ignore
     except Exception:
         pass
 
@@ -293,7 +293,7 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         plot_file_name = generate_plot_filename(
             title_str=paths.title_str,
             plot_type_flag=shared.av[0],
-            figure_number=11,  # Scatter/QQ plots is figure 11
+            figure_number=9,  # Scatter/QQ plots is figure 9
             plot_name="Scatter_QQ",
             date_num=shared.date_num,
             min_time=shared.i_min,
