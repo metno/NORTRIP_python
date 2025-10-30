@@ -1,4 +1,3 @@
-
 from typing import List, Tuple
 
 import numpy as np
@@ -6,13 +5,14 @@ import pandas as pd
 
 import constants
 from functions.average_data_func import average_data_func
+from functions.datenum_to_datetime import datenum_to_datetime
 from initialise import time_config
 from initialise.road_dust_initialise_variables import model_variables
 from input_classes import (
     converted_data,
     input_metadata,
     input_airquality,
-    input_activity
+    input_activity,
 )
 from config_classes import (
     model_parameters,
@@ -66,7 +66,9 @@ def build_results_dataframe(
         weights = np.ones(num_track, dtype=float) / max(1, num_track)
     else:
         wsum = np.sum(weights)
-        weights = weights / wsum if wsum != 0 else np.ones_like(weights) / max(1, num_track)
+        weights = (
+            weights / wsum if wsum != 0 else np.ones_like(weights) / max(1, num_track)
+        )
 
     mv = model_variables
     cd = converted_data
@@ -74,7 +76,9 @@ def build_results_dataframe(
     # Temporary arrays (track-weighted)
     road_meteo_data_temp = np.zeros((constants.num_road_meteo, n_date))
     g_road_data_temp = np.zeros((constants.num_moisture, n_date))
-    g_road_balance_data_temp = np.zeros((constants.num_moisture, constants.num_moistbalance, n_date))
+    g_road_balance_data_temp = np.zeros(
+        (constants.num_moisture, constants.num_moistbalance, n_date)
+    )
     road_salt_data_temp = np.zeros((constants.num_saltdata, constants.num_salt, n_date))
     f_q_temp = np.zeros((constants.num_source_all, n_date))
     f_q_obs_temp = np.zeros(n_date)
@@ -92,7 +96,9 @@ def build_results_dataframe(
     C_data_temp = np.sum(mv.C_data[:, :, :, :, :num_track, ro], axis=4)
     E_road_data_temp = np.sum(mv.E_road_data[:, :, :, :, :num_track, ro], axis=4)
     M_road_data_temp = np.sum(mv.M_road_data[:, :, :, :num_track, ro], axis=3)
-    M_road_balance_data_temp = np.sum(mv.M_road_balance_data[:, :, :, :, :num_track, ro], axis=4)
+    M_road_balance_data_temp = np.sum(
+        mv.M_road_balance_data[:, :, :, :, :num_track, ro], axis=4
+    )
     WR_time_data_temp = np.sum(mv.WR_time_data[:, :, :num_track, ro], axis=2)
 
     # Direct copies from converted data
@@ -102,7 +108,11 @@ def build_results_dataframe(
     date_num = cd.date_data[constants.datenum_index, :, ro]
 
     # Conversion factor (g/km -> g/m^2)
-    b_road_lanes = metadata.b_road_lanes if metadata.b_road_lanes else metadata.n_lanes * metadata.b_lane
+    b_road_lanes = (
+        metadata.b_road_lanes
+        if metadata.b_road_lanes
+        else metadata.n_lanes * metadata.b_lane
+    )
     factor = 1.0 / 1000.0 / max(b_road_lanes, 1e-9)
 
     # Indices and labels
@@ -122,22 +132,17 @@ def build_results_dataframe(
     hour_series = cd.date_data[constants.hour_index, :, ro]
     minute_series = cd.date_data[constants.minute_index, :, ro]
 
-    # Weekday mapping based on datenum
-    def matlab_weekday(dnums: np.ndarray) -> np.ndarray:
-        from datetime import datetime, timedelta
-
-        def dn_to_dt(dn: float) -> datetime:
-            return datetime(1, 1, 1) + timedelta(days=dn - 1)
-
+    # Weekday mapping based on Unix timestamp
+    def unix_weekday(timestamps: np.ndarray) -> np.ndarray:
         wd = []
-        for dn in dnums:
-            dt = dn_to_dt(float(dn))
+        for ts in timestamps:
+            dt = datenum_to_datetime(ts)
             py = dt.weekday()  # Monday=0..Sunday=6
             matlab = ((py + 1) % 7) + 1
             wd.append(matlab)
         return np.asarray(wd, dtype=float)
 
-    weekday_series = matlab_weekday(cd.date_data[constants.datenum_index, :, ro])
+    weekday_series = unix_weekday(cd.date_data[constants.datenum_index, :, ro])
 
     for label, series in (
         ("Year", year_series),
@@ -171,7 +176,10 @@ def build_results_dataframe(
     meteo_cols = [
         ("T2m (C)", meteo_data_temp[constants.T_a_index, :]),
         ("Ts_road (C)", road_meteo_data_temp[constants.T_s_index, :]),
-        ("Ts_road_obs (C)", road_meteo_data_temp[constants.road_temperature_obs_index, :]),
+        (
+            "Ts_road_obs (C)",
+            road_meteo_data_temp[constants.road_temperature_obs_index, :],
+        ),
         ("T_sub_mod (C)", road_meteo_data_temp[constants.T_sub_index, :]),
         ("RH (%)", meteo_data_temp[constants.RH_index, :]),
         ("RHs_road (%)", road_meteo_data_temp[constants.RH_s_index, :]),
@@ -179,15 +187,24 @@ def build_results_dataframe(
         ("Rain (mm/hr)", meteo_data_temp[constants.Rain_precip_index, :]),
         ("Snow (mm/hr)", meteo_data_temp[constants.Snow_precip_index, :]),
         ("Cloud cover", meteo_data_temp[constants.cloud_cover_index, :]),
-        ("Net short rad (W/m^2)", road_meteo_data_temp[constants.short_rad_net_index, :]),
+        (
+            "Net short rad (W/m^2)",
+            road_meteo_data_temp[constants.short_rad_net_index, :],
+        ),
         ("Net long rad (W/m^2)", road_meteo_data_temp[constants.long_rad_net_index, :]),
         ("Incoming long rad (W/m^2)", meteo_data_temp[constants.long_rad_in_index, :]),
-        ("Incoming short rad (W/m^2)", meteo_data_temp[constants.short_rad_in_index, :]),
+        (
+            "Incoming short rad (W/m^2)",
+            meteo_data_temp[constants.short_rad_in_index, :],
+        ),
         ("Sensible_road (W/m^2)", road_meteo_data_temp[constants.H_index, :]),
         ("Latent_road (W/m^2)", road_meteo_data_temp[constants.L_index, :]),
         ("Surface_heatflux_road (W/m^2)", road_meteo_data_temp[constants.G_index, :]),
         ("Residual Energy (W/m^2)", road_meteo_data_temp[constants.E_index, :]),
-        ("Energy correction (W/m^2)", road_meteo_data_temp[constants.E_correction_index, :]),
+        (
+            "Energy correction (W/m^2)",
+            road_meteo_data_temp[constants.E_correction_index, :],
+        ),
     ]
     for label, series in meteo_cols:
         _, v = _avg(date_num, series, i_min, i_max, av)
@@ -197,7 +214,9 @@ def build_results_dataframe(
     water = g_road_data_temp[constants.water_index, :]
     ice_sum = np.sum(g_road_data_temp[constants.snow_ice_index, :], axis=0)
     evap = g_road_balance_data_temp[constants.water_index, constants.S_evap_index, :]
-    drainage = g_road_balance_data_temp[constants.water_index, constants.S_drainage_index, :]
+    drainage = g_road_balance_data_temp[
+        constants.water_index, constants.S_drainage_index, :
+    ]
 
     for label, series in (
         ("Wetness_road (mm)", water),
@@ -216,7 +235,10 @@ def build_results_dataframe(
     maint_cols = [
         ("M_sanding (g/m^2)", activity_data_temp[constants.M_sanding_index, :]),
         ("M_salting(na) (g/m^2)", activity_data_temp[constants.M_salting_index[0], :]),
-        (f"M_salting({salt2_str}) (g/m^2)", activity_data_temp[constants.M_salting_index[1], :]),
+        (
+            f"M_salting({salt2_str}) (g/m^2)",
+            activity_data_temp[constants.M_salting_index[1], :],
+        ),
         ("Ploughing_road (0/1)", activity_data_temp[constants.t_ploughing_index, :]),
         ("Cleaning_road (0/1)", activity_data_temp[constants.t_cleaning_index, :]),
     ]
@@ -229,21 +251,27 @@ def build_results_dataframe(
         (
             "Total emissions PM10 (g/km/hr)",
             np.sum(
-                E_road_data_temp[constants.dust_noexhaust_index, x, constants.E_total_index, :],
+                E_road_data_temp[
+                    constants.dust_noexhaust_index, x, constants.E_total_index, :
+                ],
                 axis=0,
             ),
         ),
         (
             "Direct emissions PM10 (g/km/hr)",
             np.sum(
-                E_road_data_temp[constants.dust_noexhaust_index, x, constants.E_direct_index, :],
+                E_road_data_temp[
+                    constants.dust_noexhaust_index, x, constants.E_direct_index, :
+                ],
                 axis=0,
             ),
         ),
         (
             "Suspended road emissions PM10 (g/km/hr)",
             np.sum(
-                E_road_data_temp[constants.all_source_index, x, constants.E_suspension_index, :],
+                E_road_data_temp[
+                    constants.all_source_index, x, constants.E_suspension_index, :
+                ],
                 axis=0,
             ),
         ),
@@ -297,7 +325,9 @@ def build_results_dataframe(
         i_max,
         av,
     )
-    _, n_total = _avg(date_num, traffic_data_temp[constants.N_total_index, :], i_min, i_max, av)
+    _, n_total = _avg(
+        date_num, traffic_data_temp[constants.N_total_index, :], i_min, i_max, av
+    )
     with np.errstate(divide="ignore", invalid="ignore"):
         ef_pm10 = np.where(n_total != 0, emis_total_pm10 / n_total, np.nan)
     cols["Emission factor PM10 (g/km/veh)"] = ef_pm10
@@ -307,21 +337,27 @@ def build_results_dataframe(
         (
             "Total emissions PM2.5 (g/km/hr)",
             np.sum(
-                E_road_data_temp[constants.dust_noexhaust_index, x2, constants.E_total_index, :],
+                E_road_data_temp[
+                    constants.dust_noexhaust_index, x2, constants.E_total_index, :
+                ],
                 axis=0,
             ),
         ),
         (
             "Direct emissions PM2.5 (g/km/hr)",
             np.sum(
-                E_road_data_temp[constants.dust_noexhaust_index, x2, constants.E_direct_index, :],
+                E_road_data_temp[
+                    constants.dust_noexhaust_index, x2, constants.E_direct_index, :
+                ],
                 axis=0,
             ),
         ),
         (
             "Suspended road emissions PM2.5 (g/km/hr)",
             np.sum(
-                E_road_data_temp[constants.all_source_index, x2, constants.E_suspension_index, :],
+                E_road_data_temp[
+                    constants.all_source_index, x2, constants.E_suspension_index, :
+                ],
                 axis=0,
             ),
         ),
@@ -332,7 +368,9 @@ def build_results_dataframe(
     _, emis_total_pm25 = _avg(
         date_num,
         np.sum(
-            E_road_data_temp[constants.all_source_index, x2, constants.E_total_index, :],
+            E_road_data_temp[
+                constants.all_source_index, x2, constants.E_total_index, :
+            ],
             axis=0,
         ),
         i_min,
@@ -350,8 +388,12 @@ def build_results_dataframe(
         _, v = _avg(date_num, s, i_min, i_max, av)
         return v
 
-    cols["PM10_obs net (ug/m^3)"] = _avg_clean(airquality_data.PM_obs_net[constants.pm_10, :])
-    cols["PM10_obs bg (ug/m^3)"] = _avg_clean(airquality_data.PM_obs_bg[constants.pm_10, :])
+    cols["PM10_obs net (ug/m^3)"] = _avg_clean(
+        airquality_data.PM_obs_net[constants.pm_10, :]
+    )
+    cols["PM10_obs bg (ug/m^3)"] = _avg_clean(
+        airquality_data.PM_obs_bg[constants.pm_10, :]
+    )
 
     def _sum_pos(series: np.ndarray) -> np.ndarray:
         s = series.copy().astype(float)
@@ -361,51 +403,93 @@ def build_results_dataframe(
 
     cols["PM10 mod total (ug/m^3)"] = _sum_pos(
         np.sum(
-            C_data_temp[constants.all_source_noexhaust_index, x, constants.C_total_index, :],
+            C_data_temp[
+                constants.all_source_noexhaust_index, x, constants.C_total_index, :
+            ],
             axis=0,
         )
     )
     cols["PM10 mod total+ep (ug/m^3)"] = _sum_pos(
-        np.sum(C_data_temp[constants.all_source_index, x, constants.C_total_index, :], axis=0)
+        np.sum(
+            C_data_temp[constants.all_source_index, x, constants.C_total_index, :],
+            axis=0,
+        )
     )
     cols["PM10 mod dust total (ug/m^3)"] = _sum_pos(
-        np.sum(C_data_temp[constants.dust_noexhaust_index, x, constants.C_total_index, :], axis=0)
+        np.sum(
+            C_data_temp[constants.dust_noexhaust_index, x, constants.C_total_index, :],
+            axis=0,
+        )
     )
-    cols["PM10 mod roadwear (ug/m^3)"] = _avg_clean(C_data_temp[constants.road_index, x, constants.C_total_index, :])
-    cols["PM10 mod tyrewear (ug/m^3)"] = _avg_clean(C_data_temp[constants.tyre_index, x, constants.C_total_index, :])
-    cols["PM10 mod brakewear (ug/m^3)"] = _avg_clean(C_data_temp[constants.brake_index, x, constants.C_total_index, :])
-    cols["PM10 mod salt(na) (ug/m^3)"] = _avg_clean(C_data_temp[constants.salt_index[0], x, constants.C_total_index, :])
+    cols["PM10 mod roadwear (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.road_index, x, constants.C_total_index, :]
+    )
+    cols["PM10 mod tyrewear (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.tyre_index, x, constants.C_total_index, :]
+    )
+    cols["PM10 mod brakewear (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.brake_index, x, constants.C_total_index, :]
+    )
+    cols["PM10 mod salt(na) (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.salt_index[0], x, constants.C_total_index, :]
+    )
     cols[f"PM10 mod salt({salt2_str}) (ug/m^3)"] = _avg_clean(
         C_data_temp[constants.salt_index[1], x, constants.C_total_index, :]
     )
-    cols["PM10 mod sand (ug/m^3)"] = _avg_clean(C_data_temp[constants.sand_index, x, constants.C_total_index, :])
-    cols["PM10 mod exhaust (ug/m^3)"] = _avg_clean(C_data_temp[constants.exhaust_index, x, constants.C_total_index, :])
+    cols["PM10 mod sand (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.sand_index, x, constants.C_total_index, :]
+    )
+    cols["PM10 mod exhaust (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.exhaust_index, x, constants.C_total_index, :]
+    )
 
     # PM2.5 concentrations
-    cols["PM25_obs net (ug/m^3)"] = _avg_clean(airquality_data.PM_obs_net[constants.pm_25, :])
-    cols["PM25_obs bg (ug/m^3)"] = _avg_clean(airquality_data.PM_obs_bg[constants.pm_25, :])
+    cols["PM25_obs net (ug/m^3)"] = _avg_clean(
+        airquality_data.PM_obs_net[constants.pm_25, :]
+    )
+    cols["PM25_obs bg (ug/m^3)"] = _avg_clean(
+        airquality_data.PM_obs_bg[constants.pm_25, :]
+    )
     cols["PM25 mod total (ug/m^3)"] = _sum_pos(
         np.sum(
-            C_data_temp[constants.all_source_noexhaust_index, x2, constants.C_total_index, :],
+            C_data_temp[
+                constants.all_source_noexhaust_index, x2, constants.C_total_index, :
+            ],
             axis=0,
         )
     )
     cols["PM25 mod total+ep (ug/m^3)"] = _sum_pos(
-        np.sum(C_data_temp[constants.all_source_index, x2, constants.C_total_index, :], axis=0)
+        np.sum(
+            C_data_temp[constants.all_source_index, x2, constants.C_total_index, :],
+            axis=0,
+        )
     )
     cols["PM25 mod dust total (ug/m^3)"] = _sum_pos(
-        np.sum(C_data_temp[constants.dust_noexhaust_index, x2, constants.C_total_index, :], axis=0)
+        np.sum(
+            C_data_temp[constants.dust_noexhaust_index, x2, constants.C_total_index, :],
+            axis=0,
+        )
     )
-    cols["PM25 mod roadwear (ug/m^3)"] = _avg_clean(C_data_temp[constants.road_index, x2, constants.C_total_index, :])
-    cols["PM25 mod tyrewear (ug/m^3)"] = _avg_clean(C_data_temp[constants.tyre_index, x2, constants.C_total_index, :])
-    cols["PM25 mod brakewear (ug/m^3)"] = _avg_clean(C_data_temp[constants.brake_index, x2, constants.C_total_index, :])
-    cols["PM25 mod salt(na) (ug/m^3)"] = _avg_clean(C_data_temp[constants.salt_index[0], x2, constants.C_total_index, :])
+    cols["PM25 mod roadwear (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.road_index, x2, constants.C_total_index, :]
+    )
+    cols["PM25 mod tyrewear (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.tyre_index, x2, constants.C_total_index, :]
+    )
+    cols["PM25 mod brakewear (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.brake_index, x2, constants.C_total_index, :]
+    )
+    cols["PM25 mod salt(na) (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.salt_index[0], x2, constants.C_total_index, :]
+    )
     cols[f"PM25 mod salt({salt2_str}) (ug/m^3)"] = _avg_clean(
         C_data_temp[constants.salt_index[1], x2, constants.C_total_index, :]
     )
-    cols["PM25 mod sand (ug/m^3)"] = _avg_clean(C_data_temp[constants.sand_index, x2, constants.C_total_index, :])
-    cols["PM25 mod exhaust (ug/m^3)"] = _avg_clean(C_data_temp[constants.exhaust_index, x2, constants.C_total_index, :])
+    cols["PM25 mod sand (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.sand_index, x2, constants.C_total_index, :]
+    )
+    cols["PM25 mod exhaust (ug/m^3)"] = _avg_clean(
+        C_data_temp[constants.exhaust_index, x2, constants.C_total_index, :]
+    )
 
     return pd.DataFrame(cols)
-
-
