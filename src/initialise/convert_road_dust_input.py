@@ -200,7 +200,9 @@ def convert_road_dust_input(
     Converts the output from read_road_dust_input to consolidated structure.
 
     Args:
-        input_data: input_data dataclass returned from read_road_dust_input containing:
+        input_data: input_data dataclass returned from read_road_dust_input()
+
+        Containing:
             activity, airquality, meteorology, traffic, initial, and metadata dataclasses
         nodata: Missing data value
 

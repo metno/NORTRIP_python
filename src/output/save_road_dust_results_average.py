@@ -39,10 +39,20 @@ def save_road_dust_results_average(
     parameter_sheets: dict[str, pd.DataFrame],
 ):
     """
-    Create and return the averaged results DataFrame.
+    Saves the results to a text or excel file.
 
-    Writing to text/excel will be implemented separately; for now we just
-    return the pandas DataFrame with all expected columns.
+    Args:
+        time_config: The time configuration dataclass.
+        converted_data: The converted data dataclass.
+        metadata: The metadata dataclass.
+        airquality_data: The airquality dataclass.
+        model_parameters: The model parameters dataclass.
+        model_flags: The model flags dataclass.
+        model_variables: The model variables dataclass.
+        input_activity: The input activity dataclass.
+        av: The averaging index.
+        paths: The file paths dataclass.
+        parameter_sheets: The parameter sheets dictionary.
     """
     df_results = build_results_dataframe(
         time_config=time_config,

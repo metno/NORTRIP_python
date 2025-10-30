@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+    """
+    Main function for the NORTRIP Road Dust Model.
+    """
     args = create_arg_parser().parse_args()
     print_results = bool(args.print)
     use_fortran = bool(args.fortran)
