@@ -1,12 +1,13 @@
 import numpy as np
 from datetime import datetime
 from calculations.calc_radiation import calc_radiation
-from initialise import model_variables, time_config
+from initialise import time_config
 from input_classes import (
     converted_data,
     input_metadata,
     input_initial,
     input_meteorology,
+    model_variables,
 )
 from config_classes import model_flags, model_parameters
 import constants

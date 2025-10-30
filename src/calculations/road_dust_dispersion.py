@@ -6,8 +6,8 @@ Converts emissions to concentrations using NOX as a tracer
 import numpy as np
 import logging
 
-from initialise import time_config, model_variables
-from input_classes import input_metadata, input_airquality
+from initialise import time_config
+from input_classes import input_metadata, input_airquality, model_variables
 from config_classes import model_parameters
 
 logger = logging.getLogger(__name__)

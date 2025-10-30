@@ -7,12 +7,12 @@ import constants
 from functions.average_data_func import average_data_func
 from functions.datenum_to_datetime import datenum_to_datetime
 from initialise import time_config
-from initialise.road_dust_initialise_variables import model_variables
 from input_classes import (
     converted_data,
     input_metadata,
     input_airquality,
     input_activity,
+    model_variables,
 )
 from config_classes import (
     model_parameters,

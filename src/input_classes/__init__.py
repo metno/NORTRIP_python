@@ -7,6 +7,7 @@ from .input_activity import input_activity
 from .input_airquality import input_airquality
 from .converted_data import converted_data
 from .input_data import input_data
+from .model_variables import model_variables
 
 __all__ = [
     "input_metadata",
@@ -18,4 +19,5 @@ __all__ = [
     "input_airquality",
     "converted_data",
     "input_data",
+    "model_variables",
 ]

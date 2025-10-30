@@ -14,10 +14,11 @@ from functions import (
     r_0_wind_func,
     mass_balance_func,
 )
-from initialise import time_config, model_variables
+from initialise import time_config
 from input_classes import (
     converted_data,
     input_metadata,
+    model_variables,
     input_initial,
     input_airquality,
 )
@@ -509,7 +510,7 @@ def road_dust_emission_model(
 
         for t in range(constants.num_tyre):
             for v in range(constants.num_veh):
-                #f_0_suspension_temp = model_parameters.h_0_sus[s, :] * f_susroad_func(
+                # f_0_suspension_temp = model_parameters.h_0_sus[s, :] * f_susroad_func(
                 f_0_suspension_temp = metadata.h_sus * f_susroad_func(
                     model_parameters.f_0_suspension[s, :, t, v],
                     converted_data.traffic_data[constants.V_veh_index[v], ti, ro],

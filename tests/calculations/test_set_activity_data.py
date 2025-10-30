@@ -3,9 +3,9 @@ Tests for set_activity_data module.
 """
 
 import numpy as np
-from initialise import time_config, model_variables
+from initialise import time_config
 from calculations import activity_state, set_activity_data
-from input_classes import converted_data
+from input_classes import converted_data, model_variables
 from config_classes import model_flags, model_activities, model_parameters
 import constants
 

@@ -6,8 +6,9 @@ from input_classes import (
     input_metadata,
     input_airquality,
     input_meteorology,
+    model_variables,
 )
-from initialise import time_config, model_variables
+from initialise import time_config
 from .plot_summary import plot_summary
 from .style import apply_plot_style
 from .plot_traffic import plot_traffic

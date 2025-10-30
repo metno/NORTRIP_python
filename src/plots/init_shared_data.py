@@ -4,6 +4,7 @@ from input_classes import (
     input_airquality,
     input_meteorology,
     input_activity,
+    model_variables,
 )
 from config_classes import (
     model_parameters,
@@ -12,7 +13,7 @@ from config_classes import (
 from .shared_plot_data import shared_plot_data
 import numpy as np
 import constants
-from initialise import time_config, model_variables
+from initialise import time_config
 
 
 def init_shared_data(

@@ -5,8 +5,8 @@ Converts emissions to concentrations using dispersion factors
 
 import logging
 
-from initialise import time_config, model_variables
-from input_classes import input_metadata
+from initialise import time_config
+from input_classes import input_metadata, model_variables
 
 logger = logging.getLogger(__name__)
 

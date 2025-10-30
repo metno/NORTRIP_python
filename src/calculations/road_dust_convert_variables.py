@@ -7,8 +7,7 @@ import numpy as np
 import constants
 import logging
 
-from initialise import model_variables
-from input_classes import input_metadata
+from input_classes import input_metadata, model_variables
 
 logger = logging.getLogger(__name__)
 

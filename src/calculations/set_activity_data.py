@@ -10,8 +10,7 @@ import numpy as np
 import logging
 import constants
 from config_classes import model_flags, model_activities, model_parameters
-from initialise.road_dust_initialise_variables import model_variables
-from input_classes import converted_data
+from input_classes import converted_data, model_variables
 from initialise import time_config
 
 logger = logging.getLogger(__name__)

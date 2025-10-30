@@ -4,13 +4,13 @@ import os
 import pandas as pd
 
 from initialise import time_config
-from initialise.road_dust_initialise_variables import model_variables
 from pathlib import Path
 from input_classes import (
     converted_data,
     input_metadata,
     input_airquality,
     input_activity,
+    model_variables,
 )
 from config_classes import (
     model_parameters,
