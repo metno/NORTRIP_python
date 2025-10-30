@@ -122,8 +122,12 @@ def build_results_dataframe(
 
     # Helper to compute average series and register column
     cols: dict[str, np.ndarray] = {}
-    date_str, _ = _avg(date_num, date_num, i_min, i_max, av)
-    cols["Date"] = np.array(date_str)
+    date_str, av_date_num = _avg(date_num, date_num, i_min, i_max, av)
+    # Convert Unix timestamps to day-month-year format
+    date_formatted = [
+        datenum_to_datetime(ts).strftime("%d-%m-%Y") for ts in av_date_num.flatten()
+    ]
+    cols["Date"] = np.array(date_formatted)
 
     # Date/time derived columns
     year_series = cd.date_data[constants.year_index, :, ro]
