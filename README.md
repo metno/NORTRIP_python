@@ -20,7 +20,7 @@ Containing scripts, example data and documentation for running NORTRIP in Python
 
 2. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/metno/NORTRIP_python.git
    cd NORTRIP-python
    ```
 
@@ -33,7 +33,7 @@ Containing scripts, example data and documentation for running NORTRIP in Python
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/metno/NORTRIP_python.git
    cd NORTRIP-python
    ```
 
