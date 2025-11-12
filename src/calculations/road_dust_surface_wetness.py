@@ -1041,8 +1041,11 @@ def road_dust_surface_wetness(
         and meteorology_input.road_wetness_obs_available
         and model_flags.retention_flag != 0
     ):
-        model_variables.f_q[: C.num_source, ti, tr, ro] = model_variables.f_q_obs[
-            ti, tr, ro
-        ]
-        model_variables.f_q[C.brake_index, ti, tr, ro] = 1  # No retention for brakes
+        model_variables.f_q[: C.num_source, ti, tr, ro] = max(
+            model_variables.f_q_obs[ti, tr, ro], 0.00001
+        )  # Retention for tyre and road dust, with a minimum limit
+        # model_variables.f_q[C.brake_index, ti, tr, ro] = 1  # No retention for brakes
+        model_variables.f_q[C.brake_index, ti, tr, ro] = max(
+            model_variables.f_q_obs[ti, tr, ro], 0.00001
+        )  # Retention for brakes with a miinimum limit
         model_variables.f_q[C.exhaust_index, ti, tr, ro] = 1  # No retention for exhaust

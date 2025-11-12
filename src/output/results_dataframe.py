@@ -496,4 +496,57 @@ def build_results_dataframe(
         C_data_temp[constants.exhaust_index, x2, constants.C_total_index, :]
     )
 
+    # Saving coarse fraction, ass applied in the mass balance article
+    # Mass balance and emissions (PM10)
+    for label, series in (
+        (
+            "Road dust PMco mass (g/m^2)",
+            M_road_data_temp[constants.total_dust_index, x, :] * factor
+            - M_road_data_temp[constants.total_dust_index, x2, :] * factor,
+        ),
+        (
+            "Road sand PMco mass (g/m^2)",
+            M_road_data_temp[constants.sand_index, x, :] * factor
+            - M_road_data_temp[constants.sand_index, x2, :] * factor,
+        ),
+        (
+            "Total emissions PMco (g/km/hr)",
+            np.sum(
+                E_road_data_temp[
+                    constants.dust_noexhaust_index, x, constants.E_total_index, :
+                ]
+                - E_road_data_temp[
+                    constants.dust_noexhaust_index, x2, constants.E_total_index, :
+                ],
+                axis=0,
+            ),
+        ),
+        (
+            "Direct emissions PMco (g/km/hr)",
+            np.sum(
+                E_road_data_temp[
+                    constants.dust_noexhaust_index, x, constants.E_direct_index, :
+                ]
+                - E_road_data_temp[
+                    constants.dust_noexhaust_index, x2, constants.E_direct_index, :
+                ],
+                axis=0,
+            ),
+        ),
+        (
+            "Suspended road emissions PMco (g/km/hr)",
+            np.sum(
+                E_road_data_temp[
+                    constants.dust_noexhaust_index, x, constants.E_suspension_index, :
+                ]
+                - E_road_data_temp[
+                    constants.dust_noexhaust_index, x2, constants.E_suspension_index, :
+                ],
+                axis=0,
+            ),
+        ),
+    ):
+        _, v = _avg(date_num, series, i_min, i_max, av)
+        cols[label] = v
+
     return pd.DataFrame(cols)
