@@ -14,7 +14,7 @@ def mass_balance_func(M_0: float, P: float, R: float, dt: float) -> float:
     Returns:
         float: New mass value
     """
-    if P < R * 1e8:
+    if P < R * 1e8 and R > 1e-8:
         M = P / R * (1 - np.exp(-R * dt)) + M_0 * np.exp(-R * dt)
     else:
         M = M_0 + P * dt
