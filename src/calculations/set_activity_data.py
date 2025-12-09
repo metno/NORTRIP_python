@@ -174,7 +174,8 @@ def set_activity_data(
             or current_hour == model_activities.salting_hour[1]
         )
         weather_condition = salt_temperature_flag and (salt_precip_flag or salt_RH_flag)
-        delay_condition = time_since_salting >= model_activities.delay_salting_day
+        #delay variables are in days. Needs conversion to seconds.
+        delay_condition = time_since_salting >= model_activities.delay_salting_day*24*3600
 
         if hour_condition and weather_condition and delay_condition:
             # Apply salting
@@ -309,7 +310,8 @@ def set_activity_data(
             or current_hour == model_activities.sanding_hour[1]
         )
         weather_condition = sand_temperature_flag and (sand_precip_flag or sand_RH_flag)
-        delay_condition = time_since_sanding >= model_activities.delay_sanding_day
+        delay_condition = time_since_sanding >= model_activities.delay_sanding_day*24*3600
+        #print(time_since_sanding,model_activities.delay_sanding_day*24*3600)
 
         if hour_condition and weather_condition and delay_condition:
             # Apply sanding
@@ -371,11 +373,11 @@ def set_activity_data(
                 plough_moisture_flag = True
                 break
 
-        # Check if ploughing should occur
+        # Check if ploughing should occur.
         if (
             plough_moisture_flag
             and state.time_since_last_ploughing[ro]
-            >= model_activities.delay_ploughing_hour
+            >= model_activities.delay_ploughing_hour*3600
         ):
             converted_data.activity_data[constants.t_ploughing_index, ti, ro] = (
                 t_ploughing_0 + 1
@@ -440,7 +442,7 @@ def set_activity_data(
             > model_activities.min_temp_cleaning
         )
         time_condition = (
-            state.time_since_last_cleaning[ro] >= model_activities.delay_cleaning_hour
+            state.time_since_last_cleaning[ro] >= model_activities.delay_cleaning_hour*24*3600
         )
 
         if time_condition and temp_condition and cleaning_allowed:
@@ -563,7 +565,7 @@ def set_activity_data(
             current_hour == model_activities.binding_hour[0]
             or current_hour == model_activities.binding_hour[1]
         )
-        delay_condition = time_since_binding >= model_activities.delay_binding_day
+        delay_condition = time_since_binding >= model_activities.delay_binding_day*24*3600
 
         if hour_condition and delay_condition and binding_RH_flag and binding_allowed:
             # Apply binding

@@ -114,6 +114,14 @@ def average_data_func(
         end_dt = datenum_to_datetime(date_num[i_max])
         current_day = datetime(start_dt.year, start_dt.month, start_dt.day)
         end_day = datetime(end_dt.year, end_dt.month, end_dt.day)
+        #If there are not enough hours (<12) in the start day then remove this day
+        if start_dt.hour >= 12:
+            start_dt = datenum_to_datetime(date_num[i_min]+24*3600)
+            current_day = datetime(start_dt.year, start_dt.month, start_dt.day)
+        #If there are not enough hours (<12) in the final day then remove this day
+        if end_dt.hour < 12:
+            end_dt = datenum_to_datetime(date_num[i_max]-24*3600)
+            end_day = datetime(end_dt.year, end_dt.month, end_dt.day)
 
         # Precompute year, month, day arrays for fast matching
         years = np.array([dt.year for dt in dts])
