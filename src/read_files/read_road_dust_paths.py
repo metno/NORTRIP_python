@@ -96,17 +96,22 @@ def read_road_dust_paths(paths_path: str) -> model_file_paths:
     if not paths.file_fortran_exe:
         paths.file_fortran_exe = "nortrip"
 
-    # Set title string by removing extension from input data filename
-    if paths.filename_inputdata:
-        dot_idx = paths.filename_inputdata.find(".")
+    # Set title string by removing extension from output data filename
+    #if paths.filename_inputdata:
+    if paths.filename_outputdata:
+        #dot_idx = paths.filename_inputdata.find(".")
+        dot_idx = paths.filename_outputdata.find(".")
+        print('############',paths.filename_outputdata,dot_idx)
         if dot_idx > 0:
-            paths.title_str = paths.filename_inputdata[:dot_idx]
+            #paths.title_str = paths.filename_inputdata[:dot_idx]
+            paths.title_str = paths.filename_outputdata[:dot_idx]
             # Remove "input data" if present
             input_data_idx = paths.title_str.find("input data")
             if input_data_idx > 0:
                 paths.title_str = paths.title_str[: input_data_idx - 1]
         else:
-            paths.title_str = paths.filename_inputdata
+            #paths.title_str = paths.filename_inputdata
+            paths.title_str = paths.filename_outputdata
 
     # Set combined path+filename properties
     paths.path_filename_inputparam = paths.path_inputparam + paths.filename_inputparam
