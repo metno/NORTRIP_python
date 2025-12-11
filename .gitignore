@@ -17,5 +17,5 @@ wheels/
 
 matlab-version/
 Excluded/
-#output_figures/
-#output_data/
+output_figures/
+output_data/
