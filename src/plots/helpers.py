@@ -29,7 +29,7 @@ def prepare_series(
 
 
 def format_time_axis(
-    ax: Axes, dt_x: np.ndarray, av_index: int, day_tick_limit: int = 150
+    ax: Axes, dt_x: np.ndarray, av_index: int, day_tick_limit: int = 182
 ) -> None:
     if not dt_x.any():
         return
@@ -53,6 +53,18 @@ def format_time_axis(
         step = max(1, span_days // 12 or 1)
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=step))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
+    if span_days > day_tick_limit*3:
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+        ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=1))
+    if span_days > day_tick_limit*7:
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+        ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=3))
+    if span_days > day_tick_limit*10:
+        ax.xaxis.set_major_locator(mdates.YearLocator(1, month=1, day=1))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+        ax.xaxis.set_minor_locator(mdates.YearLocator(1, month=1, day=1))
     for label in ax.get_xticklabels():
         label.set_rotation(0)
         label.set_horizontalalignment("center")

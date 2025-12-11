@@ -104,7 +104,7 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     ax1.plot(dt_x, y_exhaust_av.squeeze(), "m--", linewidth=1, label="Exhaust")
     ax1.set_ylabel("Emission (g/km/hr)")
     ax1.legend(loc="upper left")
-    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=182)
 
     # ---------------- Panel 2: Mass loading ----------------
     y_mass_dust = np.maximum(
@@ -177,7 +177,7 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     )
     ax2.set_ylabel("Mass loading (g/m²)")
     ax2.legend(loc="upper left")
-    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=182)
 
     # ---------------- Panel 3: Production and sink rates ----------------
     y_wear_retention = np.nansum(
@@ -260,7 +260,7 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     ax3.plot(dt_x, y_plough_sink_av.squeeze(), "y-", linewidth=0.8, label="Ploughing")
     ax3.plot(dt_x, y_wind_sink_av.squeeze(), "g:", linewidth=0.8, label="Windblown")
     ax3.set_ylabel("Rates (g/m²/hr)")
-    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=182)
 
     # Compute sums for legend values (match MATLAB totals)
     mask_range = slice(i_min, i_max + 1)

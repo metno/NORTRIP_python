@@ -98,7 +98,7 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax1.plot(dt_x, Tsub.squeeze(), "r:", linewidth=0.5, label="Sub-surface temperature")
     ax1.set_ylabel("Temperature (C)", fontsize=6)
     ax1.legend(loc="upper left")
-    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=182)
 
     # ---------- Panel 2: Relative humidity ----------
     _, _, RH_air = average_data_func(
@@ -115,7 +115,7 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax2.plot(dt_x, RH_salt.squeeze(), "r:", linewidth=0.8, label="RH salt")
     ax2.set_ylabel("Relative humidity (%)", fontsize=6)
     ax2.legend(loc="upper left")
-    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=182)
 
     # ---------- Panel 3: Cloud cover ----------
     _, _, cloud = average_data_func(
@@ -124,7 +124,7 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax3.plot(dt_x, cloud.squeeze(), "k:", linewidth=0.5, label="Cloud cover")
     ax3.set_ylabel("Cloud cover (%)", fontsize=6)
     ax3.legend(loc="upper left")
-    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=182)
 
     # ---------- Panel 4: Wind speed ----------
     _, _, FF = average_data_func(
@@ -133,7 +133,7 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax4.plot(dt_x, FF.squeeze(), "b-", linewidth=1, label="Wind speed")
     ax4.set_ylabel("Wind speed (m/s)", fontsize=6)
     ax4.legend(loc="upper left")
-    format_time_axis(ax4, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax4, dt_x, shared.av[0], day_tick_limit=182)
 
     # ---------- Panel 5: Precipitation ----------
     _, _, Rain = average_data_func(
@@ -147,7 +147,7 @@ def plot_meteorology(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax5.set_ylabel("Precipitation (mm/hr)", fontsize=6)
     ax5.set_xlabel("Date")
     ax5.legend(loc="upper left")
-    format_time_axis(ax5, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax5, dt_x, shared.av[0], day_tick_limit=182)
 
     plt.tight_layout()
     if shared.save_plots:

@@ -76,7 +76,7 @@ def plot_wetness(shared: shared_plot_data, paths: model_file_paths) -> None:
         y_max = np.nanmax([y_max, np.nanmax(obs_wet) * 1.1])
     ax1.set_ylabel("Surface wetness (mm)")
     ax1.legend(loc="upper left")
-    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=182)
     if np.isfinite(y_max):
         ax1.set_ylim(0, y_max)
 
@@ -109,7 +109,7 @@ def plot_wetness(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax2.plot(dt_x, ice_mm.squeeze(), "b--", linewidth=1, label="Road ice depth")
     ax2.set_ylabel("Surface snow and ice (mm w.e.)")
     ax2.legend(legend_entries, loc="upper left")
-    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=182)
 
     # ------------- Panel 3: Retention factor f_q -------------
     _, _, fq_road = average_data_func(
@@ -132,7 +132,7 @@ def plot_wetness(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax3.set_ylabel("Retention factor f_q")
     ax3.set_ylim(-0.05, 1.05)
     ax3.legend(legend_fq, loc="upper left")
-    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=182)
 
     plt.tight_layout()
     if shared.save_plots:

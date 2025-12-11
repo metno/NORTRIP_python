@@ -150,7 +150,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     # ax1.set_xlabel(shared.xlabel_text)
 
     # Axis formatting similar to MATLAB date tick handling
-    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=182)
 
     # Legend
     ax1.legend(loc="upper left")
@@ -166,7 +166,12 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
                 y_sand.squeeze(),
             ]
         )
-        y_max = float(np.nanmax(y_stack)) * 1.1
+        
+        if all(np.isnan(y_total)):
+            y_max=1
+        else:
+            y_max = float(np.nanmax(y_stack)) * 1.1
+
         if np.isfinite(y_max):
             ax1.set_ylim(-10.0, y_max)
     except Exception:
@@ -260,7 +265,7 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
     )
     ax2.plot(dt_x2, y_sand.squeeze(), "r--", linewidth=1, label="Suspendable sand")
     # ax2.set_xlabel(shared.xlabel_text)
-    format_time_axis(ax2, dt_x2, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax2, dt_x2, shared.av[0], day_tick_limit=182)
     ax2.legend(legend_entries, loc="upper left")
 
     # y-limit: 0..1.1 * max of plotted series (excluding NaNs)

@@ -184,7 +184,12 @@ def plot_ae(shared: shared_plot_data, paths: model_file_paths) -> None:
                 np.asarray(y_sand).squeeze(),
             ]
         )
-        y_max = float(np.nanmax(y_stack)) * 1.1
+ 
+        if all(np.isnan(y_total)):
+            y_max=1
+        else:
+            y_max = float(np.nanmax(y_stack)) * 1.1
+
         if np.isfinite(y_max):
             ax1.set_ylim(0, y_max)
     except Exception:

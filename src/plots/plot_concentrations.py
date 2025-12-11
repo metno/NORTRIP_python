@@ -167,7 +167,12 @@ def plot_concentrations(shared: shared_plot_data, paths: model_file_paths) -> No
                 np.asarray(y_sand_pm10).squeeze(),
             ]
         )
-        y_max = float(np.nanmax(y_stack)) * 1.1
+
+        if all(np.isnan(y_total_pm10)):
+            y_max=1
+        else:
+            y_max = float(np.nanmax(y_stack)) * 1.1
+
         if np.isfinite(y_max):
             ax1.set_ylim(0, y_max)
     except Exception:

@@ -122,7 +122,7 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax1.plot(dt_x, y_winter_li.squeeze(), "g--", linewidth=0.8, label="Light winter")
     ax1.set_ylabel("Traffic volume (veh/hr)")
     ax1.legend(loc="upper left")
-    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax1, dt_x, shared.av[0], day_tick_limit=182)
     if len(dt_x) > 0:
         dt_min = unix_timestamp_to_datetime_array(np.array([date_num[i_min]]))[0]
         dt_max = unix_timestamp_to_datetime_array(np.array([date_num[i_max]]))[0]
@@ -133,7 +133,7 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax2.plot(dt_x, y_v_he.squeeze(), "r--", linewidth=0.8, label="Heavy")
     ax2.set_ylabel("Traffic speed (km/hr)")
     ax2.legend(loc="upper left")
-    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax2, dt_x, shared.av[0], day_tick_limit=182)
 
     # Panel 3: salting/sanding (stairs)
     ax3.step(
@@ -164,7 +164,7 @@ def plot_traffic(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax3.set_ylabel("Salting/sanding (g/m²)")
     ax3.set_xlabel("Date")
     ax3.legend(loc="upper left")
-    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=150)
+    format_time_axis(ax3, dt_x, shared.av[0], day_tick_limit=182)
 
     plt.tight_layout()
     if shared.save_plots:
