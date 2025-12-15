@@ -153,12 +153,14 @@ def plot_emissions_mass(shared: shared_plot_data, paths: model_file_paths) -> No
     )
     has_Ts = np.nanmax(np.abs(roadm[constants.T_s_index, :n_date])) != 0
 
-    if np.nanmax(y_clean_av) > 0 and np.isfinite(max_plot) and max_plot > 0 and has_Ts:
-        y_clean_norm = y_clean_av.squeeze() / np.nanmax(y_clean_av) * max_plot
-        ax2 = ax2  # satisfy linter; ax2 already defined
-        ax2.step(
-            dt_x, y_clean_norm, where="post", color="b", linewidth=1, label="Cleaning"
-        )
+
+    if all(np.isfinite(y_clean_av)):
+        if np.nanmax(y_clean_av) > 0 and np.isfinite(max_plot) and max_plot > 0 and has_Ts:
+            y_clean_norm = y_clean_av.squeeze() / np.nanmax(y_clean_av) * max_plot
+            ax2 = ax2  # satisfy linter; ax2 already defined
+            ax2.step(
+                dt_x, y_clean_norm, where="post", color="b", linewidth=1, label="Cleaning"
+            )
 
     ax2.plot(
         dt_x, y_mass_dust_av.squeeze(), "k-", linewidth=1, label="Suspendable dust"

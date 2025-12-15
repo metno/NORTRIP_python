@@ -101,7 +101,6 @@ def read_road_dust_paths(paths_path: str) -> model_file_paths:
     if paths.filename_outputdata:
         #dot_idx = paths.filename_inputdata.find(".")
         dot_idx = paths.filename_outputdata.find(".")
-        print('############',paths.filename_outputdata,dot_idx)
         if dot_idx > 0:
             #paths.title_str = paths.filename_inputdata[:dot_idx]
             paths.title_str = paths.filename_outputdata[:dot_idx]
