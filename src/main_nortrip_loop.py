@@ -13,7 +13,12 @@ from calculations import (
     road_dust_concentrations,
     road_dust_convert_variables,
 )
-from config_classes import model_flags, model_parameters, model_activities
+from config_classes import (
+    model_flags,
+    model_parameters,
+    model_activities,
+    model_file_paths,
+)
 from initialise import time_config
 from input_classes import (
     converted_data,
@@ -34,6 +39,7 @@ logger = logging.getLogger(__name__)
 def main_nortrip_loop(
     *,
     time_config: time_config,
+    paths: model_file_paths,
     converted_data: converted_data,
     metadata_input: input_metadata,
     initial_input: input_initial,
@@ -116,7 +122,10 @@ def main_nortrip_loop(
                 )
 
             # Print the date
-            if converted_data.date_data[constants.hour_index, tf, ro] == 1 and converted_data.date_data[constants.day_index, tf, ro] == 1:
+            if (
+                converted_data.date_data[constants.hour_index, tf, ro] == 1
+                and converted_data.date_data[constants.day_index, tf, ro] == 1
+            ):
                 full_date_str = traffic_input.date_str[1, tf]
                 date_str = full_date_str[6:12].strip()
 
@@ -247,7 +256,16 @@ def main_nortrip_loop(
 
         # Calculate dispersion factors using ospm or NOx
         if model_flags.use_ospm_flag:
-            OSPM_Main()
+            OSPM_Main(
+                paths=paths,
+                model_variables=model_variables,
+                model_parameters=model_parameters,
+                metadata=metadata_input,
+                airquality_data=airquality_input,
+                time_config=time_config,
+                converted=converted_data,
+                ro=ro,
+            )
         else:
             road_dust_dispersion(
                 time_config=time_config,

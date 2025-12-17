@@ -80,6 +80,7 @@ def main():
     # Main model loop extracted to function
     model_variables = main_nortrip_loop(
         time_config=time_config,
+        paths=paths,
         converted_data=converted_data,
         metadata_input=metadata_input,
         initial_input=initial_input,

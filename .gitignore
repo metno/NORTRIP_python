@@ -19,3 +19,6 @@ matlab-version/
 Excluded/
 output_figures/
 output_data/
+ospm/input/
+ospm/output/
+~*.xlsx
