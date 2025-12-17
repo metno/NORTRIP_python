@@ -1,4 +1,5 @@
 import logging
+import sys
 from pathlib import Path
 import numpy as np
 from config_classes import model_file_paths, model_parameters
@@ -15,6 +16,7 @@ from .write_input_file import write_input_file
 from .write_parameter_file import write_parameter_file
 
 logger = logging.getLogger(__name__)
+
 PARAMETER_FILENAME = "nortrip_ospm_parameters.txt"
 INPUT_FILENAME = "nortrip_ospm_input.txt"
 OUTPUT_FILENAME = "nortrip_ospm_output.txt"
@@ -36,17 +38,14 @@ def OSPM_Main(
     """
     total_steps = time_config.max_time - time_config.min_time + 1
 
-    if not paths.path_ospm:
-        logger.error("OSPM path is not configured. Skipping OSPM run.")
-        output = np.full(total_steps, metadata.nodata, dtype=float)
-        for offset, ti in enumerate(
-            range(time_config.min_time, time_config.max_time + 1)
-        ):
-            model_variables.f_conc[ti, ro] = output[offset]
-        airquality_data.f_dis_input = output
-        airquality_data.f_dis_available = (
-            1 if output.size and np.any(output != metadata.nodata) else 0
+    if sys.platform != "win32":
+        logger.error(
+            "OSPM is only available on Windows. Skipping dispersion calculation."
         )
+        return
+
+    if not paths.path_ospm:
+        logger.error("OSPM path is not configured. Skipping dispersion calculation.")
         return
 
     ospm_dir = Path(paths.path_ospm).resolve()
