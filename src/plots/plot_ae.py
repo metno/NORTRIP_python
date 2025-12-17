@@ -152,12 +152,12 @@ def plot_ae(shared: shared_plot_data, paths: model_file_paths) -> None:
     ax1.set_title(f"{title_str}: PM10 concentrations")
     ax1.plot(dt_x, np.asarray(y_obs).squeeze(), "k--", linewidth=1, label="Observed")
     # Optional components per flags
-    if all(np.isfinite(y_sand)):
+    if any(np.isfinite(y_sand)):
         if shared.use_sanding_data_flag and np.nanmax(np.abs(y_sand)) > 0:
             ax1.plot(
                 dt_x, np.asarray(y_sand).squeeze(), "r:", linewidth=1, label="Modelled sand"
             )
-    if all(np.isfinite(y_salt_na)):
+    if any(np.isfinite(y_salt_na)):
         if (shared.use_salting_data_1_flag or shared.use_salting_data_2_flag) and np.nanmax(
         np.abs(y_salt_na)) > 0:
             ax1.plot(
