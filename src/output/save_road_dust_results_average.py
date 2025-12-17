@@ -82,14 +82,18 @@ def save_road_dust_results_average(
         out_file = f"{base}_{av_label}.xlsx"
         logger.info(f"Saving results to {out_file}...")
 
-        with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
-            df_results.to_excel(writer, index=False, sheet_name="data")
+        try:
+            with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
+                df_results.to_excel(writer, index=False, sheet_name="data")
 
-            if parameter_sheets:
-                for sheet_name in ("Parameters", "Flags", "Activities"):
-                    parameter_sheets[sheet_name].to_excel(
-                        writer, index=False, sheet_name=sheet_name
-                    )
+                if parameter_sheets:
+                    for sheet_name in ("Parameters", "Flags", "Activities"):
+                        parameter_sheets[sheet_name].to_excel(
+                            writer, index=False, sheet_name=sheet_name
+                        )
+        except PermissionError as e:
+            logger.error(f"{out_file} is open in another program, output data not saved")
+            return
 
     else:
         logger.error(

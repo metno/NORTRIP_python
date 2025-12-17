@@ -1,7 +1,9 @@
 import subprocess
 from pathlib import Path
 from typing import Tuple
+import logging
 
+logger = logging.getLogger(__name__)
 
 def run_ospm_exe(*, ospm_dir: Path) -> Tuple[int, str]:
     """
@@ -15,6 +17,7 @@ def run_ospm_exe(*, ospm_dir: Path) -> Tuple[int, str]:
     if not exe_path.exists():
         return 1, f"OSPM executable not found at {exe_path}"
 
+    logger.info("Running OSPM executable")
     result = subprocess.run(
         [str(exe_path)],
         cwd=str(resolved_dir),
