@@ -285,14 +285,15 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         pass
 
     # ---------------- Panel 3: Scatter daily mean (modeled vs observed) ----------------
+    # x and y swopped so that x is observed and y is modelled
     ax3 = fig.add_subplot(gs[2, 0])
     # Title depending on exhaust availability is not in shared; default to generic
     ax3.set_title("Scatter daily mean")
-    ax3.set_ylabel(f"{pm_text} observed concentration (µg/m³)", fontsize=6)
-    ax3.set_xlabel(f"{pm_text} modelled concentration (µg/m³)", fontsize=7)
+    ax3.set_xlabel(f"{pm_text} observed concentration (µg/m³)", fontsize=7)
+    ax3.set_ylabel(f"{pm_text} modelled concentration (µg/m³)", fontsize=6)
 
-    x_vals = np.asarray(y_total_model).squeeze()
-    y_vals = np.asarray(y_obs).squeeze()
+    y_vals = np.asarray(y_total_model).squeeze()
+    x_vals = np.asarray(y_obs).squeeze()
     valid = np.isfinite(x_vals) & np.isfinite(y_vals)
 
     if np.any(valid):
@@ -308,11 +309,8 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         # Statistics
         if xm.size >= 2:
             try:
-                if all(xm) | all(ym):
-                    r_sq = 0
-                else:
-                    R = np.corrcoef(xm, ym)
-                    r_sq = float(R[0, 1] ** 2)
+                R = np.corrcoef(xm, ym)
+                r_sq = float(R[0, 1] ** 2)
             except Exception:
                 r_sq = np.nan
             rmse = float(np.sqrt(np.nanmean((xm - ym) ** 2)))

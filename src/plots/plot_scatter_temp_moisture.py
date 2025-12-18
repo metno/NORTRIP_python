@@ -85,11 +85,12 @@ def plot_scatter_temp_moisture(
 
     title_str = paths.title_str or "Scatter temperature and moisture"
     # Panel 1: ΔT scatter
+    #Swopped x and y to get obs on x axis
     ax1.set_title(f"{title_str}: temperature difference")
     if np.any(valid):
         xm = y_mod_diff[valid]
         ym = y_obs_diff[valid]
-        ax1.scatter(xm, ym, facecolor="none", edgecolor="black", s=10)
+        ax1.scatter(ym, xm, facecolor="none", edgecolor="black", s=10)
         maxi = float(np.nanmax([np.nanmax(xm), np.nanmax(ym)]))
         mini = float(np.nanmin([np.nanmin(xm), np.nanmin(ym)]))
         if np.isfinite(maxi) and np.isfinite(mini):
@@ -107,7 +108,7 @@ def plot_scatter_temp_moisture(
             mean_obs = float(np.nanmean(ym))
             mean_mod = float(np.nanmean(xm))
             try:
-                a1, a0 = np.polyfit(xm, ym, 1)
+                a1, a0 = np.polyfit(ym, xm, 1)
             except Exception:
                 a1, a0 = np.nan, np.nan
             ax1.text(
@@ -164,8 +165,8 @@ def plot_scatter_temp_moisture(
                 print(
                     f"{mean_obs:<20.3f}\t{mean_mod:<20.3f}\t{rmse:<20.3f}\t{mae:<20.3f}\t{r_sq:<20.3f}\t{a0:<20.3f}\t{a1:<20.3f}\t{(mean_mod - mean_obs):<20.3f}"
                 )
-    ax1.set_ylabel(r"$\Delta T_s$ observed (°C)")
-    ax1.set_xlabel(r"$\Delta T_s$ modelled (°C)")
+    ax1.set_xlabel(r"$\Delta T_s$ observed (°C)")
+    ax1.set_ylabel(r"$\Delta T_s$ modelled (°C)")
 
     # Panel 2: temperature error vs observed T_s
     # Average observed T_s and error across the window

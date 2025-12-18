@@ -101,6 +101,7 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         pass
 
     # --- Panel 1: Scatter PM10 ---
+    # x and y axis swopped so modelled is y and observed is x
     ax1 = axes[0, 0]
     if int(shared.EP_emis_available) == 1:
         ax1.set_title(f"{title_str}: Scatter plot total net PM10", fontsize=7)
@@ -111,11 +112,11 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
     r10 = np.where(np.isfinite(y_mod_10) & np.isfinite(y_obs_10))[0]
     if r10.size > 0:
         ax1.scatter(
-            y_mod_10[r10], y_obs_10[r10], facecolor="none", edgecolor="blue", s=10
+            y_obs_10[r10], y_mod_10[r10], facecolor="none", edgecolor="blue", s=10
         )
 
-    ax1.set_ylabel("PM10 observed concentration (µg/m³)")
-    ax1.set_xlabel("PM10 modelled concentration (µg/m³)")
+    ax1.set_xlabel("PM10 observed concentration (µg/m³)")
+    ax1.set_ylabel("PM10 modelled concentration (µg/m³)")
     ax1.grid(True)
 
     # Axis limits 0..max of both series among valid points
@@ -139,7 +140,7 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         mean_obs_pm10 = float(np.nanmean(y_obs_10[r10]))
         mean_mod_pm10 = float(np.nanmean(y_mod_10[r10]))
         # Regression y = a1*x + a0
-        a1, a0 = np.polyfit(y_mod_10[r10], y_obs_10[r10], 1)
+        a1, a0 = np.polyfit(y_obs_10[r10], y_mod_10[r10], 1)
 
         ax1.text(0.05, 0.95, f"r²  = {r_sq_pm10:4.2f}", transform=ax1.transAxes)
         ax1.text(
@@ -155,8 +156,8 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         ax1.text(0.55, 0.10, f"a_0  = {a0:4.1f} (µg/m³)", transform=ax1.transAxes)
         ax1.text(0.55, 0.03, f"a_1  = {a1:4.2f}", transform=ax1.transAxes)
 
-        xmin = float(np.nanmin(y_mod_10[r10]))
-        xmax = float(np.nanmax(y_mod_10[r10]))
+        xmin = float(np.nanmin(y_obs_10[r10]))
+        xmax = float(np.nanmax(y_obs_10[r10]))
         ax1.plot(
             [xmin, xmax], [a0 + a1 * xmin, a0 + a1 * xmax], "-", color=(0.5, 0.5, 0.5)
         )
@@ -172,13 +173,13 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
     if r10b.size > 0:
         y1_sort = np.sort(y_mod_10[r10b])
         y2_sort = np.sort(y_obs_10[r10b])
-        ax2.scatter(y1_sort, y2_sort, facecolor="none", edgecolor="red", s=10)
+        ax2.scatter(y2_sort, y1_sort, facecolor="none", edgecolor="red", s=10)
         max_plot = float(np.nanmax([np.nanmax(y1_sort), np.nanmax(y2_sort)]))
         if np.isfinite(max_plot):
             ax2.set_xlim(0, max_plot * 1.02)
             ax2.set_ylim(0, max_plot)
-    ax2.set_ylabel("PM10 observed concentration (µg/m³)")
-    ax2.set_xlabel("PM10 modelled concentration (µg/m³)")
+    ax2.set_xlabel("PM10 observed concentration (µg/m³)")
+    ax2.set_ylabel("PM10 modelled concentration (µg/m³)")
     ax2.grid(True)
 
     # Daily averaging extras
@@ -222,11 +223,11 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
     r25 = np.where(np.isfinite(y_mod_25) & np.isfinite(y_obs_25))[0]
     if r25.size > 1:
         ax3.scatter(
-            y_mod_25[r25], y_obs_25[r25], facecolor="none", edgecolor="blue", s=10
+            y_obs_25[r25], y_mod_25[r25], facecolor="none", edgecolor="blue", s=10
         )
 
-    ax3.set_ylabel("PM2.5 observed concentration (µg/m³)")
-    ax3.set_xlabel("PM2.5 modelled concentration (µg/m³)")
+    ax3.set_xlabel("PM2.5 observed concentration (µg/m³)")
+    ax3.set_ylabel("PM2.5 modelled concentration (µg/m³)")
     ax3.grid(True)
 
     if r25.size > 0:
@@ -244,7 +245,7 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         rmse_pm25 = float(rmse(y_mod_25[r25], y_obs_25[r25]))
         mean_obs_pm25 = float(np.nanmean(y_obs_25[r25]))
         mean_mod_pm25 = float(np.nanmean(y_mod_25[r25]))
-        a1_25, a0_25 = np.polyfit(y_mod_25[r25], y_obs_25[r25], 1)
+        a1_25, a0_25 = np.polyfit(y_obs_25[r25], y_mod_25[r25], 1)
 
         ax3.text(0.05, 0.95, f"r²  = {r_sq_pm25:4.2f}", transform=ax3.transAxes)
         ax3.text(
@@ -260,8 +261,8 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         ax3.text(0.55, 0.10, f"a_0  = {a0_25:4.1f} (µg/m³)", transform=ax3.transAxes)
         ax3.text(0.55, 0.03, f"a_1  = {a1_25:4.2f}", transform=ax3.transAxes)
 
-        xmin25 = float(np.nanmin(y_mod_25[r25]))
-        xmax25 = float(np.nanmax(y_mod_25[r25]))
+        xmin25 = float(np.nanmin(y_obs_25[r25]))
+        xmax25 = float(np.nanmax(y_obs_25[r25]))
         ax3.plot(
             [xmin25, xmax25],
             [a0_25 + a1_25 * xmin25, a0_25 + a1_25 * xmax25],
@@ -280,13 +281,13 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
     if r25b.size > 0:
         y1_25_sort = np.sort(y_mod_25[r25b])
         y2_25_sort = np.sort(y_obs_25[r25b])
-        ax4.scatter(y1_25_sort, y2_25_sort, facecolor="none", edgecolor="red", s=10)
+        ax4.scatter(y2_25_sort, y1_25_sort, facecolor="none", edgecolor="red", s=10)
         max_plot_25 = float(np.nanmax([np.nanmax(y1_25_sort), np.nanmax(y2_25_sort)]))
         if np.isfinite(max_plot_25):
             ax4.set_xlim(0, max_plot_25 * 1.02)
             ax4.set_ylim(0, max_plot_25)
-    ax4.set_ylabel("PM2.5 observed concentration (µg/m³)")
-    ax4.set_xlabel("PM2.5 modelled concentration (µg/m³)")
+    ax4.set_xlabel("PM2.5 observed concentration (µg/m³)")
+    ax4.set_ylabel("PM2.5 modelled concentration (µg/m³)")
     ax4.grid(True)
 
     if shared.save_plots:
