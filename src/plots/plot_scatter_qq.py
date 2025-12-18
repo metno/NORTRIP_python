@@ -140,7 +140,11 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         mean_obs_pm10 = float(np.nanmean(y_obs_10[r10]))
         mean_mod_pm10 = float(np.nanmean(y_mod_10[r10]))
         # Regression y = a1*x + a0
-        a1, a0 = np.polyfit(y_obs_10[r10], y_mod_10[r10], 1)
+        if (np.nanmax(y_obs_10[r10]) == np.nanmin(y_obs_10[r10])) | (np.nanmax(y_mod_10[r10]) == np.nanmin(y_mod_10[r10])):
+            a1=np.nan
+            a0=np.nan
+        else:
+            a1, a0 = np.polyfit(y_obs_10[r10], y_mod_10[r10], 1)
 
         ax1.text(0.05, 0.95, f"r²  = {r_sq_pm10:4.2f}", transform=ax1.transAxes)
         ax1.text(
@@ -245,7 +249,11 @@ def plot_scatter_qq(shared: shared_plot_data, paths: model_file_paths) -> None:
         rmse_pm25 = float(rmse(y_mod_25[r25], y_obs_25[r25]))
         mean_obs_pm25 = float(np.nanmean(y_obs_25[r25]))
         mean_mod_pm25 = float(np.nanmean(y_mod_25[r25]))
-        a1_25, a0_25 = np.polyfit(y_obs_25[r25], y_mod_25[r25], 1)
+        if (np.nanmax(y_obs_25[r25]) == np.nanmin(y_obs_25[r25])) | (np.nanmax(y_mod_25[r25]) == np.nanmin(y_mod_25[r25])):
+            a1_25=np.nan
+            a0_25=np.nan
+        else:
+            a1_25, a0_25 = np.polyfit(y_obs_25[r25], y_mod_25[r25], 1)
 
         ax3.text(0.05, 0.95, f"r²  = {r_sq_pm25:4.2f}", transform=ax3.transAxes)
         ax3.text(

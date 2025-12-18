@@ -308,19 +308,25 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
 
         # Statistics
         if xm.size >= 2:
-            try:
-                R = np.corrcoef(xm, ym)
-                r_sq = float(R[0, 1] ** 2)
-            except Exception:
+            if (np.nanmax(xm) == np.nanmin(xm)) | (np.nanmax(ym) == np.nanmin(ym)):
                 r_sq = np.nan
+            else:
+                try:
+                    R = np.corrcoef(xm, ym)
+                    r_sq = float(R[0, 1] ** 2)
+                except Exception:
+                    r_sq = np.nan
             rmse = float(np.sqrt(np.nanmean((xm - ym) ** 2)))
             mean_obs = float(np.nanmean(ym))
             mean_mod = float(np.nanmean(xm))
             # Fractional bias not displayed in scatter panel; compute later for tables
-            try:
-                a1, a0 = np.polyfit(xm, ym, 1)
-            except Exception:
+            if (np.nanmax(xm) == np.nanmin(xm)) | (np.nanmax(ym) == np.nanmin(ym)):
                 a1, a0 = np.nan, np.nan
+            else:
+                try:
+                    a1, a0 = np.polyfit(xm, ym, 1)
+                except Exception:
+                    a1, a0 = np.nan, np.nan           
 
             # Text annotations (normalized coordinates)
             ax3.text(
