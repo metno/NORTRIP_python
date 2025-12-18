@@ -308,8 +308,11 @@ def plot_summary(shared: shared_plot_data, paths: model_file_paths) -> None:
         # Statistics
         if xm.size >= 2:
             try:
-                R = np.corrcoef(xm, ym)
-                r_sq = float(R[0, 1] ** 2)
+                if all(xm) | all(ym):
+                    r_sq = 0
+                else:
+                    R = np.corrcoef(xm, ym)
+                    r_sq = float(R[0, 1] ** 2)
             except Exception:
                 r_sq = np.nan
             rmse = float(np.sqrt(np.nanmean((xm - ym) ** 2)))
