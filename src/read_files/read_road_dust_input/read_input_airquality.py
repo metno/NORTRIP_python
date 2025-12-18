@@ -140,6 +140,14 @@ def read_input_airquality(
         NOX_emis_available = 0
     if np.all(EP_emis == nodata) or np.all(np.isnan(EP_emis)):
         EP_emis_available = 0
+    
+    if NOX_emis_available == 0 | np.all(NOX_obs == nodata) | np.all(NOX_background == nodata):
+        logger.warning("No concentration or emission data available for NOX")
+    #Warning when no measurement data is available
+    if np.all(PM_obs[constants.pm_10, :] == nodata) | np.all(PM_background[constants.pm_10, :] == nodata):
+        logger.warning("No observational data available for PM10") 
+    if np.all(PM_obs[constants.pm_25, :] == nodata) | np.all(PM_background[constants.pm_25, :] == nodata):
+        logger.warning("No observational data available for PM2.5") 
 
     # Handle salt observations NaN values
     if Salt_obs_available[constants.na]:

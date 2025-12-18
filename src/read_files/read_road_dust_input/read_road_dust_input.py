@@ -80,6 +80,7 @@ def read_road_dust_input(
     elif input_file_path.endswith(".xlsx"):
         try:
             all_sheets = pd.read_excel(input_file_path, sheet_name=None, header=None)
+            logger.info(f"Input file found: {input_file_path}")
         except FileNotFoundError:
             logger.error(f"Input file not found: {input_file_path}")
             exit(1)
