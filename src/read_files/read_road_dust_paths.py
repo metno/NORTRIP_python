@@ -30,12 +30,13 @@ def read_road_dust_paths(paths_path: str) -> model_file_paths:
             logger.info(f"Setting paths from text file: {paths_path}")
             paths_df = read_txt(paths_path)
         else:
-            logger.error(f"Invalid file type: {paths_path}")
-            exit(1)
+            msg = f"Invalid file type: {paths_path}"
+            logger.error(msg)
+            raise ValueError(msg)
 
     except FileNotFoundError as e:
         logger.error(f"Path file not found: {e.filename}")
-        exit(1)
+        raise
 
     header_text = paths_df.iloc[:, 0]
     file_text = paths_df.iloc[:, 1]

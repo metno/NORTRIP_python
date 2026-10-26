@@ -10,10 +10,7 @@ def apply_safe_float(
 ) -> np.ndarray:
     """
     Apply safe_float conversion to a DataFrame column and return values as numpy array.
-
-    This function encapsulates the common pattern of:
-    df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
-
+    
     Args:
         df: DataFrame containing the data
         col_idx: Column index to process
@@ -22,4 +19,6 @@ def apply_safe_float(
     Returns:
         np.ndarray: Array of float values with safe_float conversion applied
     """
-    return df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).values
+    return df.iloc[:, col_idx].apply(lambda x: safe_float(x, nodata)).to_numpy(
+        dtype=float, copy=True
+    )
