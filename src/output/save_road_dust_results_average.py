@@ -91,9 +91,9 @@ def save_road_dust_results_average(
                         parameter_sheets[sheet_name].to_excel(
                             writer, index=False, sheet_name=sheet_name
                         )
-        except PermissionError as e:
+        except PermissionError:
             logger.error(f"{out_file} is open in another program, output data not saved")
-            return
+            raise
 
     else:
         logger.error(

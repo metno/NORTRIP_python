@@ -49,21 +49,28 @@ def read_road_dust_parameters(
 
         except FileNotFoundError as e:
             logger.error(f"Parameter file not found: {e.filename}")
-            exit(1)
+            raise
 
     elif parameter_file_path.endswith(".xlsx"):
         try:
             all_sheets = pd.read_excel(parameter_file_path, sheet_name=None)
         except FileNotFoundError:
             logger.error(f"Parameter file not found: {parameter_file_path}")
-            exit(1)
-        parameter_df = all_sheets["Parameters"]
-        flags_df = all_sheets["Flags"]
-        activities_df = all_sheets["Activities"]
+            raise
+
+        try:
+            parameter_df = all_sheets["Parameters"]
+            flags_df = all_sheets["Flags"]
+            activities_df = all_sheets["Activities"]
+        except KeyError as e:
+            msg = f"Sheet {e} not found in file: {parameter_file_path}"
+            logger.error(msg)
+            raise ValueError(msg) from e
 
     else:
-        logger.error(f"Invalid parameter file type: {parameter_file_path}")
-        exit(1)
+        msg = f"Invalid parameter file type: {parameter_file_path}"
+        logger.error(msg)
+        raise ValueError(msg)
 
     parameters = read_model_parameters(parameter_df)  # type: ignore
     flags = read_model_flags(flags_df)  # type: ignore

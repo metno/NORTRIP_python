@@ -75,7 +75,7 @@ def read_road_dust_input(
 
         except FileNotFoundError as e:
             logger.error(f"Input file not found: {e.filename}")
-            exit(1)
+            raise
 
     elif input_file_path.endswith(".xlsx"):
         try:
@@ -83,7 +83,7 @@ def read_road_dust_input(
             logger.info(f"Input file found: {input_file_path}")
         except FileNotFoundError:
             logger.error(f"Input file not found: {input_file_path}")
-            exit(1)
+            raise
 
         try:
             activity_df = all_sheets["Activity"]
@@ -96,13 +96,15 @@ def read_road_dust_input(
             # OSPM is optional
             ospm_df = all_sheets.get("OSPM", None)
 
-        except KeyError:
-            logger.error(f"Sheet not found in file: {input_file_path}")
-            exit(1)
+        except KeyError as e:
+            msg = f"Sheet {e} not found in file: {input_file_path}"
+            logger.error(msg)
+            raise ValueError(msg) from e
 
     else:
-        logger.error(f"Invalid input file type: {input_file_path}")
-        exit(1)
+        msg = f"Invalid input file type: {input_file_path}"
+        logger.error(msg)
+        raise ValueError(msg)
 
     if (
         metadata_df is None
@@ -112,8 +114,9 @@ def read_road_dust_input(
         or meteorology_df is None
         or traffic_df is None
     ):
-        logger.error("One or more required sheets are missing from the input file.")
-        exit(1)
+        msg = "One or more required sheets are missing from the input file."
+        logger.error(msg)
+        raise ValueError(msg)
 
     metadata_data = read_input_metadata(metadata_df)
     initial_data = read_input_initial(initial_df, model_parameters, metadata_data)
